@@ -1,0 +1,567 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+#map {
+    height: 100vh;
+    /* Karte nimmt die gesamte Höhe des Viewports ein */
+    width: 100%;
+}
+
+h3{
+    margin: 0;
+}
+
+.allMapBtns {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    display: none;
+    background-color: transparent;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 8px;
+    max-height: 700px;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    /* box-shadow: rgba(0, 0, 0, 0.4) 1.95px 3px 2.6px; */
+}
+
+.allMapBtns ::-webkit-scrollbar {
+    display: none;
+}
+
+.menu {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    left: 0;
+    z-index: 1000;
+    background-color: rgb(40, 40, 126);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 16px;
+    background-image: url('img/mapWhite.png');
+    background-size: 42px;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+}
+
+.giveMenuPsnAbsolute {
+    position: absolute;
+    top: 100px;
+    left: 32px;
+}
+
+.menu:hover .allMapBtns {
+    display: block;
+
+}
+
+.menu:hover {
+    border-bottom-right-radius: 0px;
+    border-top-right-radius: 0px;
+    background-color: rgb(46, 192, 46);
+    background-image: url('img/mapBlue.png');
+}
+
+.arrowImg {
+    height: 20px;
+    width: 20px;
+    margin-right: 16px;
+}
+
+.margin-top16 {
+    margin-top: 16px;
+}
+
+#imgFullScreen {
+    height: 100vh;
+    width: 100%;
+    background-color: lightgray;
+    top: 0;
+    position: absolute;
+    z-index: 1200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bigImg {
+    height: 100vh;
+}
+
+
+.mapBtn {
+    z-index: 1000;
+    font-family: 'Roboto', sans-serif;
+    padding: 10px 20px;
+    border-bottom: 2px solid transparent !important;
+    cursor: pointer;
+    width: 150px;
+    background-color: rgb(40, 40, 126);
+    color: white;
+    border: none;
+    margin-bottom: 4px;
+}
+
+.mapBtn:hover {
+    background-color: rgb(46, 192, 46);
+    color: rgb(40, 40, 126);
+}
+
+#searchCategoryHeadline {
+    width: 100%;
+    text-align: center;
+}
+
+
+.planeIcon {
+    width: 16px;
+    height: 16px;
+}
+
+#coordinate {
+    position: absolute;
+    top: 10px;
+    left: 150px;
+}
+
+.searchDropDown {
+    z-index: 1000;
+    height: 100%;
+    width: 150px;
+    position: absolute;
+    right: 110%;
+
+}
+
+#dropDownCategory {
+    visibility: hidden;
+    /* Standardmäßig unsichtbar */
+    opacity: 0;
+    /* Standardmäßig unsichtbar */
+    position: absolute;
+    top: 100%;
+    /* Dropdown unterhalb des Containers positionieren */
+    transition: opacity 0.3s, visibility 0s 0.3s;
+    /* Übergang für Sichtbarkeit und Opazität */
+    background-color: white;
+}
+
+.searchBtnWithLoader {
+    position: absolute;
+    left: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+#searchBtn {
+    border-bottom-left-radius: 0px !important;
+    border-top-left-radius: 0px !important;
+    border: none;
+    background-color: rgb(40, 40, 126);
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 150px;
+    height: 100%;
+    border-radius: 4px;
+}
+
+#searchBtn:hover {
+    background-color: rgb(46, 192, 46);
+    color: rgb(40, 40, 126);
+}
+
+.relativeDiv {
+    background-color: white;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.relativeDiv:hover #dropDownCategory {
+    visibility: visible;
+    /* Sichtbar machen, wenn über relativeDiv gehovt wird */
+    opacity: 1;
+    /* Opazität auf 1 setzen */
+    transition: opacity 0.3s;
+    /* Übergang für Opazität */
+}
+
+.relativeDiv:hover .arrowImg {
+    rotate: 270deg;
+}
+
+.relativeDiv:hover {
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+
+}
+
+.standardInput {
+    z-index: 1000;
+    /* Sicherstellen, dass der Button über der Karte liegt */
+    background-color: white;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+    margin-right: 16px;
+    display: flex;
+    position: relative;
+    width: 300px;
+}
+
+#searchInput {
+    padding: 10px 20px;
+    border: none;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    outline: none;
+    width: 100%;
+    height: 100%;
+}
+
+.shadow {
+    box-shadow: rgba(0, 0, 0, 0.4) 1.95px 3px 2.6px;
+}
+
+#addressList {
+    width: 100%;
+    position: absolute;
+    top: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.searchButton {
+    border: none;
+    background-color: white;
+    width: 100%;
+    cursor: pointer;
+    padding: 16px;
+    text-align: center;
+}
+
+.searchButton:hover {
+    background-color: rgb(40, 40, 126);
+    color: white;
+}
+
+.addressError {
+    background-color: #ffbb6b;
+    width: 100%;
+    padding-top: 16px;
+    text-align: center;
+    padding-bottom: 16px;
+}
+
+.z-index1100 {
+    z-index: 1100;
+}
+
+.leaflet-interactive:focus {
+    outline: none;
+    /* Entfernt den Fokusrahmen */
+}
+
+.topSearchBar {
+    position: absolute;
+    top: 0px;
+    width: 100vw;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.loader {
+    display: inline-block;
+    margin-left: 10px;
+    width: 18px;
+    height: 18px;
+    border: 4px solid rgb(40, 40, 126);
+    border-top: 4px solid rgb(46, 192, 46);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.overlay {
+    height: 100vh;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.2);
+    /* Transparenter weißer Hintergrund */
+    backdrop-filter: blur(10px);
+    /* Wendet den Blur-Effekt an */
+    -webkit-backdrop-filter: blur(10px);
+    /* Für Safari */
+}
+
+.cardWrapper {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#aerodromeInfoDetail {
+    transition: 0.5s;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.error {
+    position: absolute;
+    height: 50px;
+    width: 400px;
+    background-color: rgb(235, 25, 20);
+    border-radius: 16px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.errorCloseBtn {
+    border: none;
+    background-color: transparent;
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    right: 16px;
+}
+
+.aerodromeCard {
+    font-size: 1.4em;
+    height: 800px;
+    width: 600px;
+    color: white;
+    border-radius: 16px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+    background: linear-gradient(45deg, rgb(10, 60, 135), rgb(15, 90, 210));
+}
+
+.orderWeatherData{
+    width: 100%; 
+    margin-top: 32px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.buttonWithLoader {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-evenly;
+    margin-top: 32px;
+}
+
+.aerodromeCardButton {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: rgb(195, 245, 25);
+    border: none;
+    width: 200px;
+    height: 60px;
+    color: rgb(15, 90, 210);
+    font-size: 1.5em;
+    cursor: pointer;
+    border-radius: 16px;
+}
+
+.aerodromeCardButton:hover {
+    background-color: rgb(15, 90, 210);
+    border: 2px solid rgb(195, 245, 25);
+    color: rgb(195, 245, 25);
+}
+
+.aerodromeCardButton:disabled {
+    background-color: rgb(180, 180, 180);
+    /* Deaktivierter Hintergrund */
+    color: rgb(100, 100, 100);
+    /* Deaktivierter Text */
+    cursor: not-allowed;
+    /* Zeigt an, dass der Button nicht klickbar ist */
+    border: none;
+    /* Optional: Entfernt den Rahmen */
+    opacity: 0.6;
+    /* Optional: Verleiht einen grauen, durchscheinenden Look */
+}
+
+#aipInfo {
+    background-color: rgb(6, 44, 100);
+    transition: 0.5s;
+    width: 0px;
+    overflow: hidden;
+    height: 800px;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+    position: relative;
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+
+}
+
+.switchButton {
+    position: absolute;
+    top: 50%;
+    border: none;
+    height: 48px;
+    width: 48px;
+    background-color: rgb(238 238 238);;
+    color: black;
+    cursor: pointer;
+    border-radius: 16px;
+    font-size: 2em;
+}
+
+#pageIndicator{
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    color: rgb(195, 245, 25);
+}
+
+.detailButtonsGroup {
+    position: absolute;
+    position: absolute;
+    left: 102%;
+    top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border-radius: 100%;
+    border: none;
+    height: 48px;
+    width: 48px;
+    cursor: pointer;
+    color: white;
+    font-size: 2em;
+    background-color: transparent;
+}
+
+.d-none {
+    display: none !important;
+}
+
+
+.closeButton:hover {
+    color: rgb(195, 245, 25);
+}
+
+.rotateButton {
+    border: none;
+    height: 48px;
+    width: 48px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: white;
+    font-size: 2em;
+    background-color: rgb(40, 40, 126);
+}
+
+.rotateButton:hover {
+    background-color: rgb(46, 192, 46);
+    color: rgb(40, 40, 126)
+}
+
+.switchButton:hover {
+    background-color: rgb(195, 245, 25);
+    color: rgb(6, 44, 100)
+}
+
+.right-32 {
+    right: 32px;
+}
+
+.left-32 {
+    left: 32px;
+}
+
+
+.aipImg {
+    color: blue;
+}
+
+.image-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: grab;
+    display: flex;
+    justify-content: center;
+}
+
+.image-container img {
+    transform-origin: center center;
+    transition: transform 0.2s ease-out;
+    /* Für sanftes Zoomen */
+}
+
+
+
+
+
+
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

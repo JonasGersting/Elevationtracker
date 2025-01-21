@@ -1,0 +1,7 @@
+# all JSON files
+*.JSON
+*.json
+
+array.js
+
+openFlightMapsTiles/

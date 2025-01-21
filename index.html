@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>elevationFinder</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.css" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="fonts/fonts">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+
+</head>
+
+<body>
+    <div class="topSearchBar">
+        <div class="standardInput">
+            <div class="searchDropDown">
+                <div class="relativeDiv shadow">
+                    <span id="searchCategoryHeadline">Adresse</span><img class="arrowImg" src="img/arrowLeft.png"
+                        alt="">
+                    <div class="shadow" id="dropDownCategory">
+                        <button class="searchButton" onclick="setSearchCat('Adresse')">Adresse</button>
+                        <button class="searchButton" onclick="setSearchCat('Callsign')">Callsign</button>
+                        <button class="searchButton" onclick="setSearchCat('Registrierung')">Registrierung</button>
+                        <button class="searchButton" onclick="setSearchCat('ED-R')">ED-R</button>
+                        <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
+                        <button class="searchButton" onclick="setSearchCat('CTR')">CTR</button>
+                        <button class="searchButton" onclick="setSearchCat('Hinderniss')">Hinderniss</button>
+                        <button class="searchButton" onclick="setSearchCat('NAV-Aid')">NAV-Aid</button>
+                        <button class="searchButton" onclick="setSearchCat('Koordinate')">Koordinate</button>
+                    </div>
+                </div>
+            </div>
+            <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse">
+            <div class="address-list shadow" id="addressList" style="display: none;"></div>
+            <div class="searchBtnWithLoader">
+                <button class="shadow z-index1100" id="searchBtn" onclick="search()">Suche</button><span class="loader z-index1100"
+                id="loader" style="display: none;"></span>
+            </div>
+            
+        </div>
+
+    </div>
+    <div class="giveMenuPsnAbsolute">
+        <div class="menu shadow">
+            <div class="allMapBtns">
+                <button class="mapBtn" id="resetButton" onclick="resetMap()">Reset</button>
+                <button class="mapBtn" id="showOpenAipMap"
+                    onclick="toggleMap('openAIP')">openAIP-Map</button>
+                <button class="mapBtn" id="showIcaoCard" onclick="toggleMap('icaoCard')">Icao-Card</button>
+                <button class="mapBtn" id="showOpenTopoMap"
+                    onclick="toggleMap('openTopoMap')">Open-Topo-Map</button>
+                <button class="mapBtn" id="showStadiaSmooth"
+                    onclick="toggleMap('stadiaAlidadeSmooth')">Smooth</button>
+                <button class="mapBtn" id="showStadiaSmoothDark"
+                    onclick="toggleMap('stadiaAlidadeSmoothDark')">Smooth-Dark</button>
+                    <button class="mapBtn" id="showOpenAipMap"
+                    onclick="toggleMap('topPlusOpen')">top Plus Open</button>
+                    <button class="mapBtn" id="showOpenAipMap"
+                    onclick="toggleMap('topPlusOpenGrey')">top Plus Open Grey</button>
+                    <button class="mapBtn" id="showOpenAipMap"
+                    onclick="toggleMap('topPlusOpenLight')">top Plus Open Light</button>
+                    <button class="mapBtn" id="showOpenAipMap"
+                    onclick="toggleMap('topPlusOpenLightGray')">top Plus Open White</button>
+                    <button class="mapBtn" id="showOpenAipMap"
+                    onclick="toggleMap('googleMaps')">googleMaps</button>
+                    <button class="mapBtn" id="showOpenAipMap"
+                    onclick="toggleMap('googleSatelite')">googleSatelite</button>
+                <button class="mapBtn" id="showAcft" onclick="getWeather('weather')">Wetter</button>
+                <button class="mapBtn" id="showAcft" onclick="getWeather('clouds')">Wolken</button>
+                <button class="mapBtn" id="showFisAirspace" onclick="togglePolygons('fis')">FIS</button>
+                <button class="mapBtn" id="showEdrAirspace" onclick="togglePolygons('edr')">EDR</button>
+                <button class="mapBtn" id="showEddAirspace" onclick="togglePolygons('edd')">EDD</button>
+                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('ctr')">CTR</button>
+                <button class="mapBtn" id="showNavAids" onclick="toggleMarkers('navaid')">NAV-AID</button>
+                <button class="mapBtn" id="showAerodromes"
+                    onclick="toggleMarkers('aerodrome')">Aerodromes</button>
+                <button class="mapBtn" id="showAerodromes"
+                    onclick="toggleMarkers('obstacle')">Hindernisse</button>
+                <button class="mapBtn" id="showAcft" onclick="toggleRadar()">RADAR</button>
+            </div>
+        </div>
+    </div>
+    <div id="aerodromeInfoDetail">
+    </div>
+    <div id="map"></div>
+    <div class="d-none" id="imgFullScreen"></div>
+</body>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
+<script src="array.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.0.0/dist/turf.min.js"></script>
+<script src="classes/airspace.class.js"></script>
+<script src="classes/edrAirspace.class.js"></script>
+<script src="classes/fisAirspace.class.js"></script>
+<script src="classes/navaid.class.js"></script>
+<script src="classes/obstacle.class.js"></script>
+<script src="classes/eddAirspace.class.js"></script>
+<script src="classes/ctr.class.js"></script>
+<script src="classes/aerodrome.class.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+<script src="script.js"></script>
+
+
+
+
+
+</html>
