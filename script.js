@@ -118,6 +118,8 @@ const mapStates = {
     googleMaps: { layer: googleMaps, isHidden: true }
 };
 
+var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
+
 
 
 // open flightmaps card
