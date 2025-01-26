@@ -14,7 +14,7 @@ class Obstacle extends AirspacePolygon {
 
         // Marker wird hier vorbereitet, aber nicht hinzugefügt
         const iconUrl = this.getCorrectImg(this.lighted); // Platzhalter für die URL des Bildes
-        const iconSize = [65, 65];
+        const iconSize = [120, 120];
         const customIcon = L.icon({
             iconUrl: iconUrl,
             iconSize: iconSize
@@ -41,7 +41,7 @@ class Obstacle extends AirspacePolygon {
 
     getCorrectImg(lightStatus){
         if (lightStatus == 'Y') {
-            return 'img/windmillLighted.png';
+            return 'img/Windkraftanlage quadratisch.png';
         } else {
             return 'img/windmillLightOut.png';
         }
