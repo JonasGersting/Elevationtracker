@@ -12,7 +12,6 @@ class Aerodrome extends AirspacePolygon {
         this.currentImgIndex;
         this.rotationAngle = 0;
         this.aipImgsAct = false;
-
     }
 
     createCustomIcon() {
@@ -76,10 +75,7 @@ class Aerodrome extends AirspacePolygon {
         this.marker.on('click', () => this.onClick());
     }
 
-
-    // Funktion zum Umschalten der Sichtbarkeit des HTML-Elements im Icon
     toggleAdditionalInfo() {
-        // Stelle sicher, dass der Marker und das Info-Element vorhanden sind
         if (!this.marker || !this.marker._icon) return;
 
         const zoomLevel = this.map.getZoom();
@@ -87,22 +83,17 @@ class Aerodrome extends AirspacePolygon {
 
         if (infoElement) {
             if (zoomLevel >= 10) {
-                infoElement.style.display = 'block'; // Zeige das zusätzliche Info-Element
+                infoElement.style.display = 'block';
             } else {
-                infoElement.style.display = 'none'; // Verstecke das zusätzliche Info-Element
+                infoElement.style.display = 'none';
             }
         }
     }
 
-
     async onClick() {
         currentAerodrome = this;
-
         let weatherData = await this.fetchWeatherData(this.geometry);
-        console.log(weatherData);
-
         const detailDiv = document.getElementById('aerodromeInfoDetail');
-        // Zeige den Div an und füge einen Ladeindikator hinzu
         detailDiv.style.height = '100vh';
         detailDiv.innerHTML = '';
         detailDiv.innerHTML +=
@@ -148,24 +139,15 @@ class Aerodrome extends AirspacePolygon {
                 </div>
 
             </div>
-            <div id="aipInfo">
-                <div class="image-container" id="aipInfoZoomable">
+                <div id="aipInfo">                    
+                    </div>
                 </div>
             </div>
-            </div>
           
-            `; // Template Literal korrekt verwendet
+            `;
         try {
             let loader = document.getElementById('loaderAipImg');
             loader.style.display = 'inline-block';
-            // Bilder abrufen
-            let name = this.changeNameToSearchableString(this.name);
-            console.log(name);
-
-
-
-            this.aipImgs = await this.getImagesFromCloud(name);
-            console.log(this.aipImgs);
             if (this.aipImgs) {
                 this.currentImgIndex = 0;
                 let aipImgBtn = document.getElementById('showAipImgsBtn');
@@ -194,34 +176,11 @@ class Aerodrome extends AirspacePolygon {
                 throw new Error(`HTTP-Error: ${response.status}`);
             }
             const data = await response.json();
-            return data; // JSON-Daten zurückgeben
+            return data;
         } catch (error) {
             console.error("Fehler beim Abrufen der Wetterdaten:", error);
-            return null; // Bei Fehler null zurückgeben
+            return null;
         }
-    }
-
-    changeNameToSearchableString(nameOfAd) {
-        // Splitte den Namen unter Beibehaltung der Trennzeichen
-        const result = nameOfAd
-            .split(/([-/\s.])/g) // Splitte bei '-', '/', Leerzeichen oder '.' und behalte die Trennzeichen
-            .map((part, index, arr) => {
-                if (part === '-' || part === '/' || part === ' ' || part === '.') {
-                    return part; // Gib Trennzeichen unverändert zurück
-                } else {
-                    // Überprüfe, ob der vorherige Teil ein Punkt ist
-                    const prevPart = arr[index - 1];
-                    if (prevPart === '.') {
-                        // Lasse den ersten Buchstaben groß
-                        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-                    }
-                    // Normalfall: Erster Buchstabe groß, Rest klein
-                    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-                }
-            });
-
-        // Füge die Teile wieder zu einem String zusammen
-        return result.join('');
     }
 
     toggleAIPImgs() {
@@ -236,61 +195,32 @@ class Aerodrome extends AirspacePolygon {
             aerodromeCard.style.borderTopRightRadius = '0px';
             aerodromeCard.style.borderBottomRightRadius = '0px';
             aipImgContainer.style.width = '900px';
-            aipImgContainer.innerHTML += `
-                    <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
+            aipImgContainer.innerHTML +=
+
+                `
+                       <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
                     <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
                     <span id="pageIndicator"></span>
+                    <div class="pdfButtons">
+                        <button id="zoom-in">Zoom In</button>
+                        <button id="zoom-out">Zoom Out</button>
+                        <button id="rotate">Rotate</button>
+                    </div>
+                    <div id="canvas-container">
+                        <canvas id="pdf-render"></canvas>
+                    </div>
             `
-            this.showAIPIMGs();
+            this.loadPdf('adInfoTest/Gehalt_Februar.pdf');
             let pageIndicator = document.getElementById('pageIndicator');
             pageIndicator.innerHTML = '';
-            pageIndicator.innerHTML = `${this.currentImgIndex + 1} / ${this.aipImgs.images.length}`;
+            // pageIndicator.innerHTML = `${this.currentImgIndex + 1} / ${this.aipImgs.images.length}`;
         }
     }
-
-
-    showAIPIMGs() {
-        let aipImgContainer = document.getElementById('aipInfoZoomable');
-        aipImgContainer.innerHTML = '';
-        aipImgContainer.innerHTML += `
-                    <img draggable="true" class="aipImg" id="currentAipImg" src="${this.aipImgs.images[this.currentImgIndex]}" alt="">  
-                     `
-        setTimeout(() => {
-            initializeImageInteractions();
-        }, 100); // Small delay to ensure the DOM is updated
-    }
-
-
-    //get AIP IMGs
-    async getImagesFromCloud(searchQuery) {
-        const cloudFunctionUrl = 'https://fetchimages-jyzgriex7a-ew.a.run.app'; // Deine tatsächliche URL hier
-        const url = `${cloudFunctionUrl}?search=${encodeURIComponent(searchQuery)}`;
-
-        try {
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                throw new Error(`Fehler: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            return data;
-
-        } catch (error) {
-            console.error('Fehler beim Abrufen der Bilder:', error.message);
-            return null;
-        }
-    }
-
 
     changeAipImg(direction) {
-        // Setze den Zoom- und Drag-Status zurück
         if (window.resetImageState) {
-            window.resetImageState(); // Zoom und Drag zurücksetzen
+            window.resetImageState();
         }
-
-        // Bildwechsel Logik
         if (direction == 'right') {
             if (this.currentImgIndex == this.aipImgs.images.length - 1) {
                 this.currentImgIndex = 0;
@@ -305,8 +235,6 @@ class Aerodrome extends AirspacePolygon {
                 this.currentImgIndex--;
             }
         }
-
-        // Das Bild mit dem neuen Index laden
         let currentAipImg = document.getElementById('currentAipImg');
         let pageIndicator = document.getElementById('pageIndicator');
         currentAipImg.src = this.aipImgs.images[this.currentImgIndex];
@@ -323,25 +251,16 @@ class Aerodrome extends AirspacePolygon {
         }, 1000);
     }
 
-    rotateImg() {
-        // Inkrementiere den Winkel um 45 Grad
-        this.rotationAngle = (this.rotationAngle + 45) % 360; // Optional: Begrenze auf 0–359 Grad für Übersicht
+    
 
-        // Hole das Bild und setze den Rotationsstil
-        let currentAipImg = document.getElementById('currentAipImg');
-        if (currentAipImg) {
-            currentAipImg.style.transform = `rotate(${this.rotationAngle}deg)`;
-        }
-    }
 
-    showImgBig() {
-        let imgFullScreen = document.getElementById('imgFullScreen');
-        imgFullScreen.innerHTML = '';
-        imgFullScreen.classList.remove('d-none');
-        imgFullScreen.innerHTML += `
-        <img class="bigImg" src="${this.aipImgs.images[this.currentImgIndex]}" alt="">
-        `
-    }
 
+
+
+
+
+
+
+    
 
 }

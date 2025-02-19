@@ -12,7 +12,7 @@ body {
     width: 100%;
 }
 
-h3{
+h3 {
     margin: 0;
 }
 
@@ -383,8 +383,8 @@ h3{
     background: linear-gradient(45deg, rgb(10, 60, 135), rgb(15, 90, 210));
 }
 
-.orderWeatherData{
-    width: 100%; 
+.orderWeatherData {
+    width: 100%;
     margin-top: 32px;
     display: flex;
     flex-direction: row;
@@ -453,18 +453,21 @@ h3{
     border: none;
     height: 48px;
     width: 48px;
-    background-color: rgb(238 238 238);;
+    background-color: rgb(238 238 238);
+    ;
     color: black;
     cursor: pointer;
     border-radius: 16px;
     font-size: 2em;
+    z-index: 5;
 }
 
-#pageIndicator{
+#pageIndicator {
     position: absolute;
     bottom: 16px;
     right: 16px;
     color: rgb(195, 245, 25);
+    z-index: 5;
 }
 
 .detailButtonsGroup {
@@ -551,6 +554,34 @@ h3{
 }
 
 
+.pdfButtons {
+    position: absolute;
+    z-index: 5;
+}
+
+#canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    position: relative;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+#canvas-container::-webkit-scrollbar {
+    display: none;
+}
+
+canvas {
+    display: block;
+    margin: auto;
+    cursor: move;
+}
 
 
 
