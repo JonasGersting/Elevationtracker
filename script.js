@@ -347,8 +347,16 @@ function calculateAngle(lat1, lon1, lat2, lon2) {
 function resetMap() {
     currentHex = null;
     
-    map.removeLayer(currentTrack);
+    currentAddresses = [];
+    if (currentTrack) {
+        map.removeLayer(currentTrack);
+    }
     currentTrack = null;
+    if (currentAdressGeoJSONLayer) {
+        map.removeLayer(currentAdressGeoJSONLayer);
+    }
+    currentAdressGeoJSONLayer = null;
+    
     trackedAcftReg = 'nothing';
     if (markerData.navaid.added) {
         toggleMarkers('navaid');
