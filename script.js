@@ -33,7 +33,13 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 
-let openAIP = L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles/{z}/{x}/{y}.png?path=2501/aero/latest', {
+let openFlightMaps = L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles/{z}/{x}/{y}.png?path=2501/aero/latest', {
+    minZoom: 0,
+    maxZoom: 20,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+});
+
+let openAIP = L.tileLayer('https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=addef49a85fb3c7c7fdea8a653d7122c', {
     minZoom: 0,
     maxZoom: 20,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -96,13 +102,18 @@ let googleMaps = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={
     language: 'de'
 });
 
-
-
-
-
+let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
+    layers: 'dwd:RX-Produkt', // Der Layername, z. B. Radar-Produkte
+    format: 'image/png',      // Bildformat
+    transparent: true,        // Transparenz aktivieren
+    version: '1.3.0',         // WMS-Version
+    maxZoom: 20,              // Maximale Zoomstufe
+    attribution: '&copy; Deutscher Wetterdienst (DWD)' // Attribution
+});
 
 
 const mapStates = {
+    openFlightMaps: { layer: openFlightMaps, isHidden: true },
     openAIP: { layer: openAIP, isHidden: true },
     icaoCard: { layer: icaoCard, isHidden: true },
     openTopoMap: { layer: openTopoMap, isHidden: true },
@@ -115,18 +126,12 @@ const mapStates = {
     topPlusOpenLight: { layer: topPlusOpenLight, isHidden: true },
     topPlusOpenLightGray: { layer: topPlusOpenLightGray, isHidden: true },
     googleSatelite: { layer: googleSatelite, isHidden: true },
-    googleMaps: { layer: googleMaps, isHidden: true }
+    googleMaps: { layer: googleMaps, isHidden: true },
+    dwdWeather: { layer: dwdWeather, isHidden: true }
 };
 
 var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
-
-
-// open flightmaps card
-// L.tileLayer('openFlightMapsTiles/clip/merged/256/latest/{z}/{x}/{y}.png', {
-//     maxZoom: 11,
-//     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-// }).addTo(map);
 
 function toggleMap(mapKey) {
     const mapState = mapStates[mapKey];
@@ -142,10 +147,21 @@ function toggleMap(mapKey) {
 
 
 
+let navAids;
+let aerodromes;
+let obstacles;
+let aipInfo;
 
 
 
 
+
+async function init() {
+    getData('navAids');
+    getData('aerodromes');
+    getData('obstacles');
+    getData('aipInfo');
+}
 
 
 
@@ -163,13 +179,6 @@ let markers = [];
 // Array zum Speichern der Polylines
 let polylines = [];
 
-
-
-// // Event Listener für Mausklicks auf der Karte
-// map.on('click', function (e) {
-//     const { lat, lng } = e.latlng;
-//     createMarker(lat, lng);
-// });
 
 // Funktion zum Erstellen des Markers und Abfragen der Höhe
 function createMarker(lat, lng) {
@@ -431,25 +440,21 @@ function createCustomMarker(aircraftData) {
             
             </div>
             `
-        } else if (r && r.startsWith("D-E")){
+        } else if (r && r.startsWith("D-E")) {
             return `
             <div style="transform: rotate(${rotation + 90}deg);">
             <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="100%" height="100%" viewBox="0 0 375 375" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M59.724,188.988l-3.537,-0.97l3.535,-0.969c0.006,-27.991 2.095,-50.692 4.668,-50.692c2.493,-0 4.532,21.331 4.661,48.134l3.149,-0.863l0,-8.239l40.291,-6.337l8.621,0l0,-69.706l5.796,-88.053c0,0 0.611,-5.314 6.809,-5.83c8.604,-0.717 30.721,-0.426 30.721,-0.426l10.863,94.309l0,69.706l8.621,0l79.836,11.278l8.537,-51.482l25.727,-0.016l8.651,51.758l-14.048,3.818l25.563,3.61l-25.079,3.543l13.564,3.686l-8.651,51.758l-25.727,-0.016l-8.505,-51.286l-79.868,11.281l-8.621,0l0,69.707l-10.676,92.682c0,-0 -22.304,0.191 -30.908,-0.526c-6.198,-0.517 -6.915,-5.713 -6.915,-5.713l-5.69,-86.443l0,-69.707l-8.621,0l-40.291,-6.336l0,-8.239l-3.159,-0.866c-0.204,26.018 -2.21,46.475 -4.651,46.475c-2.521,-0 -4.578,-21.808 -4.666,-49.03Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="0" width="374.375" height="374.375" style="fill:none;"/></svg>
              </div>
             
             `
-        } else if (r && (r.startsWith("D-I") || r.startsWith("D-G"))){
+        } else if (r && (r.startsWith("D-I") || r.startsWith("D-G"))) {
             return `
             <div style="transform: rotate(${rotation + 90}deg);">
             <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="100%" height="100%" viewBox="0 0 373 373" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M175.148,206.165l0,69.599l-10.676,92.682c0,0 -22.304,0.191 -30.907,-0.526c-6.199,-0.517 -6.915,-5.713 -6.915,-5.713l-5.69,-86.443l-0,-0.227l-10.657,-0c-2.434,-0 -5.724,-0.647 -9.14,-1.771c-0.747,15.047 -2.758,25.836 -5.119,25.836c-2.615,-0 -4.8,-13.236 -5.315,-30.834c-3.651,-2.49 -6.239,-5.466 -6.239,-8.576c-0,-3.118 2.6,-5.92 6.265,-8.19c0.559,-17.175 2.716,-29.989 5.289,-29.989c2.347,0 4.348,10.664 5.106,25.575c3.42,-0.972 6.716,-1.509 9.153,-1.509l10.657,-0l-0,-40.021l-8.621,-0l-31.987,-5.031c-2.572,-0.5 -5.454,-1.257 -8.305,-2.22c-1.83,-0.618 -3.646,-1.321 -5.359,-2.097c-1.889,-0.856 -3.652,-1.799 -5.166,-2.813c-2.993,-2.005 -5.014,-4.285 -5.12,-6.705c-0.003,-0.066 -0.004,-0.133 -0.004,-0.2c-0,-2.495 2.049,-4.846 5.126,-6.906c1.513,-1.013 3.274,-1.956 5.162,-2.811c1.713,-0.776 3.53,-1.48 5.361,-2.098c1.768,-0.598 3.548,-1.115 5.259,-1.542l35.033,-5.509l8.621,-0l-0,-40.221l-10.657,0c-2.434,0 -5.724,-0.646 -9.14,-1.771c-0.747,15.048 -2.758,25.837 -5.119,25.837c-2.615,-0 -4.8,-13.236 -5.315,-30.834c-3.651,-2.49 -6.239,-5.466 -6.239,-8.576c-0,-3.118 2.6,-5.92 6.265,-8.19c0.559,-17.175 2.716,-29.989 5.289,-29.989c2.347,0 4.348,10.664 5.106,25.575c3.42,-0.972 6.716,-1.51 9.153,-1.51l10.657,0l-0,-0.028l5.795,-88.052c0,-0 0.611,-5.314 6.81,-5.831c8.603,-0.717 30.72,-0.425 30.72,-0.425l10.863,94.308l0,69.357l7.978,0c5.903,0 46.523,2.45 81.337,6.453l7.679,-46.308l25.061,-0.016c-0.486,16.789 -0.722,33.766 -0.701,50.935c11.826,2.246 19.621,4.747 19.621,7.421c0,0.182 -0.036,0.364 -0.107,0.545c-0.082,0.209 -0.211,0.417 -0.384,0.625c-1.876,2.252 -8.998,4.432 -19.046,6.459c0.17,17.203 0.596,34.598 1.283,52.189l-25.727,-0.017l-7.821,-47.163c-34.783,4.383 -75.3,7.266 -81.195,7.266l-7.978,0Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="0" width="372.521" height="372.521" style="fill:none;"/></svg>
              </div>
             
             `
-        }
-        
-        
-        
-        else {
+        } else {
             return `
                         <div style="transform: rotate(${rotation - 90}deg);">
             <svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -830,23 +835,34 @@ map.on('zoomend', () => {
 
 
 
-
-
+let fisAirspace = [];
+let edrAirspace = [];
+let eddAirspace = [];
+let ctrAirspace = [];
 
 
 const airspaceStates = {
-    fis: fisAirspace,
-    edr: edrAirspace,
-    edd: eddAirspace,
-    ctr: ctrAirspace
+    fis: { name: 'fisAirspace', airspace: fisAirspace },
+    edr: { name: 'edrAirspace', airspace: edrAirspace },
+    edd: { name: 'eddAirspace', airspace: eddAirspace },
+    ctr: { name: 'ctrAirspace', airspace: ctrAirspace }
 };
 
 // Objekt zum Speichern der Polygone nach AirspaceKey
 let polygonLayers = {};
 
 // Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
-function togglePolygons(airspaceKey) {
-    const airspaceState = airspaceStates[airspaceKey];
+async function togglePolygons(airspaceKey) {
+    let airspaceArray = airspaceStates[airspaceKey].airspace;
+    if (airspaceArray.length < 1) {
+        let data = await getData(airspaceStates[airspaceKey].name);
+        airspaceStates[airspaceKey].airspace = data;
+        airspaceArray = data;
+        console.log(airspaceArray);
+
+    }
+
+
 
     // Prüfen, ob es Polygone für den aktuellen Key gibt
     if (polygonLayers[airspaceKey] && polygonLayers[airspaceKey].length > 0) {
@@ -858,14 +874,64 @@ function togglePolygons(airspaceKey) {
 
     // Initialisiere, falls noch nicht vorhanden
     if (!polygonLayers[airspaceKey]) {
+
         polygonLayers[airspaceKey] = [];
     }
 
-    if (airspaceState === ctrAirspace) {
+    if (airspaceArray === ctrAirspace) {
         processItems(airspaceState, airspaceKey, map, polygonLayers[airspaceKey]);
     } else {
-        processItems([...airspaceState].reverse(), airspaceKey, map, polygonLayers[airspaceKey]);
+        processItems([...airspaceArray].reverse(), airspaceKey, map, polygonLayers[airspaceKey]);
     }
+}
+
+async function getData(key) {
+    console.log('this is the key', key);
+
+    const firebaseURL = 'https://aromaps-3b242-default-rtdb.europe-west1.firebasedatabase.app/';
+    const url = `${firebaseURL}/${key}.json`;
+    return fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (data !== null) {
+                console.log(url);
+
+
+                if (key === 'aerodromes') {
+                    aerodromes = data;
+                    markerData.aerodrome.source = data;
+                    return data;
+                } else if (key === 'navaids') {
+                    navAids = data;
+                    markerData.navaid.source = data;
+                    return data;
+                } else if (key === 'obstacles') {
+                    obstacles = data;
+                    markerData.obstacle.source = data;
+                    return data;
+                } else if (key === 'fisAirspace') {
+                    return data;
+                } else if (key === 'edrAirspace') {
+                    return data;
+                } else if (key === 'eddAirspace') {
+                    return data;
+                } else if (key === 'ctrAirspace') {
+                    return data;
+                } else if (key === 'aipInfo') {
+                    aipInfo = data;
+                    return data;
+                }
+
+
+                return
+
+            }
+            throw `No data found for key: ${key}`;
+        })
+        .catch(error => {
+            console.error('Error fetching data from Firebase:', error);
+            throw error;
+        });
 }
 
 function processItems(items, airspaceKey, map, layerArray) {
@@ -905,6 +971,8 @@ const markerData = {
 
 
 function toggleMarkers(key) {
+
+
     if (!markerData[key]) {
         console.warn(`Unbekannter Schlüssel: ${key}`);
         return;
@@ -957,6 +1025,8 @@ function toggleMarkers(key) {
             map.addLayer(markerClusterGroup); // Cluster-Layer zur Karte hinzufügen
             markerData[key].clusterLayer = markerClusterGroup; // Cluster-Layer speichern
         } else {
+
+
             // Standard-Logik für Navaid und Aerodrome
             markerData[key].markers = source
                 .filter(data => key !== "aerodrome" || data.icaoCode) // Filter für Aerodromes mit icaoCode
@@ -968,6 +1038,7 @@ function toggleMarkers(key) {
                         item = new Navaid(data.Latitude, data.Longitude, data.Name, map, data.Type, data.Designator);
                     }
                     item.addToMap(); // Marker wird direkt zur Karte hinzugefügt
+
                     return item;
                 });
         }

@@ -1,4 +1,6 @@
 class Aerodrome extends AirspacePolygon {
+    aipIds = [];
+    currentPage = 0;
     constructor(geometry, name, map, icaoCode, rwys) {
         super(geometry, name, map, icaoCode);
         this.geometry = geometry;
@@ -91,6 +93,7 @@ class Aerodrome extends AirspacePolygon {
     }
 
     async onClick() {
+        this.setaipInfo(this.icaoCode);
         currentAerodrome = this;
         let weatherData = await this.fetchWeatherData(this.geometry);
         const detailDiv = document.getElementById('aerodromeInfoDetail');
@@ -168,6 +171,33 @@ class Aerodrome extends AirspacePolygon {
         }
     }
 
+    setaipInfo(icaoCode) {        
+        aipInfo.forEach(item => {
+            if (item.Flugplatz === icaoCode) {
+                // Initialisiere this.aipIds mit den ersten beiden Werten
+                this.aipIds = [
+                    item.Adinfo, // adInfoId
+                    item.AD      // adChartId
+                ];
+                console.log(item.VFRchart);
+                // Prüfe, ob VFRchart ein Array ist, und füge Elemente einzeln hinzu
+                if (Array.isArray(item.VFRchart)) {
+                    
+                    
+                    item.VFRchart.forEach(item => {
+                        this.aipIds.push(item); // Füge alle Elemente des Arrays einzeln hinzu
+                    });
+                } else if (item.VFRchart) {
+                    this.aipIds.push(item.VFRchart); // Füge den einzelnen Wert hinzu
+                }
+            }
+        });
+        console.log(this.aipIds);
+    }
+    
+    
+    
+
     async fetchWeatherData(geometry) {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${geometry.coordinates[1]}&longitude=${geometry.coordinates[0]}&current=temperature_2m,showers,snowfall,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
         try {
@@ -200,46 +230,39 @@ class Aerodrome extends AirspacePolygon {
                 `
                        <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
                     <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
-                    <span id="pageIndicator"></span>
-                    <div class="pdfButtons">
-                        <button id="zoom-in">Zoom In</button>
-                        <button id="zoom-out">Zoom Out</button>
-                        <button id="rotate">Rotate</button>
-                    </div>
-                    <div id="canvas-container">
-                        <canvas id="pdf-render"></canvas>
-                    </div>
+                    <span id="pageIndicator">${this.currentPage + 1} / ${this.aipIds.length}</span>
+                    <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155" frameborder="0"></iframe>
+
             `
-            this.loadPdf('adInfoTest/Gehalt_Februar.pdf');
-            let pageIndicator = document.getElementById('pageIndicator');
-            pageIndicator.innerHTML = '';
+
+            // this.loadPdf('https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=21599');
+          
             // pageIndicator.innerHTML = `${this.currentImgIndex + 1} / ${this.aipImgs.images.length}`;
         }
     }
 
     changeAipImg(direction) {
-        if (window.resetImageState) {
-            window.resetImageState();
-        }
+        let aipIframe = document.getElementById('pdfIframe');
+        
         if (direction == 'right') {
-            if (this.currentImgIndex == this.aipImgs.images.length - 1) {
-                this.currentImgIndex = 0;
+            if (this.currentPage != this.aipIds.length - 1) {
+                this.currentPage++
             } else {
-                this.currentImgIndex++;
+                this.currentPage = 0;
             }
+           aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
         }
         if (direction == 'left') {
-            if (this.currentImgIndex == 0) {
-                this.currentImgIndex = this.aipImgs.images.length - 1;
+            if (this.currentPage == 0) {
+                this.currentPage = this.aipIds.length - 1;
             } else {
-                this.currentImgIndex--;
+                this.currentPage--;
             }
+            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
         }
-        let currentAipImg = document.getElementById('currentAipImg');
         let pageIndicator = document.getElementById('pageIndicator');
-        currentAipImg.src = this.aipImgs.images[this.currentImgIndex];
         pageIndicator.innerHTML = '';
-        pageIndicator.innerHTML = `${this.currentImgIndex + 1} / ${this.aipImgs.images.length}`
+        pageIndicator.innerHTML = `${this.currentPage + 1} / ${this.aipIds.length}`;
     }
 
 

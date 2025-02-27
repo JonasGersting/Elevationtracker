@@ -465,9 +465,12 @@ h3 {
 #pageIndicator {
     position: absolute;
     bottom: 16px;
-    right: 16px;
+    right: 32px;
     color: rgb(195, 245, 25);
     z-index: 5;
+    background-color: rgb(15, 90, 210);
+    border-radius: 16px;
+    padding: 8px;
 }
 
 .detailButtonsGroup {
@@ -559,33 +562,12 @@ h3 {
     z-index: 5;
 }
 
-#canvas-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+#pdfIframe {
     width: 100%;
     height: 100%;
-    overflow: auto;
+    min-width: 600px;
     position: relative;
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
 }
-
-#canvas-container::-webkit-scrollbar {
-    display: none;
-}
-
-canvas {
-    display: block;
-    margin: auto;
-    cursor: move;
-}
-
-
-
-
 
 @keyframes spin {
     from {
