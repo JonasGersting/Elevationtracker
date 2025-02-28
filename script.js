@@ -6,7 +6,7 @@ let currentAerodrome;
 
 //current acft variables
 let currentTrack;
-let currentHex;
+
 
 // Event-Listener, um zu überprüfen, ob der Cursor über keinem Polygon schwebt
 function checkCursorOverPolygon() {
@@ -345,8 +345,10 @@ function calculateAngle(lat1, lon1, lat2, lon2) {
 
 // Funktion zum Reset der Karte
 function resetMap() {
-    currentHex = null;
-    
+    let trackedAcftDiv = document.getElementById('trackedAcft');
+    trackedAcftDiv.classList.add('hiddenTrackedAcft');
+    trackedHex = null;
+
     currentAddresses = [];
     if (currentTrack) {
         map.removeLayer(currentTrack);
@@ -356,7 +358,7 @@ function resetMap() {
         map.removeLayer(currentAdressGeoJSONLayer);
     }
     currentAdressGeoJSONLayer = null;
-    
+
     trackedAcftReg = 'nothing';
     if (markerData.navaid.added) {
         toggleMarkers('navaid');
@@ -413,6 +415,16 @@ function searchCoordinate() {
 
 
 
+let trackedAcftReg = 'nothing';
+let trackedCallsign;
+let trackedAcftImg;
+let trackedAlt;
+let trackedPos;
+let trackedType;
+let trackedSpeed;
+let trackedHeading;
+let trackedTrack;
+let trackedHex;
 
 
 
@@ -431,11 +443,17 @@ function createCustomMarker(aircraftData) {
     const { lat, lon, desc, alt_baro, ias, true_heading, track, r, flight, hex } = aircraftData;
     let acftImgColor;
     let rotation = true_heading || track;
-    if (trackedAcftReg == flight) {
+    if (trackedHex == hex) {
+        setTrackingDetails(r, desc, flight, alt_baro, ias, true_heading, lat, lon, track, hex);
+        showAcftDetails(hex);
+    }
+
+    if (trackedHex == hex) {
         acftImgColor = 'rgb(181 117 33)'
     } else {
         acftImgColor = returnAircraftImg(alt_baro);
     }
+
 
     // Benutzerdefiniertes Icon mit Rotation
     const planeIcon = L.divIcon({
@@ -453,15 +471,8 @@ function createCustomMarker(aircraftData) {
     const tooltipContent = `
         <div>
             <strong>registration:</strong> ${r || 'Unknown'}<br>
-            <strong>Description:</strong> ${desc || 'Unknown'}<br>
             <strong>Callsign:</strong> ${flight}<br>
             <strong>Altitude:</strong> ${alt_baro || 'N/A'} ft<br>
-            <strong>Speed:</strong> ${ias || 'N/A'} kn<br>
-            <strong>Heading:</strong> ${true_heading}°<br>
-            <strong>Lat:</strong> ${lat}<br>
-            <strong>Lon:</strong> ${lon}<br>
-            <strong>Rotation:</strong> ${rotation}<br>
-            <strong>Track:</strong> ${track}
         </div>
     `;
 
@@ -473,9 +484,10 @@ function createCustomMarker(aircraftData) {
 
     // Klick-Event hinzufügen
     planeMarker.on('click', () => {
+        setTrackingDetails(r, desc, flight, alt_baro, ias, true_heading, lat, lon, track, hex);
+        showAcftDetails(hex);
         handleTrack(hex);
         trackedAcftReg = flight; // Ändere trackedAcftReg auf den flight-Wert
-        currentHex = hex;
         // Aktualisiere das Bild des Markers
         const updatedPlaneIcon = L.divIcon({
             html: returnCorrectSvgForAcft(rotation, 'rgb(181 117 33)', r, flight),
@@ -490,6 +502,58 @@ function createCustomMarker(aircraftData) {
     });
 
     return planeMarker;
+}
+
+function setTrackingDetails(r, desc, flight, alt_baro, ias, true_heading, lat, lon, track, hex) {
+    trackedAcftReg = r;
+    trackedCallsign = flight;
+    trackedAlt = alt_baro;
+    const roundedLat = lat.toFixed(2);
+    const roundedLon = lon.toFixed(2);
+    trackedPos = `${roundedLat}N, ${roundedLon}E`;
+    trackedType = desc;
+    trackedSpeed = ias;
+    trackedHeading = true_heading;
+    trackedTrack = track;
+    trackedHex = hex;
+}
+
+async function showAcftDetails(hex) {
+    let trackedAcftDiv = document.getElementById('trackedAcft')
+    let callsignDiv = document.getElementById('trackedCallsign');
+    let regDiv = document.getElementById('trackedReg');
+    let img = document.getElementById('trackedImg');
+    let altDiv = document.getElementById('trackedAltitude');
+    let posDiv = document.getElementById('trackedPos');
+    let typeDiv = document.getElementById('trackedType');
+    let speedDiv = document.getElementById('trackedIas');
+    let headingDiv = document.getElementById('trackedHeading');
+    let trackDiv = document.getElementById('trackedTrack');
+    trackedAcftDiv.classList.remove('hiddenTrackedAcft');
+    callsignDiv.innerHTML = trackedCallsign;
+    regDiv.innerHTML = trackedAcftReg;
+    img.src = await getImgSrc(hex);
+    altDiv.innerHTML = trackedAlt;
+    posDiv.innerHTML = trackedPos;
+    typeDiv.innerHTML = trackedType;
+    speedDiv.innerHTML = trackedSpeed;
+    headingDiv.innerHTML = trackedHeading;
+    trackDiv.innerHTML = trackedTrack;
+}
+
+async function getImgSrc(hex) {
+    const apiUrl = `https://api.planespotters.net/pub/photos//hex/${hex}`;
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`no tracks found`);
+        }
+        const data = await response.json();
+        return data.photos[0].thumbnail.src
+    } catch (error) {
+        console.error("Fehler beim API-Abruf:", error);
+        return
+    }
 }
 
 async function handleTrack(hex) {
@@ -529,8 +593,8 @@ function drawTrack(map, track) {
     // Erstelle eine Polyline mit den Koordinaten und einem grünen Stil
     currentTrack = L.polyline(coordinates, {
         color: 'green',
-        weight: 5, // Linienstärke
-        opacity: 0.7, // Transparenz
+        weight: 3, // Linienstärke
+        opacity: 1, // Transparenz
     });
 
     // Füge die Linie zur Karte hinzu
@@ -541,7 +605,7 @@ function drawTrack(map, track) {
 function returnCorrectSvgForAcft(rotation, color, r, flight) {
     if (r && r.startsWith("D-H") || flight && flight.startsWith("DH")) {
         return `
-                <div style="transform: rotate(${rotation}deg);">
+                <div style="transform: rotate(${rotation - 90}deg);">
         <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="100%" height="100%" viewBox="0 0 129 97" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M10.641,51.985l-7.247,-0c-1.608,-0 -2.914,-1.583 -2.914,-3.532c-0,-1.949 1.306,-3.531 2.914,-3.531l7.247,0l-0,-11.939l-2.222,-3.862l10.382,-0l-0,15.801l29.212,0c3.128,-4.619 12.252,-8.389 24.205,-10.161l-23.317,-28.254c-1.137,-1.378 -1.137,-3.615 0,-4.994c1.138,-1.378 2.984,-1.378 4.121,0l26.761,32.428c2.543,-0.18 5.169,-0.275 7.856,-0.275c2.686,0 5.313,0.095 7.855,0.275l26.761,-32.428c1.137,-1.378 2.984,-1.378 4.121,0c1.137,1.379 1.137,3.616 0,4.994l-23.316,28.254c14.881,2.206 25.377,7.509 25.377,13.692c-0,6.184 -10.496,11.486 -25.377,13.693l23.316,28.253c1.137,1.379 1.137,3.616 0,4.994c-1.137,1.378 -2.984,1.378 -4.121,0l-26.761,-32.427c-2.542,0.18 -5.169,0.274 -7.855,0.274c-2.687,0 -5.313,-0.094 -7.856,-0.274l-26.761,32.427c-1.137,1.378 -2.983,1.378 -4.121,0c-1.137,-1.378 -1.137,-3.615 0,-4.994l23.317,-28.253c-11.953,-1.772 -21.077,-5.542 -24.205,-10.161l-29.212,-0l-0,15.801l-10.609,0l2.449,-3.882l-0,-11.919Z" style="fill:${color};stroke:#000;stroke-width:2px;"/></svg>
         </div>
         `
@@ -715,8 +779,8 @@ async function fetchAircraftData(centerLat, centerLon, radius) {
             const marker = createCustomMarker(acft);
             aircraftLayer.addLayer(marker);
         });
-        if (currentHex) {
-            handleTrack(currentHex);
+        if (trackedHex) {
+            handleTrack(trackedHex);
         }
     } catch (error) {
         console.error("Fehler beim API-Abruf:", error);
@@ -726,7 +790,6 @@ async function fetchAircraftData(centerLat, centerLon, radius) {
 
 
 
-let trackedAcftReg = null;
 
 
 
@@ -792,7 +855,7 @@ async function fetchAircraftDataCallsign(callsign) {
         if (acft) {
             trackedAcftReg = acft.flight;
             handleTrack(acft.hex);
-            currentHex = acft.hex;
+            trackedHex = acft.hex;
             const marker = createCustomMarker(acft);
             aircraftLayer.addLayer(marker);
 

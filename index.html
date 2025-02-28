@@ -84,7 +84,43 @@
     <div id="aerodromeInfoDetail">
     </div>
     <div id="map"></div>
-    <div class="d-none" id="imgFullScreen"></div>
+    <div class="hiddenTrackedAcft" id="trackedAcft">
+        <h2 id="trackedCallsign">BPO345</h2>
+        <h3 id="trackedReg">D-HVGM</h3>
+        <img id="trackedImg" src="https://t.plnspttrs.net/04648/1543914_9e6709f74a_t.jpg" alt="no img found">
+        <div class="trackedAcftRow">
+            <span>Höhe:</span>
+            <span id="trackedAltitude">1000FT</span>
+        </div>
+        <div class="trackedAcftRow">
+            <span>Position:</span>
+            <span id="trackedPos">45.6N 9.6E</span>
+        </div>
+        <div class="trackedAcftRow">
+            <span>Type:</span>
+            <span id="trackedType">EC-135</span>
+        </div>
+        <div class="trackedAcftRow">
+            <span>IAS:</span>
+            <span id="trackedIas">110kts</span>
+        </div>
+        <div class="trackedAcftRow">
+            <span>Heading:</span>
+            <span id="trackedHeading">90deg</span>
+        </div>
+        <div class="trackedAcftRow">
+            <span>Track:</span>
+            <span id="trackedTrack">91deg</span>
+        </div>
+        <div class="trackedAcftRow">
+            <input placeholder="destination" id="icaoDest" type="text">
+            <button class="etaBtn" onclick="calcEta()">calc ETA</button>
+        </div>
+        <div class="trackedAcftRow">
+            <span>ETA:</span>
+            <span id="ETA">25 min</span>
+        </div>
+    </div>
 </body>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
