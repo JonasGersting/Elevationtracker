@@ -61,6 +61,32 @@ h3 {
     cursor: pointer;
 }
 
+.radarBtn{
+    margin-top: 16px;
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    left: 0;
+    z-index: 1000;
+    background-color: rgb(40, 40, 126);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 16px;
+    background-image: url('img/radarWhite.png');
+    background-size: 60px;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    border: none;
+}
+
+.radarBtn:hover{
+    background-color: rgb(46, 192, 46);
+    background-image: url('img/radarBlue.png');
+}
+
 .giveMenuPsnAbsolute {
     position: absolute;
     top: 100px;

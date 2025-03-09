@@ -201,7 +201,7 @@ function createMarker(lat, lng) {
             <button onclick="findClosestNavAid(${lat},${lng})">NAV-AID</button>`).openPopup();
     });
 
-    
+
 }
 
 function findClosestNavAid(markerLat, markerLon) {
@@ -211,8 +211,8 @@ function findClosestNavAid(markerLat, markerLon) {
     let closestNavAidLatLng = null;
 
     // Iteriere durch alle Navaids
-    navAids.forEach(navaid => {                
-        if ((navaid.properties.charted && navaid.properties.charted.includes('ICAO500')) || (navaid.properties.dme_charted && navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted && navaid.properties.dme_charted.includes('NN') )) {
+    navAids.forEach(navaid => {
+        if ((navaid.properties.charted && navaid.properties.charted.includes('ICAO500')) || (navaid.properties.dme_charted && navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted && navaid.properties.dme_charted.includes('NN'))) {
             const distance = haversine(
                 markerLat, markerLon,
                 navaid.geometry.coordinates[1], navaid.geometry.coordinates[0]
@@ -1020,13 +1020,15 @@ let fisAirspace = [];
 let edrAirspace = [];
 let eddAirspace = [];
 let ctrAirspace = [];
+let rmzAirspace = [];
 
 
 const airspaceStates = {
     fis: { name: 'fisAirspace', airspace: fisAirspace },
     edr: { name: 'edrAirspace', airspace: edrAirspace },
     edd: { name: 'eddAirspace', airspace: eddAirspace },
-    ctr: { name: 'ctrAirspace', airspace: ctrAirspace }
+    ctr: { name: 'ctrAirspace', airspace: ctrAirspace },
+    rmz: { name: 'rmzAirspace', airspace: rmzAirspace }
 };
 
 // Objekt zum Speichern der Polygone nach AirspaceKey
@@ -1039,6 +1041,9 @@ async function togglePolygons(airspaceKey) {
         let data = await getData(airspaceStates[airspaceKey].name);
         airspaceStates[airspaceKey].airspace = data;
         airspaceArray = data;
+        console.log(data);
+        
+
     }
 
 
@@ -1058,7 +1063,7 @@ async function togglePolygons(airspaceKey) {
     }
 
     if (airspaceArray === ctrAirspace) {
-        processItems(airspaceState, airspaceKey, map, polygonLayers[airspaceKey]);
+        processItems(airspaceArray, airspaceKey, map, polygonLayers[airspaceKey]);
     } else {
         processItems([...airspaceArray].reverse(), airspaceKey, map, polygonLayers[airspaceKey]);
     }
@@ -1073,7 +1078,7 @@ async function getData(key) {
             if (data !== null) {
                 if (key === 'aerodromes') {
                     aerodromes = data;
-                    markerData.aerodrome.source = data;                  
+                    markerData.aerodrome.source = data;
                     return data;
                 } else if (key === 'navAids') {
                     navAids = data[0].features;
@@ -1094,6 +1099,8 @@ async function getData(key) {
                 } else if (key === 'aipInfo') {
                     aipInfo = data;
                     return data;
+                } else if (key === 'rmzAirspace') {
+                    return data[0].features;
                 }
 
 
@@ -1124,6 +1131,9 @@ function processItems(items, airspaceKey, map, layerArray) {
                     break;
                 case 'ctr':
                     polygon = new CtrAirspace(item.geometry, item.name, map, layerArray);
+                    break;
+                case 'rmz':
+                    polygon = new RmzAirspace(item.geometry, item.properties.Ident, map, layerArray);
                     break;
             }
             polygon.addToMap();
@@ -1206,7 +1216,7 @@ function toggleMarkers(key) {
                     let item;
                     if (key === "aerodrome") {
                         item = new Aerodrome(data.geometry, data.name, map, data.icaoCode, data.runways);
-                    } else if (key === "navaid") {              
+                    } else if (key === "navaid") {
                         item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted);
                     }
                     item.addToMap(); // Marker wird direkt zur Karte hinzugefügt
