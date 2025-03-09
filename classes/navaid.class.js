@@ -1,12 +1,13 @@
 class Navaid extends AirspacePolygon {
-    constructor(lat, long, name, map, type, designator) {
-        super(lat, long, name, map, type, designator);
+    constructor(lat, long, name, map, type, designator, charted) {
+        super(lat, long, name, map, type, designator, charted);
         this.lat = lat;
         this.long = long;
         this.name = name;
         this.map = map;
         this.type = type;
         this.designator = designator;
+        this.charted = charted;
     }
 
     // Methode zum Hinzufügen des Markers zur Karte mit benutzerdefiniertem Icon

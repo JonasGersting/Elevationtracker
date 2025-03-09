@@ -197,31 +197,32 @@ function createMarker(lat, lng) {
 
     // Abfrage der Höhe von der Open Elevation API
     getElevation(lat, lng).then(elevation => {
-        marker.bindPopup(`<b>Höhe:</b> ${elevation} Fuß`).openPopup();
+        marker.bindPopup(`<b>Höhe:</b> ${elevation}FT<br>
+            <button onclick="findClosestNavAid(${lat},${lng})">NAV-AID</button>`).openPopup();
     });
 
-    findClosestNavAid(marker);
+    
 }
 
-function findClosestNavAid(markerPoint) {
+function findClosestNavAid(markerLat, markerLon) {
     // Initialisiere die kürzeste Distanz und das nächste Navaid
     let closestNavAid = null;
     let shortestDistance = Infinity;
     let closestNavAidLatLng = null;
 
     // Iteriere durch alle Navaids
-    navAids.forEach(navaid => {
-        if (navaid.Type != 'LOC' && navaid.Type != 'MKR' && navaid.Type != 'DME' && navaid.Type != 'ILS') {
+    navAids.forEach(navaid => {                
+        if ((navaid.properties.charted && navaid.properties.charted.includes('ICAO500')) || (navaid.properties.dme_charted && navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted && navaid.properties.dme_charted.includes('NN') )) {
             const distance = haversine(
-                markerPoint._latlng.lat, markerPoint._latlng.lng,
-                navaid.Latitude, navaid.Longitude
+                markerLat, markerLon,
+                navaid.geometry.coordinates[1], navaid.geometry.coordinates[0]
             );
 
             // Überprüfe, ob die aktuelle Distanz kürzer ist
             if (distance < shortestDistance) {
                 shortestDistance = distance;
                 closestNavAid = navaid;
-                closestNavAidLatLng = [navaid.Latitude, navaid.Longitude];
+                closestNavAidLatLng = [navaid.geometry.coordinates[1], navaid.geometry.coordinates[0]];
             }
         }
     });
@@ -230,12 +231,12 @@ function findClosestNavAid(markerPoint) {
         // Berechne den Winkel (Azimut) vom Navaid zum Marker
         const angle = calculateAngle(
             closestNavAidLatLng[0], closestNavAidLatLng[1],
-            markerPoint._latlng.lat, markerPoint._latlng.lng
+            markerLat, markerLon
         );
 
         // Zeichne eine Linie vom MarkerPoint zum nächstgelegenen Navaid
         const line = L.polyline([
-            [markerPoint._latlng.lat, markerPoint._latlng.lng],
+            [markerLat, markerLon],
             closestNavAidLatLng
         ], {
             color: 'blue',
@@ -246,7 +247,7 @@ function findClosestNavAid(markerPoint) {
         polylines.push(line);
 
         // Popup mit dem Namen des Navaids, der Distanz und dem Winkel hinzufügen
-        line.bindPopup(`${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAid.Name} ${closestNavAid.Type} ${closestNavAid.Designator}`).openPopup();
+        line.bindPopup(`${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAid.properties.txtname} ${closestNavAid.properties['select-source-layer']} ${closestNavAid.properties.ident}`).openPopup();
     }
 }
 
@@ -433,7 +434,7 @@ let trackedSpeed;
 let trackedHeading;
 let trackedTrack;
 let trackedHex;
-let trackedEta;
+let trackedEta = '';
 let trackedIcaoDest;
 let flightDistLine = null;
 
@@ -1038,8 +1039,6 @@ async function togglePolygons(airspaceKey) {
         let data = await getData(airspaceStates[airspaceKey].name);
         airspaceStates[airspaceKey].airspace = data;
         airspaceArray = data;
-        console.log(airspaceArray);
-
     }
 
 
@@ -1066,24 +1065,19 @@ async function togglePolygons(airspaceKey) {
 }
 
 async function getData(key) {
-    console.log('this is the key', key);
-
     const firebaseURL = 'https://aromaps-3b242-default-rtdb.europe-west1.firebasedatabase.app/';
     const url = `${firebaseURL}/${key}.json`;
     return fetch(url)
         .then(res => res.json())
         .then(data => {
             if (data !== null) {
-                console.log(url);
-
-
                 if (key === 'aerodromes') {
                     aerodromes = data;
-                    markerData.aerodrome.source = data;
+                    markerData.aerodrome.source = data;                  
                     return data;
-                } else if (key === 'navaids') {
-                    navAids = data;
-                    markerData.navaid.source = data;
+                } else if (key === 'navAids') {
+                    navAids = data[0].features;
+                    markerData.navaid.source = data[0].features;
                     return data;
                 } else if (key === 'obstacles') {
                     obstacles = data;
@@ -1151,8 +1145,6 @@ const markerData = {
 
 
 function toggleMarkers(key) {
-
-
     if (!markerData[key]) {
         console.warn(`Unbekannter Schlüssel: ${key}`);
         return;
@@ -1214,8 +1206,8 @@ function toggleMarkers(key) {
                     let item;
                     if (key === "aerodrome") {
                         item = new Aerodrome(data.geometry, data.name, map, data.icaoCode, data.runways);
-                    } else if (key === "navaid") {
-                        item = new Navaid(data.Latitude, data.Longitude, data.Name, map, data.Type, data.Designator);
+                    } else if (key === "navaid") {              
+                        item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted);
                     }
                     item.addToMap(); // Marker wird direkt zur Karte hinzugefügt
 
@@ -1260,7 +1252,6 @@ async function getWeather(weatherType) {
         // Wetter-Pfad basierend auf dem Wettertyp auslesen
         if (weatherType === 'weather') {
             weatherPath = data.radar.nowcast.at(-1).path;
-            console.log(weatherPath);
         } else if (weatherType === 'clouds') {
             weatherPath = data.satellite.infrared.at(-1).path;
 
@@ -1414,7 +1405,6 @@ function search() {
     }
     else {
         console.log('Suche nicht erfolgreich');
-
     }
 
 }
