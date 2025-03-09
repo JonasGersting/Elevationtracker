@@ -370,6 +370,14 @@ function resetMap() {
     // Entferne alle Polylines
     polylines.forEach(line => map.removeLayer(line));
     polylines = [];
+    if (flightDistLine) {
+        flightDistLine.remove();
+    }
+    if (trackedIcaoDest) {
+        trackedIcaoDest = '';
+        let icaoDestInput = document.getElementById('icaoDest');
+        icaoDestInput.value = '';
+    }
 }
 
 
@@ -425,6 +433,10 @@ let trackedSpeed;
 let trackedHeading;
 let trackedTrack;
 let trackedHex;
+let trackedEta;
+let trackedIcaoDest;
+let flightDistLine = null;
+
 
 
 
@@ -440,12 +452,15 @@ let aircraftLayer = L.layerGroup().addTo(map);
 
 
 function createCustomMarker(aircraftData) {
-    const { lat, lon, desc, alt_baro, ias, true_heading, track, r, flight, hex } = aircraftData;
+    const { lat, lon, t, alt_baro, ias, true_heading, track, r, flight, hex, gs } = aircraftData;
     let acftImgColor;
     let rotation = true_heading || track;
     if (trackedHex == hex) {
-        setTrackingDetails(r, desc, flight, alt_baro, ias, true_heading, lat, lon, track, hex);
+        setTrackingDetails(r, t, flight, alt_baro, gs, true_heading, lat, lon, track, hex);
         showAcftDetails(hex);
+        if (trackedIcaoDest) {
+            calcEta(trackedPos, trackedSpeed, trackedIcaoDest);
+        }
     }
 
     if (trackedHex == hex) {
@@ -484,9 +499,11 @@ function createCustomMarker(aircraftData) {
 
     // Klick-Event hinzufügen
     planeMarker.on('click', () => {
-        setTrackingDetails(r, desc, flight, alt_baro, ias, true_heading, lat, lon, track, hex);
+        setTrackingDetails(r, t, flight, alt_baro, ias, true_heading, lat, lon, track, hex);
         showAcftDetails(hex);
         handleTrack(hex);
+
+
         trackedAcftReg = flight; // Ändere trackedAcftReg auf den flight-Wert
         // Aktualisiere das Bild des Markers
         const updatedPlaneIcon = L.divIcon({
@@ -500,18 +517,17 @@ function createCustomMarker(aircraftData) {
         console.log(`Tracked Aircraft Registration geändert: ${trackedAcftReg}`);
         console.log(track);
     });
-
     return planeMarker;
 }
 
-function setTrackingDetails(r, desc, flight, alt_baro, ias, true_heading, lat, lon, track, hex) {
+function setTrackingDetails(r, t, flight, alt_baro, ias, true_heading, lat, lon, track, hex) {
     trackedAcftReg = r;
     trackedCallsign = flight;
     trackedAlt = alt_baro;
     const roundedLat = lat.toFixed(2);
     const roundedLon = lon.toFixed(2);
-    trackedPos = `${roundedLat}N, ${roundedLon}E`;
-    trackedType = desc;
+    trackedPos = [roundedLat, roundedLon];
+    trackedType = t;
     trackedSpeed = ias;
     trackedHeading = true_heading;
     trackedTrack = track;
@@ -529,16 +545,18 @@ async function showAcftDetails(hex) {
     let speedDiv = document.getElementById('trackedIas');
     let headingDiv = document.getElementById('trackedHeading');
     let trackDiv = document.getElementById('trackedTrack');
+    let eta = document.getElementById('ETA');
     trackedAcftDiv.classList.remove('hiddenTrackedAcft');
     callsignDiv.innerHTML = trackedCallsign;
     regDiv.innerHTML = trackedAcftReg;
     img.src = await getImgSrc(hex);
-    altDiv.innerHTML = trackedAlt;
-    posDiv.innerHTML = trackedPos;
+    altDiv.innerHTML = `${trackedAlt}FT`;
+    posDiv.innerHTML = `${trackedPos[0]}N, ${trackedPos[1]}E`;
     typeDiv.innerHTML = trackedType;
-    speedDiv.innerHTML = trackedSpeed;
-    headingDiv.innerHTML = trackedHeading;
-    trackDiv.innerHTML = trackedTrack;
+    speedDiv.innerHTML = `${trackedSpeed}kts`;
+    headingDiv.innerHTML = `${trackedHeading}°`;
+    trackDiv.innerHTML = `${trackedTrack}°`;
+    eta.innerHTML = `${trackedEta}min`;
 }
 
 async function getImgSrc(hex) {
@@ -599,6 +617,50 @@ function drawTrack(map, track) {
 
     // Füge die Linie zur Karte hinzu
     currentTrack.addTo(map);
+}
+
+function showETA() {
+    let dest = document.getElementById('icaoDest').value.toUpperCase();
+    trackedIcaoDest = dest;
+    calcEta(trackedPos, trackedSpeed, dest);
+}
+
+
+function calcEta(trackedPos, trackedSpeed, dest) {
+    for (let i = 0; i < aerodromes.length; i++) {
+        const ad = aerodromes[i]
+        if (dest == ad.icaoCode) {
+            const distMeters = calcDistance(ad.geometry.coordinates, trackedPos).toFixed(2);
+            const distNm = distMeters / 1852;
+            const flightTimeHours = distNm / trackedSpeed;
+            const flightTimeMin = (flightTimeHours * 60).toFixed(0);
+            trackedEta = flightTimeMin;
+        }
+    }
+}
+
+function drawDist(acftPos, adPos) {
+    if (flightDistLine) {
+        flightDistLine.remove();
+    }
+    flightDistLine = L.polyline(
+        [acftPos, adPos], // Die Koordinaten der Linie (Start- und Endpunkt)
+        {
+            color: 'black', // Farbe der Linie
+            weight: 3,         // Dicke der Linie
+            dashArray: '5, 5', // Strichmuster: gestrichelt
+        }
+    );
+    flightDistLine.addTo(map);
+}
+
+
+function calcDistance(adPos, trackedPos) {
+    const adPosition = L.latLng(adPos[1], adPos[0]); // [longitude, latitude]
+    const acftPosition = L.latLng(trackedPos[0], trackedPos[1]); // acftLat, acftLon
+    const distance = acftPosition.distanceTo(adPosition);
+    drawDist(acftPosition, adPosition);
+    return distance;
 }
 
 

@@ -132,7 +132,10 @@ h3 {
 }
 
 #trackedImg{
+    border-radius: 8px;
     max-width: 100%;
+    border: 2px solid rgb(195, 245, 25);
+    margin-bottom: 16px;
 }
 
 #icaoDest{
@@ -152,6 +155,13 @@ h3 {
     background-color: rgb(195, 245, 25);
     color: rgb(10, 60, 135);
     border-radius: 8px;
+    cursor: pointer;
+}
+
+.etaBtn:hover{
+    background-color: rgb(10, 60, 135);
+    color: rgb(195, 245, 25);
+    border: 2px solid rgb(195, 245, 25);
 }
 
 .bigImg {
