@@ -1,8 +1,6 @@
 class PjeAirspace extends AirspacePolygon {
     constructor(geometry, name, ident, map, polygonLayers) {
-        super(geometry, name, ident, map, polygonLayers);
-        console.log(geometry, name, ident, map, polygonLayers);
-        
+        super(geometry, name, ident, map, polygonLayers);        
     }
 
    

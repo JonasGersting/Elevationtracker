@@ -1,8 +1,9 @@
 // Basisklasse für Airspace-Polygone
 class AirspacePolygon {
-    constructor(geometry, name, map, polygonLayers) {
+    constructor(geometry, name, ident, map, polygonLayers) {
         this.geometry = geometry;
         this.name = name;
+        this.ident = ident;
         this.map = map;
         this.layer = null; // Platzhalter für den Polygon-Layer
         this.polygonLayers = polygonLayers; // Referenz auf das spezifische polygonLayers-Array

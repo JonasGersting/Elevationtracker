@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="fonts/fonts">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
 
 
 
@@ -75,6 +76,8 @@
                 <button class="mapBtn" id="showEddAirspace" onclick="togglePolygons('edd')">EDD</button>
                 <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('ctr')">CTR</button>
                 <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('rmz')">RMZ</button>
+                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('tmz')">TMZ</button>
+                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('atz')">ATZ</button>
                 <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('fir')">FIR</button>
                 <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('gafor')">Gafor</button>
                 <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('pje')">PJE</button>
@@ -83,8 +86,15 @@
                 <button class="mapBtn" id="showAerodromes" onclick="toggleMarkers('obstacle')">Hindernisse</button>
             </div>
         </div>
-        <button class="radarBtn" onclick="toggleRadar()"></button>
+        <button class="radarBtn shadow" onclick="toggleRadar()"></button>
     </div>
+    <div class="shadow" id="calcGaforRadius">
+        <div class="gaforInput">
+            <input id="gaforNumbers" oninput="validateInput(this)" type="text" placeholder="45 34 1 4..."> <button class="gaforBtn" onclick="calcGaforRadius()">Radius</button>
+        </div>
+        <span id="gaforRadius">Radius:</span>
+    </div>
+    <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
     </div>
     <div id="map"></div>
@@ -139,6 +149,8 @@
 <script src="classes/firAirspace.class.js"></script>
 <script src="classes/gaforAirspace.class.js" ></script>
 <script src="classes/pjeAirspace.class.js" ></script>
+<script src="classes/tmzAirspace.class.js" ></script>
+<script src="classes/atzAirspace.class.js" ></script>
 <script src="classes/navaid.class.js"></script>
 <script src="classes/obstacle.class.js"></script>
 <script src="classes/eddAirspace.class.js"></script>

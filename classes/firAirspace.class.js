@@ -1,6 +1,6 @@
 class FirAirspace extends AirspacePolygon {
     constructor(geometry, name, map, polygonLayers) {
-        super(geometry, name, map, polygonLayers);
+        super(geometry, name, map, polygonLayers);        
     }
 
     

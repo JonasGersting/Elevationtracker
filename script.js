@@ -165,6 +165,7 @@ async function init() {
     getData('aerodromes');
     getData('obstacles');
     getData('aipInfo');
+    showCursorCoordinates(map);
 }
 
 
@@ -565,13 +566,12 @@ async function getImgSrc(hex) {
     try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
-            throw new Error(`no tracks found`);
+            return 'img/acftWhite.png'
         }
         const data = await response.json();
         return data.photos[0].thumbnail.src
     } catch (error) {
-        console.error("Fehler beim API-Abruf:", error);
-        return
+        return 'img/acftWhite.png'
     }
 }
 
@@ -1024,6 +1024,8 @@ let rmzAirspace = [];
 let firAirspace = [];
 let gaforAirspace = [];
 let pjeAirspace = [];
+let tmzAirspace = [];
+let atzAirspace = [];
 
 const airspaceStates = {
     fis: { name: 'fisAirspace', airspace: fisAirspace },
@@ -1034,6 +1036,8 @@ const airspaceStates = {
     fir: { name: 'firAirspace', airspace: firAirspace },
     gafor: { name: 'gaforAirspace', airspace: gaforAirspace },
     pje: { name: 'pjeAirspace', airspace: pjeAirspace },
+    tmz: { name: 'tmzAirspace', airspace: tmzAirspace },
+    atz: { name: 'atzAirspace', airspace: atzAirspace },
 };
 
 // Objekt zum Speichern der Polygone nach AirspaceKey
@@ -1041,6 +1045,11 @@ let polygonLayers = {};
 
 // Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
 async function togglePolygons(airspaceKey) {
+    if (airspaceKey === 'gafor') {
+        let gaforCalc = document.getElementById('calcGaforRadius');
+        gaforCalc.style.display = 'flex';
+    }
+
     let airspaceArray = airspaceStates[airspaceKey].airspace;
     let data = await getData(airspaceStates[airspaceKey].name);
 
@@ -1110,6 +1119,10 @@ async function getData(key) {
                     return data[0].features;
                 } else if (key === 'pjeAirspace') {
                     return data[0].features;
+                } else if (key === 'tmzAirspace') {
+                    return data[0].features;
+                } else if (key === 'atzAirspace') {
+                    return data[0].features;
                 }
 
 
@@ -1125,34 +1138,39 @@ async function getData(key) {
 }
 
 function processItems(items, airspaceKey, map, layerArray) {
-    console.log(items, airspaceKey);
     items.forEach(item => {
         if (item.geometry && item.geometry.type === "Polygon" || item.geometry && item.geometry.type === "MultiPolygon") {
             let polygon;
             switch (airspaceKey) {
                 case 'fis':
-                    polygon = new FisAirspace(item.geometry, item.name, map, layerArray);
+                    polygon = new FisAirspace(item.geometry, item.name, 'null', map, layerArray);
                     break;
                 case 'edr':
-                    polygon = new EdrAirspace(item.geometry, item.name, map, layerArray);
+                    polygon = new EdrAirspace(item.geometry, item.name, 'null', map, layerArray);
                     break;
                 case 'edd':
-                    polygon = new EddAirspace(item.geometry, item.name, map, layerArray);
+                    polygon = new EddAirspace(item.geometry, item.name, 'null', map, layerArray);
                     break;
                 case 'ctr':
-                    polygon = new CtrAirspace(item.geometry, item.name, map, layerArray);
+                    polygon = new CtrAirspace(item.geometry, item.name, 'null', map, layerArray);
                     break;
                 case 'rmz':
-                    polygon = new RmzAirspace(item.geometry, item.properties.Ident, map, layerArray);
+                    polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
                     break;
                 case 'fir':
-                    polygon = new FirAirspace(item.geometry, item.properties.Ident, map, layerArray);
+                    polygon = new FirAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
                     break;
                 case 'gafor':
-                    polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, map, layerArray);
+                    polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', map, layerArray);
                     break;
                 case 'pje':
                     polygon = new PjeAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                    break;
+                case 'tmz':
+                    polygon = new TmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                    break;
+                case 'atz':
+                    polygon = new AtzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
                     break;
             }
             polygon.addToMap();
@@ -1520,3 +1538,188 @@ function initializeImageInteractions() {
     window.resetImageState = resetImageState;
 }
 
+
+
+//show actual position as coordinate in DMS
+// Hilfsfunktion zur Umwandlung von Dezimalgrad in DMS
+function toDMS(coordinate, isLatitude) {
+    const absolute = Math.abs(coordinate);
+    const degrees = Math.floor(absolute);
+    const minutesNotTruncated = (absolute - degrees) * 60;
+    const minutes = Math.floor(minutesNotTruncated);
+    const seconds = Math.floor((minutesNotTruncated - minutes) * 60);
+
+    const direction = isLatitude
+        ? coordinate >= 0 ? 'N' : 'S'
+        : coordinate >= 0 ? 'E' : 'W';
+
+    return `${degrees}° ${minutes}' ${seconds}''${direction}`;
+}
+
+// Funktion zum Anzeigen der aktuellen Mauskoordinaten in DMS
+function showCursorCoordinates(map) {
+    const displayDiv = document.getElementById('showActualPos');
+    if (!displayDiv) {
+        console.error("Element mit der ID 'showActualPos' nicht gefunden.");
+        return;
+    }
+
+    map.on('mousemove', function (event) {
+        const { lat, lng } = event.latlng;
+
+        // Umwandlung in DMS
+        const latitudeDMS = toDMS(lat, true);
+        const longitudeDMS = toDMS(lng, false);
+
+        // Koordinaten im Div anzeigen
+        displayDiv.textContent = `${latitudeDMS} ${longitudeDMS}`;
+    });
+}
+
+
+
+
+//gafor radius
+
+function validateInput(input) {
+    // Erlaubt Zahlen mit bis zu 2 Stellen, getrennt durch Leerzeichen
+    input.value = input.value
+        .replace(/[^0-9\s]/g, '')            // Entfernt nicht-zulässige Zeichen
+        .replace(/\b(\d{3,})\b/g, '');       // Entfernt Zahlen mit 3 oder mehr Stellen
+}
+
+
+function calcGaforRadius() {
+    const input = document.getElementById("gaforNumbers").value;
+    const numbers = input
+        .split(/\s+/) // Zerlegt den Input in ein Array von Zahlen (Trennung durch Leerzeichen)
+        .filter(Boolean) // Entfernt leere Einträge
+        .map(num => num.padStart(2, "0")); // Fügt führende Nullen hinzu, falls nötig
+    document.getElementById("gaforNumbers").value = '';
+    const gaforRadius = airspaceStates.gafor.airspace.filter(item =>
+        numbers.includes(item.properties.gafor_nummer)
+    );
+    drawBoundingCircle(gaforRadius);
+    console.log(gaforRadius);
+
+
+
+}
+
+
+// Funktion zur Berechnung des konvexen Hüllpolygons
+function convexHull(points) {
+    // Punkte sortieren (zuerst nach x, dann nach y)
+    points = points.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+
+    // Hilfsfunktion für den "cross product" (Kreuzprodukt)
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+
+    let lower = [];
+    for (let i = 0; i < points.length; i++) {
+        while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], points[i]) <= 0) {
+            lower.pop();
+        }
+        lower.push(points[i]);
+    }
+
+    let upper = [];
+    for (let i = points.length - 1; i >= 0; i--) {
+        while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], points[i]) <= 0) {
+            upper.pop();
+        }
+        upper.push(points[i]);
+    }
+
+    // Entferne den letzten Punkt, weil er doppelt vorkommt
+    lower.pop();
+    upper.pop();
+
+    return lower.concat(upper);
+}
+
+// Berechnung des kleinsten umschließenden Kreises für das konvexe Hüllpolygon
+function smallestBoundingCircle(points) {
+    const hull = convexHull(points);
+
+    // Berechne den maximalen Abstand zwischen zwei Punkten im konvexen Hüllpolygon
+    let maxDistance = 0;
+    let farthestPair = [];
+
+    for (let i = 0; i < hull.length; i++) {
+        for (let j = i + 1; j < hull.length; j++) {
+            const dist = haversineDistanceGafor(hull[i], hull[j]);
+            if (dist > maxDistance) {
+                maxDistance = dist;
+                farthestPair = [hull[i], hull[j]]; // Speichert das Paar mit dem größten Abstand
+            }
+        }
+    }
+
+    // Berechne den Mittelpunkt des Kreises
+    const [point1, point2] = farthestPair;
+    const centerLat = (point1[0] + point2[0]) / 2;
+    const centerLon = (point1[1] + point2[1]) / 2;
+
+    const center = [centerLon, centerLat];
+
+    // Der Radius des Kreises ist die halbe Länge des größten Abstands
+    const radius = maxDistance / 2;
+
+    return { center, radius };
+}
+
+function drawBoundingCircle(gaforRadius) {
+    // Alle Koordinaten sammeln
+    const allCoordinates = gaforRadius.flatMap(item => item.geometry.coordinates.flat(Infinity));
+
+    // Paare von [Längengrad, Breitengrad] erstellen
+    const pairedCoordinates = [];
+    for (let i = 0; i < allCoordinates.length; i += 2) {
+        pairedCoordinates.push([allCoordinates[i], allCoordinates[i + 1]]);
+    }
+
+    // Berechnung des kleinsten Bounding Circles
+    const { center, radius } = smallestBoundingCircle(pairedCoordinates);
+
+    // Kreis auf der Karte hinzufügen
+    const circle = L.circle(center, {
+        color: 'orange',
+        fillColor: 'orange', // Die Farbe des Kreises
+        fillOpacity: 0, // Keine Füllung (vollständig durchsichtig)
+        opacity: 1, // Die Sichtbarkeit des Randes (soll sichtbar bleiben)
+        radius: radius * 1000, // Umwandlung in Meter
+    }).addTo(map);
+
+    // CSS für den Kreis, um Interaktionen zu deaktivieren
+    circle.getElement().style.pointerEvents = 'none';
+
+    let radiusNM = (radius / 1.852).toFixed(2);
+    let gaforSpan = document.getElementById('gaforRadius');
+    gaforSpan.innerHTML = `Radius: ${radiusNM}NM`
+    console.log("Kreiszentrum:", center);
+    console.log("Radius (km):", radius);
+
+    return circle;
+}
+
+
+
+
+
+function haversineDistanceGafor([lon1, lat1], [lon2, lat2]) {
+    const toRadians = deg => (deg * Math.PI) / 180;
+    const R = 6371; // Erdradius in Kilometern
+
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRadians(lat1)) *
+        Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Entfernung in Kilometern
+}
