@@ -1021,14 +1021,19 @@ let edrAirspace = [];
 let eddAirspace = [];
 let ctrAirspace = [];
 let rmzAirspace = [];
-
+let firAirspace = [];
+let gaforAirspace = [];
+let pjeAirspace = [];
 
 const airspaceStates = {
     fis: { name: 'fisAirspace', airspace: fisAirspace },
     edr: { name: 'edrAirspace', airspace: edrAirspace },
     edd: { name: 'eddAirspace', airspace: eddAirspace },
     ctr: { name: 'ctrAirspace', airspace: ctrAirspace },
-    rmz: { name: 'rmzAirspace', airspace: rmzAirspace }
+    rmz: { name: 'rmzAirspace', airspace: rmzAirspace },
+    fir: { name: 'firAirspace', airspace: firAirspace },
+    gafor: { name: 'gaforAirspace', airspace: gaforAirspace },
+    pje: { name: 'pjeAirspace', airspace: pjeAirspace },
 };
 
 // Objekt zum Speichern der Polygone nach AirspaceKey
@@ -1037,14 +1042,12 @@ let polygonLayers = {};
 // Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
 async function togglePolygons(airspaceKey) {
     let airspaceArray = airspaceStates[airspaceKey].airspace;
-    if (airspaceArray.length < 1) {
-        let data = await getData(airspaceStates[airspaceKey].name);
-        airspaceStates[airspaceKey].airspace = data;
-        airspaceArray = data;
-        console.log(data);
-        
+    let data = await getData(airspaceStates[airspaceKey].name);
 
-    }
+
+    airspaceStates[airspaceKey].airspace = data;
+    airspaceArray = data;
+
 
 
 
@@ -1101,6 +1104,12 @@ async function getData(key) {
                     return data;
                 } else if (key === 'rmzAirspace') {
                     return data[0].features;
+                } else if (key === 'firAirspace') {
+                    return data[0].features;
+                } else if (key === 'gaforAirspace') {
+                    return data[0].features;
+                } else if (key === 'pjeAirspace') {
+                    return data[0].features;
                 }
 
 
@@ -1116,8 +1125,9 @@ async function getData(key) {
 }
 
 function processItems(items, airspaceKey, map, layerArray) {
+    console.log(items, airspaceKey);
     items.forEach(item => {
-        if (item.geometry && item.geometry.type === "Polygon") {
+        if (item.geometry && item.geometry.type === "Polygon" || item.geometry && item.geometry.type === "MultiPolygon") {
             let polygon;
             switch (airspaceKey) {
                 case 'fis':
@@ -1134,6 +1144,15 @@ function processItems(items, airspaceKey, map, layerArray) {
                     break;
                 case 'rmz':
                     polygon = new RmzAirspace(item.geometry, item.properties.Ident, map, layerArray);
+                    break;
+                case 'fir':
+                    polygon = new FirAirspace(item.geometry, item.properties.Ident, map, layerArray);
+                    break;
+                case 'gafor':
+                    polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, map, layerArray);
+                    break;
+                case 'pje':
+                    polygon = new PjeAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
                     break;
             }
             polygon.addToMap();

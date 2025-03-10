@@ -658,6 +658,14 @@ h3 {
     position: relative;
 }
 
+.gaforArea {
+    background-color: transparent;
+    color: rgb(40, 40, 126);
+    font-weight: bold; /* Optional: für bessere Lesbarkeit */
+    border: none; /* Optional: falls ein Rahmen entfernt werden soll */
+    box-shadow: none; /* Optional: falls Schatten entfernt werden sollen */
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -667,3 +675,4 @@ h3 {
         transform: rotate(360deg);
     }
 }
+
