@@ -13,7 +13,7 @@ class Obstacle extends AirspacePolygon {
         this.map = map;
 
         // Marker wird hier vorbereitet, aber nicht hinzugefügt
-        const iconUrl = this.getCorrectImg(this.lighted); // Platzhalter für die URL des Bildes
+        const iconUrl = this.getCorrectImg(this.lighted, this.type); // Platzhalter für die URL des Bildes
         const iconSize = [120, 120];
         const customIcon = L.icon({
             iconUrl: iconUrl,
@@ -39,11 +39,35 @@ class Obstacle extends AirspacePolygon {
         clusterGroup.addLayer(this.marker);
     }
 
-    getCorrectImg(lightStatus){
-        if (lightStatus == 'Y') {
-            return 'img/Windkraftanlage quadratisch.png';
-        } else {
-            return 'img/windmillLightOut.png';
+    getCorrectImg(lightStatus, type){
+        if (type == 'WINDMILL') {
+            if (lightStatus == 'Y') {
+                return 'img/windmillLighted.svg';
+            } else {
+                return 'img/windmillLightOut.svg';
+            }
+        } else if (type == 'STACK') {
+            if (lightStatus == 'Y') {
+                return 'img/stackLighted.svg';
+            } else {
+                return 'img/stack.svg';
+            }
+        } else if (type == 'CABLE ABOVE VALLEY BOTTOM') {
+            if (lightStatus == 'Y') {
+                return 'img/electricitypoleLighted.svg';
+            } else {
+                return 'img/electricitypole.svg';
+            }
+        }  else if (type == 'BUILDING') {
+            if (lightStatus == 'Y') {
+                return 'img/AKWLighted.svg';
+            } else {
+                return 'img/AKW.svg';
+            }
+        }else {
+            return 'img/windmillLighted.svg';
         }
+
+       
     }
 }
