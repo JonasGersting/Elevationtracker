@@ -1081,61 +1081,131 @@ async function togglePolygons(airspaceKey) {
     }
 }
 
+const DB_NAME = 'cacheDatabase';
+const STORE_NAME = 'cacheStore';
+
+// IndexedDB initialisieren
+async function getDB() {
+    return idb.openDB(DB_NAME, 1, {
+        upgrade(db) {
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'key' });
+            }
+        },
+    });
+}
+
+// Daten aus IndexedDB abrufen
+async function getFromIndexedDB(key, maxAge = 2 * 60 * 60 * 1000) {
+    const db = await getDB();
+    const cachedItem = await db.get(STORE_NAME, key);
+
+    if (!cachedItem) return null;
+
+    const { data, timestamp } = cachedItem;
+    const age = Date.now() - timestamp;
+
+    if (age < maxAge) {
+        return data;
+    }
+
+    // Cache ist abgelaufen
+    await db.delete(STORE_NAME, key);
+    return null;
+}
+
+// Daten in IndexedDB speichern
+async function saveToIndexedDB(key, data) {
+    const db = await getDB();
+    const payload = {
+        key,
+        data,
+        timestamp: Date.now(),
+    };    
+    await db.put(STORE_NAME, payload);
+}
+
 async function getData(key) {
+    const cachedData = await getFromIndexedDB(key);
+    if (cachedData) {
+        console.log(`Daten für ${key} aus dem Cache geladen.`);
+
+        // Verarbeite die gecachten Daten, um die Variablen entsprechend zu setzen
+        processDataByKey(key, cachedData);
+        return cachedData;
+    }
+
     const firebaseURL = 'https://aromaps-3b242-default-rtdb.europe-west1.firebasedatabase.app/';
     const url = `${firebaseURL}/${key}.json`;
-    return fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            if (data !== null) {
-                if (key === 'aerodromes') {
-                    aerodromes = data;
-                    markerData.aerodrome.source = data;
-                    return data;
-                } else if (key === 'navAids') {
-                    navAids = data[0].features;
-                    markerData.navaid.source = data[0].features;
-                    return data;
-                } else if (key === 'obstacles') {
-                    obstacles = data;
-                    markerData.obstacle.source = data;
-                    return data;
-                } else if (key === 'fisAirspace') {
-                    return data;
-                } else if (key === 'edrAirspace') {
-                    return data;
-                } else if (key === 'eddAirspace') {
-                    return data;
-                } else if (key === 'ctrAirspace') {
-                    return data;
-                } else if (key === 'aipInfo') {
-                    aipInfo = data;
-                    return data;
-                } else if (key === 'rmzAirspace') {
-                    return data[0].features;
-                } else if (key === 'firAirspace') {
-                    return data[0].features;
-                } else if (key === 'gaforAirspace') {
-                    return data[0].features;
-                } else if (key === 'pjeAirspace') {
-                    return data[0].features;
-                } else if (key === 'tmzAirspace') {
-                    return data[0].features;
-                } else if (key === 'atzAirspace') {
-                    return data[0].features;
-                }
 
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`API-Anfrage fehlgeschlagen: ${response.statusText}`);
+        }
+        let data = await response.json();
 
-                return
-
+        if (data !== null) {
+            if (data[0]?.features) {
+                await saveToIndexedDB(key, data[0].features);
+                data = data[0].features;
+            } else {
+                await saveToIndexedDB(key, data);
             }
-            throw `No data found for key: ${key}`;
-        })
-        .catch(error => {
-            console.error('Error fetching data from Firebase:', error);
-            throw error;
-        });
+
+            // Verarbeite die Daten entsprechend dem Key
+            processDataByKey(key, data);
+            console.log(data);
+            
+            return data;
+        }
+
+        throw `Keine Daten für Key: ${key} gefunden.`;
+    } catch (error) {
+        console.error('Fehler beim Abrufen der Daten:', error);
+        throw error;
+    }
 }
+
+function processDataByKey(key, data) {
+    if (key === 'aerodromes') {
+        aerodromes = data;
+        markerData.aerodrome.source = data;
+    } else if (key === 'navAids') {
+        navAids = data;
+        markerData.navaid.source = data;
+        console.log(navAids);
+        
+    } else if (key === 'obstacles') {
+        obstacles = data;
+        markerData.obstacle.source = data;
+    } else if (key === 'fisAirspace') {
+        fisAirspace = data;
+    } else if (key === 'edrAirspace') {
+        edrAirspace = data;
+    } else if (key === 'eddAirspace') {
+        eddAirspace = data;
+    } else if (key === 'ctrAirspace') {
+        ctrAirspace = data;
+    } else if (key === 'aipInfo') {
+        aipInfo = data;
+    } else if (key === 'rmzAirspace') {
+        rmzAirspace = data[0]?.features;
+    } else if (key === 'firAirspace') {
+        firAirspace = data[0]?.features;
+    } else if (key === 'gaforAirspace') {
+        gaforAirspace = data[0]?.features;
+    } else if (key === 'pjeAirspace') {
+        pjeAirspace = data[0]?.features;
+    } else if (key === 'tmzAirspace') {
+        tmzAirspace = data[0]?.features;
+    } else if (key === 'atzAirspace') {
+        atzAirspace = data[0]?.features;
+    }
+}
+
+
+
 
 function processItems(items, airspaceKey, map, layerArray) {
     items.forEach(item => {
