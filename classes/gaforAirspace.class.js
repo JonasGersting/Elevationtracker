@@ -1,10 +1,9 @@
 class GaforAirspace extends AirspacePolygon {
     constructor(geometry, name, map, polygonLayers) {
         super(geometry, name, map, polygonLayers);
+        this.isSelected = false; // Zustand für die Auswahl des Polygons
     }
 
-    
-    
     addToMap() {
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
@@ -13,8 +12,7 @@ class GaforAirspace extends AirspacePolygon {
                     permanent: true,
                     direction: 'center',
                     className: 'gaforArea',
-                }).openTooltip()
-                
+                }).openTooltip();
 
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
@@ -23,35 +21,44 @@ class GaforAirspace extends AirspacePolygon {
 
                 layer.on('mouseout', () => {
                     isCursorOverPolygon = false;  // Setze den globalen Zustand zurück
-                    layer.setStyle({fillColor: 'lightblue', fillOpacity: 0.5});
+                    if (!this.isSelected) {
+                        layer.setStyle({fillColor: 'lightblue', fillOpacity: 0.5});
+                    }
                 });
 
                 layer.on('click', () => {
                     const inputField = document.getElementById('gaforNumbers');
-                    // Hole den aktuellen Wert im Input-Feld
                     const currentValue = inputField.value.trim();
-                    // Überprüfen, ob bereits ein Wert im Input-Feld existiert, dann füge den neuen Wert hinzu, wenn er noch nicht da ist
-                    if (currentValue) {
-                        inputField.value = currentValue + ' ' + this.name; // Füge den Namen hinzu (mit einem Leerzeichen getrennt)
+
+                    if (this.isSelected) {
+                        // Wenn das Polygon bereits ausgewählt ist, entferne den Namen aus dem Input-Feld und setze die Fill-Color zurück
+                        inputField.value = currentValue.replace(this.name, '').trim();
+                        layer.setStyle({fillColor: 'lightblue', fillOpacity: 0.5});
                     } else {
-                        inputField.value = this.name; // Wenn kein Wert da ist, setze den Namen als Wert
+                        // Wenn das Polygon noch nicht ausgewählt ist, füge den Namen zum Input-Feld hinzu
+                        if (currentValue) {
+                            // Überprüfen, ob der Name bereits im Input-Feld existiert
+                            if (!currentValue.includes(this.name)) {
+                                inputField.value = currentValue + ' ' + this.name; // Füge den Namen hinzu (mit einem Leerzeichen getrennt)
+                            }
+                        } else {
+                            inputField.value = this.name; // Wenn kein Wert da ist, setze den Namen als Wert
+                        }
+                        layer.setStyle({fillColor: 'white', fillOpacity: 0.8}); // Setze die Farbe auf weiß, wenn ausgewählt
                     }
+                    // Toggle den Zustand von isSelected
+                    this.isSelected = !this.isSelected;
                 });
-                
             }
         }).addTo(this.map);
     }
 
-  
-
-
     getStyle() {
         return {
-            color: 'lightblue',  // Farbe des Polygons
-            weight: 2,     // Randdicke
-            opacity: 1,  // Randtransparenz
-            fillOpacity: 0.5 // Fülltransparenz
+            color: 'lightblue',  // Randfarbe
+            weight: 2,            // Randdicke
+            opacity: 1,          // Randtransparenz
+            fillOpacity: 0.5     // Fülltransparenz
         };
     }
-
 }

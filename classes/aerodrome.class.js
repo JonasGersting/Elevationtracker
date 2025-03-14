@@ -84,7 +84,7 @@ class Aerodrome extends AirspacePolygon {
         const infoElement = this.marker._icon.querySelector('.additional-info');
 
         if (infoElement) {
-            if (zoomLevel >= 10) {
+            if (zoomLevel >= 9) {
                 infoElement.style.display = 'block';
             } else {
                 infoElement.style.display = 'none';

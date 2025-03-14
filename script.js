@@ -1121,7 +1121,7 @@ async function saveToIndexedDB(key, data) {
         key,
         data,
         timestamp: Date.now(),
-    };    
+    };
     await db.put(STORE_NAME, payload);
 }
 
@@ -1155,8 +1155,6 @@ async function getData(key) {
 
             // Verarbeite die Daten entsprechend dem Key
             processDataByKey(key, data);
-            console.log(data);
-            
             return data;
         }
 
@@ -1174,8 +1172,6 @@ function processDataByKey(key, data) {
     } else if (key === 'navAids') {
         navAids = data;
         markerData.navaid.source = data;
-        console.log(navAids);
-        
     } else if (key === 'obstacles') {
         obstacles = data;
         markerData.obstacle.source = data;
@@ -1648,136 +1644,91 @@ function showCursorCoordinates(map) {
 
 
 
-
-//gafor radius
-
+// Validiert die Eingabe für GAFOR-Nummern
 function validateInput(input) {
-    // Erlaubt Zahlen mit bis zu 2 Stellen, getrennt durch Leerzeichen
     input.value = input.value
-        .replace(/[^0-9\s]/g, '')            // Entfernt nicht-zulässige Zeichen
-        .replace(/\b(\d{3,})\b/g, '');       // Entfernt Zahlen mit 3 oder mehr Stellen
+        .replace(/[^0-9\s]/g, '')    // Entfernt nicht-zulässige Zeichen
+        .replace(/\s+/g, ' ')        // Reduziert auf einzelne Leerzeichen
+        .trim();                     // Entfernt führende und abschließende Leerzeichen
 }
 
-
+// Berechnet den GAFOR-Radius basierend auf den Eingaben
 function calcGaforRadius() {
     const input = document.getElementById("gaforNumbers").value;
     const numbers = input
-        .split(/\s+/) // Zerlegt den Input in ein Array von Zahlen (Trennung durch Leerzeichen)
-        .filter(Boolean) // Entfernt leere Einträge
-        .map(num => num.padStart(2, "0")); // Fügt führende Nullen hinzu, falls nötig
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(num => num.padStart(2, "0")); // Führende Nullen hinzufügen
+
     document.getElementById("gaforNumbers").value = '';
+
+    if (!numbers.length) {
+        console.error("Keine gültigen GAFOR-Nummern eingegeben.");
+        return;
+    }
+
     const gaforRadius = airspaceStates.gafor.airspace.filter(item =>
         numbers.includes(item.properties.gafor_nummer)
     );
-    drawBoundingCircle(gaforRadius);
-    console.log(gaforRadius);
 
-
-
-}
-
-
-// Funktion zur Berechnung des konvexen Hüllpolygons
-function convexHull(points) {
-    // Punkte sortieren (zuerst nach x, dann nach y)
-    points = points.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-
-    // Hilfsfunktion für den "cross product" (Kreuzprodukt)
-    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
-
-    let lower = [];
-    for (let i = 0; i < points.length; i++) {
-        while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], points[i]) <= 0) {
-            lower.pop();
-        }
-        lower.push(points[i]);
+    if (!gaforRadius.length) {
+        console.error("Keine GAFOR-Daten für die eingegebenen Nummern gefunden.");
+        return;
     }
 
-    let upper = [];
-    for (let i = points.length - 1; i >= 0; i--) {
-        while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], points[i]) <= 0) {
-            upper.pop();
-        }
-        upper.push(points[i]);
+    const extremePoints = findFurthestPoints(gaforRadius);
+    if (!extremePoints) return;
+
+    const center = findMiddle(extremePoints);
+    if (!center) return;
+
+    const radius = calculateDistance(extremePoints.point1, extremePoints.point2) / 2;
+    if (radius > 0) {
+        drawCircle(center, radius);
+        console.log('Das ist der Radius:', radius);
+    } else {
+        console.error("Radius konnte nicht berechnet werden.");
     }
-
-    // Entferne den letzten Punkt, weil er doppelt vorkommt
-    lower.pop();
-    upper.pop();
-
-    return lower.concat(upper);
 }
 
-// Berechnung des kleinsten umschließenden Kreises für das konvexe Hüllpolygon
-function smallestBoundingCircle(points) {
-    const hull = convexHull(points);
+// Findet die zwei Punkte, die am weitesten voneinander entfernt sind
+function findFurthestPoints(polygon) {
+    const allCoordinates = polygon.flatMap(item => item.geometry.coordinates.flat(Infinity));
 
-    // Berechne den maximalen Abstand zwischen zwei Punkten im konvexen Hüllpolygon
+    if (allCoordinates.length < 2) {
+        console.error("Nicht genügend Koordinaten für die Berechnung gefunden.");
+        return null;
+    }
+
     let maxDistance = 0;
-    let farthestPair = [];
+    let point1 = null;
+    let point2 = null;
 
-    for (let i = 0; i < hull.length; i++) {
-        for (let j = i + 1; j < hull.length; j++) {
-            const dist = haversineDistanceGafor(hull[i], hull[j]);
-            if (dist > maxDistance) {
-                maxDistance = dist;
-                farthestPair = [hull[i], hull[j]]; // Speichert das Paar mit dem größten Abstand
+    for (let i = 0; i < allCoordinates.length; i += 2) {
+        for (let j = i + 2; j < allCoordinates.length; j += 2) {
+            const p1 = [allCoordinates[i + 1], allCoordinates[i]];
+            const p2 = [allCoordinates[j + 1], allCoordinates[j]];
+
+            const distance = calculateDistance(p1, p2);
+            if (distance > maxDistance) {
+                maxDistance = distance;
+                point1 = p1;
+                point2 = p2;
             }
         }
     }
 
-    // Berechne den Mittelpunkt des Kreises
-    const [point1, point2] = farthestPair;
-    const centerLat = (point1[0] + point2[0]) / 2;
-    const centerLon = (point1[1] + point2[1]) / 2;
-
-    const center = [centerLon, centerLat];
-
-    // Der Radius des Kreises ist die halbe Länge des größten Abstands
-    const radius = maxDistance / 2;
-
-    return { center, radius };
-}
-
-function drawBoundingCircle(gaforRadius) {
-    // Alle Koordinaten sammeln
-    const allCoordinates = gaforRadius.flatMap(item => item.geometry.coordinates.flat(Infinity));
-
-    // Paare von [Längengrad, Breitengrad] erstellen
-    const pairedCoordinates = [];
-    for (let i = 0; i < allCoordinates.length; i += 2) {
-        pairedCoordinates.push([allCoordinates[i], allCoordinates[i + 1]]);
+    if (!point1 || !point2) {
+        console.error("Keine gültigen Punkte gefunden.");
+        return null;
     }
 
-    // Berechnung des kleinsten Bounding Circles
-    const { center, radius } = smallestBoundingCircle(pairedCoordinates);
-
-    // Kreis auf der Karte hinzufügen
-    const circle = L.circle(center, {
-        color: 'orange',
-        fillColor: 'orange', // Die Farbe des Kreises
-        fillOpacity: 0, // Keine Füllung (vollständig durchsichtig)
-        opacity: 1, // Die Sichtbarkeit des Randes (soll sichtbar bleiben)
-        radius: radius * 1000, // Umwandlung in Meter
-    }).addTo(map);
-
-    // CSS für den Kreis, um Interaktionen zu deaktivieren
-    circle.getElement().style.pointerEvents = 'none';
-
-    let radiusNM = (radius / 1.852).toFixed(2);
-    let gaforSpan = document.getElementById('gaforRadius');
-    gaforSpan.innerHTML = `Radius: ${radiusNM}NM`
-    console.log("Kreiszentrum:", center);
-    console.log("Radius (km):", radius);
-
-    return circle;
+    console.log("Am weitesten entfernte Punkte:", { point1, point2 });
+    return { point1, point2 };
 }
 
-
-
-
-
-function haversineDistanceGafor([lon1, lat1], [lon2, lat2]) {
+// Berechnet die Entfernung zwischen zwei Punkten in Kilometern
+function calculateDistance([lat1, lon1], [lat2, lon2]) {
     const toRadians = deg => (deg * Math.PI) / 180;
     const R = 6371; // Erdradius in Kilometern
 
@@ -1793,3 +1744,63 @@ function haversineDistanceGafor([lon1, lat1], [lon2, lat2]) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Entfernung in Kilometern
 }
+
+// Berechnet den Mittelpunkt zwischen zwei Punkten
+function findMiddle({ point1, point2 }) {
+    if (!point1 || !point2) {
+        console.error("Ungültige Punkte übergeben.");
+        return null;
+    }
+
+    const middleLatitude = (point1[0] + point2[0]) / 2;
+    const middleLongitude = (point1[1] + point2[1]) / 2;
+
+    const middlePoint = [middleLatitude, middleLongitude];
+    console.log("Mittelpunkt:", middlePoint);
+    return middlePoint;
+}
+
+// Zeichnet einen Kreis mit Leaflet auf der Karte
+function drawCircle(center, radius) {
+    if (!center || radius <= 0) {
+        console.error("Ungültige Eingaben für den Kreis:", { center, radius });
+        return;
+    }
+
+    if (!map) {
+        console.error("Karte ist nicht initialisiert.");
+        return;
+    }
+
+    L.circle([center[0], center[1]], {
+        color: 'orange',
+        fillColor: 'none',
+        fillOpacity: 0,
+        opacity: 1,
+        radius: radius * 1000, // Radius in Metern
+    }).addTo(map);
+
+    console.log("Kreis gezeichnet:", { center, radius });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
