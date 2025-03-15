@@ -749,9 +749,26 @@ function returnRotation(track, true_heading) {
 function toggleRadar() {
 
     if (radarActive) {
+        let trackedAcftDiv = document.getElementById('trackedAcft');
+        trackedAcftDiv.classList.add('hiddenTrackedAcft');
+        trackedHex = null;
+        if (currentTrack) {
+            map.removeLayer(currentTrack);
+        }
+        currentTrack = null;
+        trackedAcftReg = 'nothing';
+        if (flightDistLine) {
+            flightDistLine.remove();
+        }
+        if (trackedIcaoDest) {
+            trackedIcaoDest = '';
+            let icaoDestInput = document.getElementById('icaoDest');
+            icaoDestInput.value = '';
+        }
         radarActive = false;
         aircraftLayer.clearLayers();
         stopRadarInterval();
+
     }
     else if (!radarActive) {
         radarActive = true;
@@ -1045,8 +1062,14 @@ let polygonLayers = {};
 
 // Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
 async function togglePolygons(airspaceKey) {
+    let gaforCalc = document.getElementById('calcGaforRadius');
     if (airspaceKey === 'gafor') {
-        let gaforCalc = document.getElementById('calcGaforRadius');
+        let gaforInput = document.getElementById('gaforNumbers');
+        gaforInput.value = '';
+        let gaforRadius = document.getElementById('gaforRadius');
+        gaforRadius.innerHTML = `<span id="gaforRadius">Radius:</span>`;
+        let gaforCenter = document.getElementById('gaforCenter');
+        gaforCenter.innerHTML = `<span id="gaforCenter">Center:</span>`;
         gaforCalc.style.display = 'flex';
     }
 
@@ -1065,6 +1088,13 @@ async function togglePolygons(airspaceKey) {
         // Entferne bestehende Polygone für diesen Key
         polygonLayers[airspaceKey].forEach(polygon => polygon.removeFromMap());
         polygonLayers[airspaceKey] = [];
+        if (airspaceKey === 'gafor') {
+            gaforCalc.style.display = 'none';
+            if (currentGaforCircle) {
+                currentGaforCircle.removeFromMap();
+
+            }
+        }
         return;
     }
 
@@ -1652,6 +1682,8 @@ function validateInput(input) {
         .trim();                     // Entfernt führende und abschließende Leerzeichen
 }
 
+let currentGaforCircle = null;  // Variable, die die aktuelle GaforCircle-Instanz speichert
+
 // Berechnet den GAFOR-Radius basierend auf den Eingaben
 function calcGaforRadius() {
     const input = document.getElementById("gaforNumbers").value;
@@ -1683,12 +1715,36 @@ function calcGaforRadius() {
     if (!center) return;
 
     const radius = calculateDistance(extremePoints.point1, extremePoints.point2) / 2;
+
     if (radius > 0) {
-        drawCircle(center, radius);
+        // Überprüfen, ob bereits eine Instanz von GaforCircle existiert
+        if (currentGaforCircle) {
+            // Lösche den vorherigen GaforCircle (falls vorhanden)
+            currentGaforCircle.removeFromMap();
+        }
+
+        // Erstelle eine neue Instanz von GaforCircle
+        currentGaforCircle = new GaforCircle(center, radius, map);
+
+        // Füge den neuen Kreis der Karte hinzu
+        currentGaforCircle.addToMap();
+
         console.log('Das ist der Radius:', radius);
     } else {
         console.error("Radius konnte nicht berechnet werden.");
     }
+    showCenterAndRadius(center, radius);
+}
+
+
+function showCenterAndRadius(center, radius) {
+    let gaforRadius = document.getElementById('gaforRadius');
+    let gaforCenter = document.getElementById('gaforCenter');
+    let DMSCenterLat = toDMS(center[0], true);
+    let DMSCenterLon = toDMS(center[1], false);
+    let radiusNM = (radius / 1.852).toFixed(2);
+    gaforRadius.innerHTML = `<span id="gaforRadius">Radius:${radiusNM} NM</span>`;
+    gaforCenter.innerHTML = `<span id="gaforRadius">Center:${DMSCenterLat} ${DMSCenterLon}</span>`;
 }
 
 // Findet die zwei Punkte, die am weitesten voneinander entfernt sind
@@ -1772,16 +1828,11 @@ function drawCircle(center, radius) {
         return;
     }
 
-    L.circle([center[0], center[1]], {
-        color: 'orange',
-        fillColor: 'none',
-        fillOpacity: 0,
-        opacity: 1,
-        radius: radius * 1000, // Radius in Metern
-    }).addTo(map);
-
-    console.log("Kreis gezeichnet:", { center, radius });
+    // Erstelle eine neue Instanz der GaforCircle-Klasse
+    const gaforCircle = new GaforCircle(center, radius, map);
+    gaforCircle.addToMap();
 }
+
 
 
 
