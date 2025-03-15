@@ -183,10 +183,14 @@ let markers = [];
 
 // Array zum Speichern der Polylines
 let polylines = [];
+let initialMarkerLat = null; // Speichern der ursprünglichen Marker Latitude
+let initialMarkerLon = null; // Speichern der ursprünglichen Marker Longitude
 
 
 // Funktion zum Erstellen des Markers und Abfragen der Höhe
 function createMarker(lat, lng) {
+    initialMarkerLat = lat;
+    initialMarkerLon = lng;
     if (!markerData.navaid.added) {
         toggleMarkers('navaid');
     }
@@ -205,17 +209,39 @@ function createMarker(lat, lng) {
 
 }
 
-function findClosestNavAid(markerLat, markerLon) {
+let closestNavAid = null;
+let foundNavAids = []; // Array zum Speichern bereits gefundener Navaids
+let foundNavaidId = 0;
+
+function findClosestNavAid(markerLat, markerLon, isNext = false) {
+    console.log('ich werde ausgeführt');
+    foundNavaidId++;
+    // Speichere die ursprünglichen Koordinaten beim ersten Aufruf
+    if (!initialMarkerLat || !initialMarkerLon) {
+        initialMarkerLat = markerLat;
+        initialMarkerLon = markerLon;
+    }
+
+    // Zurücksetzen des gefundenen Navaids für die neue Suche
+    closestNavAid = null;
+
     // Initialisiere die kürzeste Distanz und das nächste Navaid
-    let closestNavAid = null;
     let shortestDistance = Infinity;
     let closestNavAidLatLng = null;
 
     // Iteriere durch alle Navaids
     navAids.forEach(navaid => {
-        if ((navaid.properties.charted && navaid.properties.charted.includes('ICAO500')) || (navaid.properties.dme_charted && navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted && navaid.properties.dme_charted.includes('NN'))) {
+        // Wenn isNext true ist, überspringe Navaids, die bereits gefunden wurden
+        if (isNext && foundNavAids.includes(navaid.properties.txtname)) {
+            return; // Überspringe dieses Navaid, wenn es bereits gefunden wurde
+        }
+
+        // Bedingungen für das Auswählen des richtigen Navaids
+        if (((navaid.properties.charted && navaid.properties.charted.includes('ICAO500')) ||
+            (navaid.properties.dme_charted && (navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted.includes('NN')))) && navaid.properties.icaocode == 'ED') {
+
             const distance = haversine(
-                markerLat, markerLon,
+                initialMarkerLat, initialMarkerLon, // Benutze die ursprünglichen Koordinaten
                 navaid.geometry.coordinates[1], navaid.geometry.coordinates[0]
             );
 
@@ -228,16 +254,17 @@ function findClosestNavAid(markerLat, markerLon) {
         }
     });
 
+    // Wenn ein nächstes Navaid gefunden wurde
     if (closestNavAid && closestNavAidLatLng) {
         // Berechne den Winkel (Azimut) vom Navaid zum Marker
         const angle = calculateAngle(
             closestNavAidLatLng[0], closestNavAidLatLng[1],
-            markerLat, markerLon
+            initialMarkerLat, initialMarkerLon // Benutze die ursprünglichen Koordinaten
         );
 
         // Zeichne eine Linie vom MarkerPoint zum nächstgelegenen Navaid
         const line = L.polyline([
-            [markerLat, markerLon],
+            [initialMarkerLat, initialMarkerLon], // Benutze die ursprünglichen Koordinaten
             closestNavAidLatLng
         ], {
             color: 'blue',
@@ -247,10 +274,28 @@ function findClosestNavAid(markerLat, markerLon) {
         // Füge die Linie zum Array hinzu
         polylines.push(line);
 
-        // Popup mit dem Namen des Navaids, der Distanz und dem Winkel hinzufügen
-        line.bindPopup(`${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAid.properties.txtname} ${closestNavAid.properties['select-source-layer']} ${closestNavAid.properties.ident}`).openPopup();
+        // Popup-Inhalt mit Button hinzufügen
+        const popupContent = `
+            <div>
+                <p>${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAid.properties.txtname} ${closestNavAid.properties['select-source-layer']} ${closestNavAid.properties.ident}</p>
+                <button id="nextNavAidBtn${foundNavaidId}">Finde nächstes Navaid</button>
+            </div>
+        `;
+        line.bindPopup(popupContent).openPopup();
+        // Event-Handler für den Button hinzufügen
+        document.getElementById(`nextNavAidBtn${foundNavaidId}`).addEventListener('click', () => {
+            // Speichern des Namens des gefundenen Navaids
+            foundNavAids.push(closestNavAid.properties.txtname); // Speichere den Namen des gefundenen Navaids
+
+            findClosestNavAid(initialMarkerLat, initialMarkerLon, true); // isNext = true
+
+        });
+    } else {
+        alert("Es wurde kein Navaid gefunden.");
     }
 }
+
+
 
 
 function returnOrientation(deg) {
@@ -380,6 +425,11 @@ function resetMap() {
         let icaoDestInput = document.getElementById('icaoDest');
         icaoDestInput.value = '';
     }
+    initialMarkerLat = null;
+    initialMarkerLon = null;
+    closestNavAid = null;
+    foundNavAids = []; // Array zum Speichern bereits gefundener Navaids
+    foundNavaidId = 0;
 }
 
 
@@ -1350,7 +1400,7 @@ function toggleMarkers(key) {
                     if (key === "aerodrome") {
                         item = new Aerodrome(data.geometry, data.name, map, data.icaoCode, data.runways);
                     } else if (key === "navaid") {
-                        item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted);
+                        item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted, data.properties.icaocode);
                     }
                     item.addToMap(); // Marker wird direkt zur Karte hinzugefügt
 

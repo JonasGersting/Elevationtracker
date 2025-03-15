@@ -16,6 +16,14 @@ h3 {
     margin: 0;
 }
 
+.allBackgroundMaps{
+    display: none;
+}
+
+.backgroundMaps:hover .allBackgroundMaps  {
+    display: block;
+
+}
 .allMapBtns {
     position: absolute;
     top: 0;
@@ -97,6 +105,8 @@ h3 {
     display: block;
 
 }
+
+
 
 .menu:hover {
     border-bottom-right-radius: 0px;
@@ -726,6 +736,22 @@ h3 {
     display: flex;
     gap: 16px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @keyframes spin {
     from {

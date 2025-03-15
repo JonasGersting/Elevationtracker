@@ -1,5 +1,5 @@
 class Navaid extends AirspacePolygon {
-    constructor(lat, long, name, map, type, designator, charted) {
+    constructor(lat, long, name, map, type, designator, charted, icaoCode) {
         super(lat, long, name, map, type, designator, charted);
         this.lat = lat;
         this.long = long;
@@ -8,6 +8,7 @@ class Navaid extends AirspacePolygon {
         this.type = type;
         this.designator = designator;
         this.charted = charted;
+        this.icaoCode = icaoCode;
     }
 
     // Methode zum Hinzufügen des Markers zur Karte mit benutzerdefiniertem Icon
@@ -29,7 +30,7 @@ addToMap() {
     this.marker = L.marker([this.lat, this.long], { icon: customIcon }).addTo(this.map);
 
     // Binde ein Popup an den Marker
-    this.marker.bindPopup(`Name: ${this.name}<br>Type: ${this.type}<br>Designator: ${this.designator}`);
+    this.marker.bindPopup(`Name: ${this.name}<br>Type: ${this.type}<br>Designator: ${this.designator}<br>charted: ${this.charted}<br>ICAO: ${this.icaoCode}`);
 }
 
 returnCorrectIcon(type){

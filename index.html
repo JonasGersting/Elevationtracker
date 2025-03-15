@@ -10,8 +10,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.css" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="fonts/fonts">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
 
 
@@ -52,22 +54,30 @@
         <div class="menu shadow">
             <div class="allMapBtns">
                 <button class="mapBtn" id="resetButton" onclick="resetMap()">Reset</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('openFlightMaps')">openflightmaps</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('openAIP')">openAIP-Map</button>
-                <button class="mapBtn" id="showIcaoCard" onclick="toggleMap('icaoCard')">Icao-Card</button>
-                <button class="mapBtn" id="showOpenTopoMap" onclick="toggleMap('openTopoMap')">Open-Topo-Map</button>
-                <button class="mapBtn" id="showStadiaSmooth" onclick="toggleMap('stadiaAlidadeSmooth')">Smooth</button>
-                <button class="mapBtn" id="showStadiaSmoothDark"
-                    onclick="toggleMap('stadiaAlidadeSmoothDark')">Smooth-Dark</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpen')">top Plus Open</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenGrey')">top Plus Open
-                    Grey</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenLight')">top Plus Open
-                    Light</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenLightGray')">top Plus Open
-                    White</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('googleMaps')">googleMaps</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('googleSatelite')">googleSatelite</button>
+                <div class="mapBtn backgroundMaps">Hintergrundkarte
+                    <div class="allBackgroundMaps">
+                        <button class="mapBtn" id="showOpenAipMap"
+                            onclick="toggleMap('openFlightMaps')">openflightmaps</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('openAIP')">openAIP-Map</button>
+                        <button class="mapBtn" id="showIcaoCard" onclick="toggleMap('icaoCard')">Icao-Card</button>
+                        <button class="mapBtn" id="showOpenTopoMap"
+                            onclick="toggleMap('openTopoMap')">Open-Topo-Map</button>
+                        <button class="mapBtn" id="showStadiaSmooth"
+                            onclick="toggleMap('stadiaAlidadeSmooth')">Smooth</button>
+                        <button class="mapBtn" id="showStadiaSmoothDark"
+                            onclick="toggleMap('stadiaAlidadeSmoothDark')">Smooth-Dark</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpen')">top Plus Open</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenGrey')">top Plus Open
+                            Grey</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenLight')">top Plus Open
+                            Light</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenLightGray')">top Plus Open
+                            White</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('googleMaps')">googleMaps</button>
+                        <button class="mapBtn" id="showOpenAipMap"
+                            onclick="toggleMap('googleSatelite')">googleSatelite</button>
+                    </div>
+                </div>
                 <button class="mapBtn" id="showAcft" onclick="getWeather('weather')">Wetter</button>
                 <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('dwdWeather')">DWD</button>
                 <button class="mapBtn" id="showAcft" onclick="getWeather('clouds')">Wolken</button>
@@ -90,7 +100,8 @@
     </div>
     <div class="shadow" id="calcGaforRadius">
         <div class="gaforInput">
-            <input id="gaforNumbers" oninput="validateInput(this)" type="text" placeholder="45 34 1 4..."> <button class="gaforBtn" onclick="calcGaforRadius()">Radius</button>
+            <input id="gaforNumbers" oninput="validateInput(this)" type="text" placeholder="45 34 1 4..."> <button
+                class="gaforBtn" onclick="calcGaforRadius()">Radius</button>
         </div>
         <span id="gaforRadius">Radius:</span>
         <span id="gaforCenter">Center:</span>
@@ -149,11 +160,11 @@
 <script src="classes/fisAirspace.class.js"></script>
 <script src="classes/rmz.class.js"></script>
 <script src="classes/firAirspace.class.js"></script>
-<script src="classes/gaforAirspace.class.js" ></script>
-<script src="classes/gaforCircle.class.js" ></script>
-<script src="classes/pjeAirspace.class.js" ></script>
-<script src="classes/tmzAirspace.class.js" ></script>
-<script src="classes/atzAirspace.class.js" ></script>
+<script src="classes/gaforAirspace.class.js"></script>
+<script src="classes/gaforCircle.class.js"></script>
+<script src="classes/pjeAirspace.class.js"></script>
+<script src="classes/tmzAirspace.class.js"></script>
+<script src="classes/atzAirspace.class.js"></script>
 <script src="classes/navaid.class.js"></script>
 <script src="classes/obstacle.class.js"></script>
 <script src="classes/eddAirspace.class.js"></script>
