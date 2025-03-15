@@ -29,14 +29,15 @@
                         alt="">
                     <div class="shadow" id="dropDownCategory">
                         <button class="searchButton" onclick="setSearchCat('Adresse')">Adresse</button>
+                        <button class="searchButton" onclick="setSearchCat('Koordinate')">Koordinate</button>
+                        <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
                         <button class="searchButton" onclick="setSearchCat('Callsign')">Callsign</button>
                         <button class="searchButton" onclick="setSearchCat('Registrierung')">Registrierung</button>
                         <button class="searchButton" onclick="setSearchCat('ED-R')">ED-R</button>
-                        <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
                         <button class="searchButton" onclick="setSearchCat('CTR')">CTR</button>
                         <button class="searchButton" onclick="setSearchCat('Hinderniss')">Hinderniss</button>
                         <button class="searchButton" onclick="setSearchCat('NAV-Aid')">NAV-Aid</button>
-                        <button class="searchButton" onclick="setSearchCat('Koordinate')">Koordinate</button>
+                       
                     </div>
                 </div>
             </div>
@@ -54,8 +55,8 @@
         <div class="menu shadow">
             <div class="allMapBtns">
                 <button class="mapBtn" id="resetButton" onclick="resetMap()">Reset</button>
-                <div class="mapBtn backgroundMaps">Hintergrundkarte
-                    <div class="allBackgroundMaps">
+                <div class="mapBtn backgroundMaps smallMenuBtn">Hintergrund
+                    <div class="allBackgroundMaps smallMenu">
                         <button class="mapBtn" id="showOpenAipMap"
                             onclick="toggleMap('openFlightMaps')">openflightmaps</button>
                         <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('openAIP')">openAIP-Map</button>
@@ -66,34 +67,52 @@
                             onclick="toggleMap('stadiaAlidadeSmooth')">Smooth</button>
                         <button class="mapBtn" id="showStadiaSmoothDark"
                             onclick="toggleMap('stadiaAlidadeSmoothDark')">Smooth-Dark</button>
-                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpen')">top Plus Open</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpen')">top Plus
+                            Open</button>
                         <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenGrey')">top Plus Open
                             Grey</button>
                         <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenLight')">top Plus Open
                             Light</button>
-                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenLightGray')">top Plus Open
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('topPlusOpenLightGray')">top Plus
+                            Open
                             White</button>
                         <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('googleMaps')">googleMaps</button>
                         <button class="mapBtn" id="showOpenAipMap"
                             onclick="toggleMap('googleSatelite')">googleSatelite</button>
                     </div>
                 </div>
-                <button class="mapBtn" id="showAcft" onclick="getWeather('weather')">Wetter</button>
-                <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('dwdWeather')">DWD</button>
-                <button class="mapBtn" id="showAcft" onclick="getWeather('clouds')">Wolken</button>
-                <button class="mapBtn" id="showFisAirspace" onclick="togglePolygons('fis')">FIS</button>
-                <button class="mapBtn" id="showEdrAirspace" onclick="togglePolygons('edr')">EDR</button>
-                <button class="mapBtn" id="showEddAirspace" onclick="togglePolygons('edd')">EDD</button>
-                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('ctr')">CTR</button>
-                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('rmz')">RMZ</button>
-                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('tmz')">TMZ</button>
-                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('atz')">ATZ</button>
-                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('fir')">FIR</button>
-                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('gafor')">Gafor</button>
-                <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('pje')">PJE</button>
-                <button class="mapBtn" id="showNavAids" onclick="toggleMarkers('navaid')">NAV-AID</button>
-                <button class="mapBtn" id="showAerodromes" onclick="toggleMarkers('aerodrome')">Aerodromes</button>
-                <button class="mapBtn" id="showAerodromes" onclick="toggleMarkers('obstacle')">Hindernisse</button>
+                <div class="mapBtn weatherMaps smallMenuBtn">Wetter
+                    <div class="allWeatherMaps smallMenu">
+                        <button class="mapBtn" id="showAcft" onclick="getWeather('weather')">Wetter</button>
+                        <button class="mapBtn" id="showOpenAipMap" onclick="toggleMap('dwdWeather')">DWD</button>
+                        <button class="mapBtn" id="showAcft" onclick="getWeather('clouds')">Wolken</button>
+                    </div>
+                </div>
+                <div class="mapBtn airspaceLayer smallMenuBtn">Lufträume
+                    <div class="allAirspaceLayer smallMenu">
+                        <button class="mapBtn" id="showFisAirspace" onclick="togglePolygons('fis')">FIS</button>
+                        <button class="mapBtn" id="showEdrAirspace" onclick="togglePolygons('edr')">EDR</button>
+                        <button class="mapBtn" id="showEddAirspace" onclick="togglePolygons('edd')">EDD</button>
+                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('ctr')">CTR</button>
+                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('rmz')">RMZ</button>
+                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('tmz')">TMZ</button>
+                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('atz')">ATZ</button>
+                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('fir')">FIR</button>
+                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('gafor')">Gafor</button>
+                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('pje')">PJE</button>
+                    </div>
+                </div>
+                <div class="mapBtn objects smallMenuBtn">Objekte
+                    <div class="allObjects smallMenu">
+                        <button class="mapBtn" id="showNavAids" onclick="toggleMarkers('navaid')">NAV-AID</button>
+                        <button class="mapBtn" id="showAerodromes"
+                            onclick="toggleMarkers('aerodrome')">Aerodromes</button>
+                        <button class="mapBtn" id="showAerodromes"
+                            onclick="toggleMarkers('obstacle')">Hindernisse</button>
+                    </div>
+                </div>
+
+
             </div>
         </div>
         <button class="radarBtn shadow" onclick="toggleRadar()"></button>
