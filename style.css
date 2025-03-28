@@ -114,6 +114,11 @@ h3 {
     color: rgb(40, 40, 126);
 }
 
+.bgMapButtonActive {
+    background-color: rgb(46, 192, 46);
+    color: rgb(40, 40, 126);
+}
+
 .mapBtnTitle {
     height: 32px;
     text-align: center;

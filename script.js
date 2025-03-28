@@ -117,36 +117,92 @@ let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
 
 
 const mapStates = {
-    openFlightMaps: { layer: openFlightMaps, isHidden: true },
-    openAIP: { layer: openAIP, isHidden: true },
-    icaoCard: { layer: icaoCard, isHidden: true },
-    openTopoMap: { layer: openTopoMap, isHidden: true },
-    stadiaAlidadeSmooth: { layer: stadiaAlidadeSmooth, isHidden: true },
-    stadiaAlidadeSmoothDark: { layer: stadiaAlidadeSmoothDark, isHidden: true },
-    rainviewerWeather: { layer: null, isHidden: true },
-    rainviewerClouds: { layer: null, isHidden: true },
-    topPlusOpen: { layer: topPlusOpen, isHidden: true },
-    topPlusOpenGrey: { layer: topPlusOpenGrey, isHidden: true },
-    topPlusOpenLight: { layer: topPlusOpenLight, isHidden: true },
-    topPlusOpenLightGray: { layer: topPlusOpenLightGray, isHidden: true },
-    googleSatelite: { layer: googleSatelite, isHidden: true },
-    googleMaps: { layer: googleMaps, isHidden: true },
-    dwdWeather: { layer: dwdWeather, isHidden: true }
+    backgroundMaps: {
+        openTopoMap: { layer: openTopoMap, isHidden: true },
+        stadiaAlidadeSmooth: { layer: stadiaAlidadeSmooth, isHidden: true },
+        stadiaAlidadeSmoothDark: { layer: stadiaAlidadeSmoothDark, isHidden: true },
+        topPlusOpen: { layer: topPlusOpen, isHidden: true },
+        topPlusOpenGrey: { layer: topPlusOpenGrey, isHidden: true },
+        topPlusOpenLight: { layer: topPlusOpenLight, isHidden: true },
+        topPlusOpenLightGray: { layer: topPlusOpenLightGray, isHidden: true },
+        googleSatelite: { layer: googleSatelite, isHidden: true },
+        googleMaps: { layer: googleMaps, isHidden: true }
+    },
+    additionalLayers: {
+        openFlightMaps: { layer: openFlightMaps, isHidden: true },
+        openAIP: { layer: openAIP, isHidden: true },
+        icaoCard: { layer: icaoCard, isHidden: true },
+        dwdWeather: { layer: dwdWeather, isHidden: true },
+        rainviewerWeather: { layer: null, isHidden: true },
+        rainviewerClouds: { layer: null, isHidden: true }
+    }
 };
+
 
 var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
+function toggleMap(mapKey, category) {
+    const categoryStates = mapStates[category];
+    const mapState = categoryStates[mapKey];
 
-function toggleMap(mapKey) {
-    const mapState = mapStates[mapKey];
     if (mapState.isHidden) {
-        mapState.layer.addTo(map);
+        // Entferne alle aktiven Layer innerhalb der Kategorie
+        Object.keys(categoryStates).forEach(key => {
+            const otherMapState = categoryStates[key];
+            if (!otherMapState.isHidden && otherMapState.layer) {
+                map.removeLayer(otherMapState.layer); // Entfernt den Layer
+                otherMapState.isHidden = true; // Setzt den Status zurück
+                
+                // Aktualisiere den Button
+                const otherMapBtn = document.getElementById(key);
+                if (otherMapBtn) {
+                    otherMapBtn.classList.remove('bgMapButtonActive');
+                }
+            }
+        });
+
+        // Füge den aktuellen Layer hinzu
+        if (mapState.layer) {
+            mapState.layer.addTo(map);
+        }
+        const mapBtn = document.getElementById(mapKey);
+        if (mapBtn) {
+            mapBtn.classList.add('bgMapButtonActive');
+        }
         mapState.isHidden = false;
+
+        // Aktualisiere die Zusatzlayer, wenn eine Hintergrundkarte geändert wurde
+        if (category === 'backgroundMaps') {
+            updateAdditionalLayerOrder();
+        }
     } else {
-        map.removeLayer(mapState.layer);
+        // Entferne den aktuellen Layer
+        if (mapState.layer) {
+            map.removeLayer(mapState.layer);
+        }
         mapState.isHidden = true;
+
+        // Aktualisiere den Button
+        const mapBtn = document.getElementById(mapKey);
+        if (mapBtn) {
+            mapBtn.classList.remove('bgMapButtonActive');
+        }
     }
 }
+
+function updateAdditionalLayerOrder() {
+    const additionalLayers = mapStates.additionalLayers;
+    Object.keys(additionalLayers).forEach(key => {
+        const layerState = additionalLayers[key];
+        if (!layerState.isHidden && layerState.layer) {
+            map.removeLayer(layerState.layer); // Entferne den Layer
+            layerState.layer.addTo(map); // Füge ihn wieder hinzu
+        }
+    });
+}
+
+
+
 
 
 
@@ -1461,7 +1517,7 @@ async function getWeather(weatherType) {
             });
 
             // Layer in mapStates aktualisieren
-            mapStates.rainviewerWeather.layer = rainviewerWeather;
+            mapStates.additionalLayers.rainviewerWeather.layer = rainviewerWeather;
         } else if (weatherType === 'clouds' && !rainviewerClouds) {
             rainviewerClouds = L.tileLayer(`https://tilecache.rainviewer.com${weatherPath}/256/{z}/{x}/{y}/0/1_0.png`, {
                 minZoom: 0,
@@ -1470,7 +1526,7 @@ async function getWeather(weatherType) {
             });
 
             // Layer in mapStates aktualisieren
-            mapStates.rainviewerClouds.layer = rainviewerClouds;
+            mapStates.additionalLayers.rainviewerClouds.layer = rainviewerClouds;
         } else {
             // Aktualisiere die URL des bestehenden Layers, falls nötig
             if (weatherType === 'weather') {
@@ -1479,7 +1535,7 @@ async function getWeather(weatherType) {
                 rainviewerClouds.setUrl(`https://tilecache.rainviewer.com${weatherPath}/256/{z}/{x}/{y}/0/1_0.png`);
             }
         }
-        toggleMap(weatherType === 'weather' ? 'rainviewerWeather' : 'rainviewerClouds');
+        toggleMap((weatherType === 'weather' ? 'rainviewerWeather' : 'rainviewerClouds'), 'additionalLayers');
     } catch (error) {
         console.error(`Fehler: ${error.message}`);
     }
