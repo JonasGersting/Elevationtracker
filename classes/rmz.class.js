@@ -3,8 +3,6 @@ class RmzAirspace extends AirspacePolygon {
         super(geometry, name, ident, map, polygonLayers);
     }
 
-    
-    
     addToMap() {
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
@@ -21,31 +19,27 @@ class RmzAirspace extends AirspacePolygon {
                     if (!polygonIsBroughtUpToFront) {
                         this.handlePolygonOverlap(this.geometry);
                     }
-                      // Prüfen auf Überlappung
                     layer.bindTooltip(tooltip).openTooltip();
-                    layer.setStyle({fillColor: 'white', fillOpacity: 0.8});
+                    layer.setStyle({ color: 'white', dashArray: '4 4', opacity: 1, fillOpacity: 0.6, fillColor: 'gray' }); // Weiße gestrichelte Linie beim Hover
                 });
 
                 layer.on('mouseout', () => {
                     isCursorOverPolygon = false;  // Setze den globalen Zustand zurück
                     layer.closeTooltip();
                     layer.unbindTooltip(); // Verbindung lösen
-                    layer.setStyle({fillColor: 'gray', fillOpacity: 0.2});
+                    layer.setStyle(this.getStyle()); // Stil zurücksetzen
                 });
             }
         }).addTo(this.map);
     }
 
-  
-
-
     getStyle() {
         return {
-            color: 'gray',  // Farbe des Polygons
-            weight: 2,     // Randdicke
-            opacity: 0.6,  // Randtransparenz
-            fillOpacity: 0.2 // Fülltransparenz
+            color: 'gray',      // Farbe des Randes
+            weight: 2,          // Dicke des Randes
+            opacity: 0.6,       // Transparenz des Randes
+            dashArray: '4 4',   // Muster für gestrichelte Linien
+            fillOpacity: 0      // Innenbereich vollständig transparent
         };
     }
-
 }

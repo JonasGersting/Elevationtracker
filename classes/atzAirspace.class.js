@@ -3,42 +3,40 @@ class AtzAirspace extends AirspacePolygon {
         super(geometry, name, map, polygonLayers);
     }
 
-    
-    
     addToMap() {
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
             onEachFeature: (feature, layer) => {
-                layer.bindTooltip(this.name, {
-                    permanent: true,
-                    direction: 'center',
+                const tooltip = L.tooltip({
+                    permanent: false,       // Tooltip erscheint nur bei Hover
+                    direction: 'right',     // Richtung des Tooltips
+                    offset: L.point(20, 0), // Offset für bessere Platzierung
                     className: 'polygon-label',
-                }).openTooltip()
-                
+                }).setContent(this.name);
 
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
-                    layer.setStyle({fillColor: 'white', fillOpacity: 0.8});
+                    layer.bindTooltip(tooltip).openTooltip(); // Tooltip beim Hover öffnen
+                    layer.setStyle({ color: 'white', dashArray: '4 4', fillOpacity: 0.6, fillColor: 'black' }); // Weiß gestrichelte Linie beim Hover
                 });
 
                 layer.on('mouseout', () => {
-                    isCursorOverPolygon = false;  // Setze den globalen Zustand zurück
-                    layer.setStyle({fillColor: 'black', fillOpacity: 0.5});
+                    isCursorOverPolygon = false; // Zustand zurücksetzen
+                    layer.closeTooltip();        // Tooltip schließen
+                    layer.unbindTooltip();       // Tooltip-Verbindung lösen
+                    layer.setStyle(this.getStyle()); // Ursprünglicher Stil
                 });
             }
         }).addTo(this.map);
     }
 
-  
-
-
     getStyle() {
         return {
-            color: 'black',  // Farbe des Polygons
-            weight: 2,     // Randdicke
-            opacity: 1,  // Randtransparenz
-            fillOpacity: 0.5 // Fülltransparenz
+            color: 'black',    // Schwarz gestrichelte Linie
+            weight: 2,         // Dicke des Randes
+            opacity: 1,        // Transparenz des Randes
+            dashArray: '4 4',  // Gestricheltes Muster
+            fillOpacity: 0     // Innenbereich vollständig transparent
         };
     }
-
 }

@@ -90,6 +90,18 @@ h3 {
     background-color: rgb(195, 245, 25); /* Farbe des Thumbs beim Hover */
 }
 
+.dim-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white; /* Halbtransparenter schwarzer Overlay */
+    opacity: 0.6;
+    pointer-events: none; /* Interaktionen mit der Karte bleiben möglich */
+    z-index: 401; /* Über der Karte, aber unter anderen UI-Elementen */
+    display: none;
+}
 
 
 .bgMapButton {
@@ -110,13 +122,13 @@ h3 {
 }
 
 .bgMapButton:hover {
-    background-color: rgb(46, 192, 46);
+    background-color: rgb(219, 231, 249);
     color: rgb(40, 40, 126);
 }
 
 .bgMapButtonActive {
-    background-color: rgb(46, 192, 46);
-    color: rgb(40, 40, 126);
+    background-color: rgb(195, 245, 25) !important;
+    color: rgb(40, 40, 126) !important;
 }
 
 .mapBtnTitle {
@@ -225,14 +237,19 @@ h3 {
 }
 
 .radarBtn:hover {
-    background-color: rgb(46, 192, 46);
-    background-image: url('img/radarBlue.png');
+    background-color: rgb(219, 231, 249) !important;
+    background-image: url('img/radarBlue.png') !important;
 }
 
 .giveMenuPsnAbsolute {
     position: absolute;
     top: 100px;
     left: 32px;
+}
+
+.radarBtnActive{
+    background-color: rgb(144, 183, 18) !important;
+    background-image: url('img/radarBlue.png') !important;
 }
 
 .menu:hover .allMapBtns {
@@ -245,7 +262,7 @@ h3 {
 .menu:hover {
     border-bottom-right-radius: 0px;
     border-top-right-radius: 0px;
-    background-color: rgb(46, 192, 46);
+    background-color: rgb(195, 245, 25);
     background-image: url('img/mapBlue.png');
 }
 
@@ -354,7 +371,7 @@ h3 {
 }
 
 .mapBtn:hover {
-    background-color: rgb(46, 192, 46);
+    background-color: rgb(219, 231, 249);
     color: rgb(40, 40, 126);
 }
 
@@ -421,7 +438,7 @@ h3 {
 }
 
 #searchBtn:hover {
-    background-color: rgb(46, 192, 46);
+    background-color: rgb(219, 231, 249);
     color: rgb(40, 40, 126);
 }
 
@@ -542,7 +559,7 @@ h3 {
     width: 18px;
     height: 18px;
     border: 4px solid rgb(40, 40, 126);
-    border-top: 4px solid rgb(46, 192, 46);
+    border-top: 4px solid rgb(195, 245, 25);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -753,7 +770,7 @@ h3 {
 }
 
 .rotateButton:hover {
-    background-color: rgb(46, 192, 46);
+    background-color: rgb(219, 231, 249);
     color: rgb(40, 40, 126)
 }
 

@@ -42,9 +42,10 @@ class PjeAirspace extends AirspacePolygon {
 
     getStyle() {
         return {
-            color: 'orange',  // Farbe des Polygons
+            color: 'darkorange',  // Farbe des Polygons
             weight: 2,     // Randdicke
-            opacity: 0.6,  // Randtransparenz
+            opacity: 1,  // Randtransparenz
+            dashArray: '4 4',
             fillOpacity: 0.2 // Fülltransparenz
         };
     }

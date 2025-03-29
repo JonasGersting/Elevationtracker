@@ -1,6 +1,6 @@
 class EdrAirspace extends AirspacePolygon {
-    constructor(geometry, name, map, polygonLayers) {
-        super(geometry, name, map, polygonLayers);
+    constructor(geometry, name, ident,  map, polygonLayers) {
+        super(geometry, name, ident, map, polygonLayers);
     }
 
     
@@ -44,7 +44,8 @@ class EdrAirspace extends AirspacePolygon {
             color: 'red',  // Farbe des Polygons
             weight: 2,     // Randdicke
             opacity: 0.6,  // Randtransparenz
-            fillOpacity: 0.2 // Fülltransparenz
+            fillOpacity: 0.2, // Fülltransparenz
+            zIndexOffset: 402
         };
     }
 

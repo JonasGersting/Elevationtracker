@@ -141,7 +141,10 @@ const mapStates = {
 
 var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
+
+
 function toggleMap(mapKey, category) {
+    toggleActBtn(mapKey);
     const categoryStates = mapStates[category];
     const mapState = categoryStates[mapKey];
 
@@ -165,10 +168,7 @@ function toggleMap(mapKey, category) {
         if (mapState.layer) {
             mapState.layer.addTo(map);
         }
-        const mapBtn = document.getElementById(mapKey);
-        if (mapBtn) {
-            mapBtn.classList.add('bgMapButtonActive');
-        }
+       
         mapState.isHidden = false;
 
         // Aktualisiere die Zusatzlayer, wenn eine Hintergrundkarte geändert wurde
@@ -181,12 +181,6 @@ function toggleMap(mapKey, category) {
             map.removeLayer(mapState.layer);
         }
         mapState.isHidden = true;
-
-        // Aktualisiere den Button
-        const mapBtn = document.getElementById(mapKey);
-        if (mapBtn) {
-            mapBtn.classList.remove('bgMapButtonActive');
-        }
     }
 }
 
@@ -200,6 +194,10 @@ function updateAdditionalLayerOrder() {
         }
     });
 }
+
+
+
+
 
 
 
@@ -853,6 +851,7 @@ function returnRotation(track, true_heading) {
 
 
 function toggleRadar() {
+    toggleActBtnRadar();
 
     if (radarActive) {
         let trackedAcftDiv = document.getElementById('trackedAcft');
@@ -1048,6 +1047,7 @@ async function fetchAircraftDataCallsign(callsign) {
             // Setze die Ansicht auf die Position des Objekts
             map.setView([acft.lat, acft.lon], 10); // 10 ist die Zoom-Stufe
             radarActive = true;
+            toggleActBtnRadar();
             // Starte Radar nach dem Timeout
             setTimeout(() => {
                 startRadarInterval();
@@ -1055,7 +1055,9 @@ async function fetchAircraftDataCallsign(callsign) {
         } else {
             alert('Es wurde kein ACFT gefunden')
 
-            startRadarInterval();
+            setTimeout(() => {
+                startRadarInterval();
+            }, 1000);
 
 
         }
@@ -1168,6 +1170,7 @@ let polygonLayers = {};
 
 // Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
 async function togglePolygons(airspaceKey) {
+    toggleActBtn(airspaceKey)
     let gaforCalc = document.getElementById('calcGaforRadius');
     if (airspaceKey === 'gafor') {
         let gaforInput = document.getElementById('gaforNumbers');
@@ -1215,6 +1218,16 @@ async function togglePolygons(airspaceKey) {
     } else {
         processItems([...airspaceArray].reverse(), airspaceKey, map, polygonLayers[airspaceKey]);
     }
+}
+
+function toggleActBtn(id){
+    let button = document.getElementById(id);   
+    button.classList.toggle('bgMapButtonActive');
+}
+
+function toggleActBtnRadar(){
+    let button = document.getElementById('radar');   
+    button.classList.toggle('radarBtnActive');
 }
 
 const DB_NAME = 'cacheDatabase';
@@ -1340,46 +1353,65 @@ function processDataByKey(key, data) {
 
 
 function processItems(items, airspaceKey, map, layerArray) {
-    items.forEach(item => {
-        if (item.geometry && item.geometry.type === "Polygon" || item.geometry && item.geometry.type === "MultiPolygon") {
-            let polygon;
-            switch (airspaceKey) {
-                case 'fis':
-                    polygon = new FisAirspace(item.geometry, item.name, 'null', map, layerArray);
-                    break;
-                case 'edr':
+    if (airspaceKey === 'edr' || airspaceKey === 'edd' || airspaceKey === 'ctr') {
+        // Normales Durchiterieren von vorne
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            
+            if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
+                let polygon;
+                if (airspaceKey === 'edr') {
                     polygon = new EdrAirspace(item.geometry, item.name, 'null', map, layerArray);
-                    break;
-                case 'edd':
+                } else if (airspaceKey === 'edd') {
                     polygon = new EddAirspace(item.geometry, item.name, 'null', map, layerArray);
-                    break;
-                case 'ctr':
+                }else if (airspaceKey === 'ctr') {
                     polygon = new CtrAirspace(item.geometry, item.name, 'null', map, layerArray);
-                    break;
-                case 'rmz':
-                    polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
-                    break;
-                case 'fir':
-                    polygon = new FirAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
-                    break;
-                case 'gafor':
-                    polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', map, layerArray);
-                    break;
-                case 'pje':
-                    polygon = new PjeAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
-                    break;
-                case 'tmz':
-                    polygon = new TmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
-                    break;
-                case 'atz':
-                    polygon = new AtzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
-                    break;
+                }
+                polygon.addToMap();
+                layerArray.push(polygon);
             }
-            polygon.addToMap();
-            layerArray.push(polygon);
         }
-    });
+    } else {
+        // Rückwärts Durchiterieren
+        for (let i = items.length - 1; i >= 0; i--) {
+            const item = items[i];
+            
+            if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
+                let polygon;
+                switch (airspaceKey) {
+                    case 'fis':
+                        polygon = new FisAirspace(item.geometry, item.name, 'null', map, layerArray);
+                        break;
+                    case 'ctr':
+                        polygon = new CtrAirspace(item.geometry, item.name, 'null', map, layerArray);
+                        break;
+                    case 'rmz':
+                        polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                        break;
+                    case 'fir':
+                        polygon = new FirAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
+                        break;
+                    case 'gafor':
+                        polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', map, layerArray);
+                        break;
+                    case 'pje':
+                        polygon = new PjeAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                        break;
+                    case 'tmz':
+                        polygon = new TmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                        break;
+                    case 'atz':
+                        polygon = new AtzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                        break;
+                }
+                polygon.addToMap();
+                layerArray.push(polygon);
+            }
+        }
+    }
 }
+
+
 
 
 
@@ -1394,6 +1426,7 @@ const markerData = {
 
 
 function toggleMarkers(key) {
+    toggleActBtn(key);
     if (!markerData[key]) {
         console.warn(`Unbekannter Schlüssel: ${key}`);
         return;

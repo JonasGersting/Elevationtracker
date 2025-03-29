@@ -1,6 +1,6 @@
 class EddAirspace extends AirspacePolygon {
-    constructor(geometry, name, map, polygonLayers) {
-        super(geometry, name, map, polygonLayers);
+    constructor(geometry, name, ident, map, polygonLayers) {
+        super(geometry, name, ident, map, polygonLayers);
     }
 
     

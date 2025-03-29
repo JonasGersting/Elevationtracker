@@ -127,31 +127,31 @@
                 </div>
                 <div class="mapBtn weatherMaps smallMenuBtn">Wetter
                     <div class="allWeatherMaps smallMenu">
-                        <button class="mapBtn" id="weather" onclick="getWeather('weather')">Wetter</button>
+                        <button class="mapBtn" id="rainviewerWeather" onclick="getWeather('weather')">Wetter</button>
                         <button class="mapBtn" id="dwdWeather" onclick="toggleMap('dwdWeather', 'additionalLayers')">DWD</button>
-                        <button class="mapBtn" id="clouds" onclick="getWeather('clouds')">Wolken</button>
+                        <button class="mapBtn" id="rainviewerClouds" onclick="getWeather('clouds')">Wolken</button>
                     </div>
                 </div>
                 <div class="mapBtn airspaceLayer smallMenuBtn">Lufträume
                     <div class="allAirspaceLayer smallMenu">
-                        <button class="mapBtn" id="showFisAirspace" onclick="togglePolygons('fis')">FIS</button>
-                        <button class="mapBtn" id="showEdrAirspace" onclick="togglePolygons('edr')">EDR</button>
-                        <button class="mapBtn" id="showEddAirspace" onclick="togglePolygons('edd')">EDD</button>
-                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('ctr')">CTR</button>
-                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('rmz')">RMZ</button>
-                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('tmz')">TMZ</button>
-                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('atz')">ATZ</button>
-                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('fir')">FIR</button>
-                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('gafor')">Gafor</button>
-                        <button class="mapBtn" id="showCtrAirspace" onclick="togglePolygons('pje')">PJE</button>
+                        <button class="mapBtn" id="fis" onclick="togglePolygons('fis')">FIS</button>
+                        <button class="mapBtn" id="edr" onclick="togglePolygons('edr')">EDR</button>
+                        <button class="mapBtn" id="edd" onclick="togglePolygons('edd')">EDD</button>
+                        <button class="mapBtn" id="ctr" onclick="togglePolygons('ctr')">CTR</button>
+                        <button class="mapBtn" id="rmz" onclick="togglePolygons('rmz')">RMZ</button>
+                        <button class="mapBtn" id="tmz" onclick="togglePolygons('tmz')">TMZ</button>
+                        <button class="mapBtn" id="atz" onclick="togglePolygons('atz')">ATZ</button>
+                        <button class="mapBtn" id="fir" onclick="togglePolygons('fir')">FIR</button>
+                        <button class="mapBtn" id="gafor" onclick="togglePolygons('gafor')">Gafor</button>
+                        <button class="mapBtn" id="pje" onclick="togglePolygons('pje')">PJE</button>
                     </div>
                 </div>
                 <div class="mapBtn objects smallMenuBtn">Objekte
                     <div class="allObjects smallMenu">
-                        <button class="mapBtn" id="showNavAids" onclick="toggleMarkers('navaid')">NAV-AID</button>
-                        <button class="mapBtn" id="showAerodromes"
+                        <button class="mapBtn" id="navaid" onclick="toggleMarkers('navaid')">NAV-AID</button>
+                        <button class="mapBtn" id="aerodrome"
                             onclick="toggleMarkers('aerodrome')">Aerodromes</button>
-                        <button class="mapBtn" id="showAerodromes"
+                        <button class="mapBtn" id="obstacle"
                             onclick="toggleMarkers('obstacle')">Hindernisse</button>
                     </div>
                 </div>
@@ -159,7 +159,7 @@
 
             </div>
         </div>
-        <button class="radarBtn shadow" onclick="toggleRadar()"></button>
+        <button id="radar" class="radarBtn shadow" onclick="toggleRadar()"></button>
     </div>
     <div class="shadow" id="calcGaforRadius">
         <div class="gaforInput">
@@ -172,6 +172,7 @@
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
     </div>
+    <div class="dim-layer" ></div>
     <div id="map"></div>
     <div class="hiddenTrackedAcft" id="trackedAcft">
         <h2 id="trackedCallsign">BPO345</h2>
