@@ -95,7 +95,7 @@ h3 {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: white; /* Halbtransparenter schwarzer Overlay */
     opacity: 0.6;
     pointer-events: none; /* Interaktionen mit der Karte bleiben möglich */
@@ -552,6 +552,12 @@ h3 {
     align-items: center;
 }
 
+#brightness-slider{
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    z-index: 1100;
+}
 
 .loader {
     display: inline-block;

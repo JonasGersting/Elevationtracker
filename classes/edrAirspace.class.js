@@ -7,6 +7,7 @@ class EdrAirspace extends AirspacePolygon {
     
     addToMap() {
         this.layer = L.geoJSON(this.geometry, {
+            pane: 'additionalLayer',
             style: this.getStyle(),
             onEachFeature: (feature, layer) => {
                 const tooltip = L.tooltip({

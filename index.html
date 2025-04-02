@@ -109,7 +109,7 @@
                         <button class="bgMapButton" id="openAIP" onclick="toggleMap('openAIP', 'additionalLayers')">
                             <span class="mapBtnTitle">openAIP-Map</span>
                             <img class="mapImg"
-                                src="https://api.tiles.openaip.net/api/data/openaip/9/272/174.png?apiKey=addef49a85fb3c7c7fdea8a653d7122c"
+                                src="https://map.adsbexchange.com/mapproxy/tiles/1.0.0/openaip/ul_grid/9/272/174.png"
                                 alt="">
                         </button>
                         <button class="bgMapButton" id="icaoCard" onclick="toggleMap('icaoCard', 'additionalLayers')">
@@ -172,8 +172,10 @@
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
     </div>
-    <div class="dim-layer" ></div>
-    <div id="map"></div>
+    <input type="range" id="brightness-slider" min="0" max="200" value="100">
+    <div id="map">
+        <div class="dim-layer" ></div>
+    </div>
     <div class="hiddenTrackedAcft" id="trackedAcft">
         <h2 id="trackedCallsign">BPO345</h2>
         <h3 id="trackedReg">D-HVGM</h3>

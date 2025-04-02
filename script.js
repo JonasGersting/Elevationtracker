@@ -30,20 +30,67 @@ let rainviewerClouds;
 var map = L.map('map', {
 }).setView([50.505, 12], 9);
 
+map.createPane('bg');
+map.getPane('bg').style.zIndex = 200;
+
+map.createPane('additionalLayer');
+map.getPane('additionalLayer').style.zIndex = 500;
+
 // OpenStreetMap-Kacheln hinzufügen
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+var tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 20,
+    pane: 'bg',
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
+// // Pane für das Helligkeits-Overlay erstellen
+// map.createPane('brightnessOverlayPane');
+// map.getPane('brightnessOverlayPane').style.zIndex = 400;
+// map.getPane('brightnessOverlayPane').style.width = '100vw';
+// map.getPane('brightnessOverlayPane').style.height = '100vh';
+// map.getPane('brightnessOverlayPane').style.backgroundColor = 'white';
+// map.getPane('brightnessOverlayPane').style.opacity = 0;
+// map.getPane('brightnessOverlayPane').style.pointerEvents = 'none';
+
+
+// Helligkeitsregler erstellen
+var slider = document.getElementById('brightness-slider');
+slider.value = 0;
+
+// Aktuelle Hintergrundkarte speichern
+var currentTileLayer = tileLayer; // Standard ist OSM
+
+// // Weißes Overlay-Element erstellen
+// var brightnessOverlay = document.createElement("div");
+// brightnessOverlay.style.position = "absolute";
+// brightnessOverlay.style.top = "0";
+// brightnessOverlay.style.left = "0";
+// brightnessOverlay.style.width = "100%";
+// brightnessOverlay.style.height = "100%";
+// brightnessOverlay.style.backgroundColor = "white";
+// brightnessOverlay.style.opacity = "0"; // Standardmäßig unsichtbar
+// brightnessOverlay.style.pointerEvents = "none"; // Interaktionen mit der Karte erlauben
+// brightnessOverlay.style.zIndex = "350"; // Interaktionen mit der Karte erlauben
+
+
+// Overlay zur Leaflet-Karte hinzufügen
+// document.getElementById("map").appendChild(brightnessOverlay);
+
+// Funktion zur Anpassung der Helligkeit
+slider.addEventListener("input", function (e) {
+    var value = e.target.value;
+
+    // map.getPane('brightnessOverlayPane').style.opacity = value / 100;
+
+});
 
 let openFlightMaps = L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles/{z}/{x}/{y}.png?path=2503/aero/latest', {
     minZoom: 0,
     maxZoom: 20,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 });
-
-let openAIP = L.tileLayer('https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=addef49a85fb3c7c7fdea8a653d7122c', {
+// https://api.tiles.openaip.net/api/data/openaip/9/272/174.png?apiKey=addef49a85fb3c7c7fdea8a653d7122c
+let openAIP = L.tileLayer('https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=c1a16fde6c6d3f6d23a802f70db5d6b6', {
     minZoom: 0,
     maxZoom: 20,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -57,53 +104,61 @@ let icaoCard = L.tileLayer('https://ais.dfs.de/static-maps/icao500/tiles/{z}/{x}
 
 var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     maxZoom: 20,
-    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
 });
 
 var stadiaAlidadeSmooth = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
     minZoom: 0,
     maxZoom: 20,
     attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    ext: 'png'
+    ext: 'png',
+
 });
 
 var stadiaAlidadeSmoothDark = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
     minZoom: 0,
     maxZoom: 20,
     attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    ext: 'png'
+    ext: 'png',
+
 });
 
 let topPlusOpen = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     maxZoom: 20,
-    tileSize: 256
+    tileSize: 256,
+
 });
 
 let topPlusOpenGrey = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_grau/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     maxZoom: 20,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+
 });
 
 let topPlusOpenLight = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     maxZoom: 20,
+
 });
 
 let topPlusOpenLightGray = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light_grau/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     maxZoom: 20,
+
 });
 
 let googleSatelite = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl={language}', {
     attribution: 'Map data &copy;2025 Google',
     subdomains: '0123',
     maxZoom: 22,
-    language: 'de'
+    language: 'de',
+
 });
 
 let googleMaps = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl={language}', {
     attribution: 'Map data &copy;2025 Google',
     subdomains: '0123',
     maxZoom: 22,
-    language: 'de'
+    language: 'de',
+
 });
 
 let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
@@ -141,22 +196,18 @@ const mapStates = {
 
 var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
-
-
+// Funktion zum Wechseln der Karten mit Helligkeitseinstellung
 function toggleMap(mapKey, category) {
     toggleActBtn(mapKey);
     const categoryStates = mapStates[category];
     const mapState = categoryStates[mapKey];
 
     if (mapState.isHidden) {
-        // Entferne alle aktiven Layer innerhalb der Kategorie
         Object.keys(categoryStates).forEach(key => {
             const otherMapState = categoryStates[key];
             if (!otherMapState.isHidden && otherMapState.layer) {
-                map.removeLayer(otherMapState.layer); // Entfernt den Layer
-                otherMapState.isHidden = true; // Setzt den Status zurück
-                
-                // Aktualisiere den Button
+                map.removeLayer(otherMapState.layer);
+                otherMapState.isHidden = true;
                 const otherMapBtn = document.getElementById(key);
                 if (otherMapBtn) {
                     otherMapBtn.classList.remove('bgMapButtonActive');
@@ -164,19 +215,17 @@ function toggleMap(mapKey, category) {
             }
         });
 
-        // Füge den aktuellen Layer hinzu
         if (mapState.layer) {
             mapState.layer.addTo(map);
+            currentTileLayer = mapState.layer; // Aktuelle Karte setzen
         }
-       
+
         mapState.isHidden = false;
 
-        // Aktualisiere die Zusatzlayer, wenn eine Hintergrundkarte geändert wurde
         if (category === 'backgroundMaps') {
             updateAdditionalLayerOrder();
         }
     } else {
-        // Entferne den aktuellen Layer
         if (mapState.layer) {
             map.removeLayer(mapState.layer);
         }
@@ -184,6 +233,8 @@ function toggleMap(mapKey, category) {
     }
 }
 
+
+// Zusatzlayer aktualisieren
 function updateAdditionalLayerOrder() {
     const additionalLayers = mapStates.additionalLayers;
     Object.keys(additionalLayers).forEach(key => {
@@ -194,6 +245,9 @@ function updateAdditionalLayerOrder() {
         }
     });
 }
+
+
+
 
 
 
@@ -1220,13 +1274,13 @@ async function togglePolygons(airspaceKey) {
     }
 }
 
-function toggleActBtn(id){
-    let button = document.getElementById(id);   
+function toggleActBtn(id) {
+    let button = document.getElementById(id);
     button.classList.toggle('bgMapButtonActive');
 }
 
-function toggleActBtnRadar(){
-    let button = document.getElementById('radar');   
+function toggleActBtnRadar() {
+    let button = document.getElementById('radar');
     button.classList.toggle('radarBtnActive');
 }
 
@@ -1357,14 +1411,14 @@ function processItems(items, airspaceKey, map, layerArray) {
         // Normales Durchiterieren von vorne
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            
+
             if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
                 let polygon;
                 if (airspaceKey === 'edr') {
                     polygon = new EdrAirspace(item.geometry, item.name, 'null', map, layerArray);
                 } else if (airspaceKey === 'edd') {
                     polygon = new EddAirspace(item.geometry, item.name, 'null', map, layerArray);
-                }else if (airspaceKey === 'ctr') {
+                } else if (airspaceKey === 'ctr') {
                     polygon = new CtrAirspace(item.geometry, item.name, 'null', map, layerArray);
                 }
                 polygon.addToMap();
@@ -1375,7 +1429,7 @@ function processItems(items, airspaceKey, map, layerArray) {
         // Rückwärts Durchiterieren
         for (let i = items.length - 1; i >= 0; i--) {
             const item = items[i];
-            
+
             if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
                 let polygon;
                 switch (airspaceKey) {
