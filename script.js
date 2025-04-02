@@ -30,27 +30,36 @@ let rainviewerClouds;
 var map = L.map('map', {
 }).setView([50.505, 12], 9);
 
-map.createPane('bg');
-map.getPane('bg').style.zIndex = 200;
+// map.createPane('bg');
+// map.getPane('bg').style.zIndex = 200;
 
-map.createPane('additionalLayer');
-map.getPane('additionalLayer').style.zIndex = 500;
+// map.createPane('additionalLayer');
+// map.getPane('additionalLayer').style.zIndex = 500;
+
+// // Neues Pane für den Dim-Layer erstellen
+// map.createPane('dimPane');
+// map.getPane('dimPane').style.zIndex = 400; // Über den Tile-Layern, aber unter den Markern und Polygonen
+
+// const dimLayer = L.DomUtil.create('div', 'dimPane', map.getPane('dimPane')); // Füge den Layer direkt zum Body hinzu
+// dimLayer.style.position = 'absolute'; // Fixiere den Layer
+// dimLayer.style.top = '0';
+// dimLayer.style.left = '0';
+// dimLayer.style.width = '100vw';
+// dimLayer.style.height = '100vh';
+// dimLayer.style.backgroundColor = 'white'; // Hintergrundfarbe des Layers
+// dimLayer.style.zIndex = '400'; // Stelle sicher, dass der Layer über der Karte liegt
+// dimLayer.style.pointerEvents = 'none'; // Erlaube Interaktionen mit der Karte
+// dimLayer.style.opacity = 0.5;
+// dimLayer.style.transform = 'none'; // Deaktiviere die Leaflet-Transformation
+
+
 
 // OpenStreetMap-Kacheln hinzufügen
 var tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 20,
-    pane: 'bg',
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-// // Pane für das Helligkeits-Overlay erstellen
-// map.createPane('brightnessOverlayPane');
-// map.getPane('brightnessOverlayPane').style.zIndex = 400;
-// map.getPane('brightnessOverlayPane').style.width = '100vw';
-// map.getPane('brightnessOverlayPane').style.height = '100vh';
-// map.getPane('brightnessOverlayPane').style.backgroundColor = 'white';
-// map.getPane('brightnessOverlayPane').style.opacity = 0;
-// map.getPane('brightnessOverlayPane').style.pointerEvents = 'none';
 
 
 // Helligkeitsregler erstellen
@@ -169,6 +178,7 @@ let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
     maxZoom: 20,              // Maximale Zoomstufe
     attribution: '&copy; Deutscher Wetterdienst (DWD)' // Attribution
 });
+
 
 
 const mapStates = {
@@ -784,6 +794,15 @@ function showETA() {
     calcEta(trackedPos, trackedSpeed, dest);
 }
 
+function validateLength(input) {
+    if (input.value.length < 4 && trackedIcaoDest) {            
+        trackedIcaoDest = '';
+        let icaoDestInput = document.getElementById('icaoDest');
+        icaoDestInput.value = '';
+        flightDistLine.remove();
+    }
+}
+
 
 function calcEta(trackedPos, trackedSpeed, dest) {
     for (let i = 0; i < aerodromes.length; i++) {
@@ -936,7 +955,6 @@ function toggleRadar() {
 
 
 }
-
 
 //flightradar24 Klon
 let radarTimer = null; // Timer für das Radar-Intervall
