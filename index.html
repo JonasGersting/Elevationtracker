@@ -56,52 +56,70 @@
             <div class="allMapBtns">
                 <button class="mapBtn" id="resetButton" onclick="resetMap()">Reset</button>
                 <div class="mapBtn backgroundMaps smallMenuBtn">Hintergrund
-                    <div class="allBackgroundMaps smallMenu bgMapsMenu">
-                        <button class="bgMapButton" id="topPlusOpenLight" onclick="toggleMap('topPlusOpenLight', 'backgroundMaps')">
-                            <span class="mapBtnTitle">top Plus Open Light</span>
-                            <img class="mapImg"
-                                src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light/default/WEBMERCATOR/10/345/537.png"
-                                alt="">
-                        </button>
-                        <button class="bgMapButton" id="topPlusOpen" onclick="toggleMap('topPlusOpen', 'backgroundMaps')">
-                            <span class="mapBtnTitle">top Plus Open</span>
-                            <img class="mapImg"
-                                src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/10/347/537.png"
-                                alt="">
-                        </button>
-                        <button class="bgMapButton" id="topPlusOpenLightGray" onclick="toggleMap('topPlusOpenLightGray', 'backgroundMaps')">
-                            <span class="mapBtnTitle">top Plus Open White</span>
-                            <img class="mapImg"
-                                src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light_grau/default/WEBMERCATOR/10/346/535.png"
-                                alt="">
-                        </button>
-                        <button class="bgMapButton" id="googleSatelite" onclick="toggleMap('googleSatelite', 'backgroundMaps')">
-                            <span class="mapBtnTitle">googleSatelite</span>
-                            <img class="mapImg" src="https://mt1.google.com/vt/lyrs=y&x=537&y=348&z=10&hl=de" alt="">
-                        </button>
-                        <button class="bgMapButton" id="googleMaps" onclick="toggleMap('googleMaps', 'backgroundMaps')">
-                            <span class="mapBtnTitle">googleMaps</span>
-                            <img class="mapImg" src="https://mt1.google.com/vt/lyrs=m&x=538&y=347&z=10&hl=de" alt="">
-                        </button>
-                        <button class="bgMapButton" id="topPlusOpenGrey" onclick="toggleMap('topPlusOpenGrey', 'backgroundMaps')">
-                            <span class="mapBtnTitle"> top Plus Open Grey</span>
-                            <img class="mapImg"
-                                src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_grau/default/WEBMERCATOR/10/347/538.png"
-                                alt="">
-                        </button>
-                        <button class="bgMapButton" id="stadiaAlidadeSmooth" onclick="toggleMap('stadiaAlidadeSmooth', 'backgroundMaps')">
-                            <span class="mapBtnTitle">Smooth</span>
-                            <img class="mapImg" src="https://c.basemaps.cartocdn.com/light_all/10/535/346.png" alt="">
-                        </button>
-                        <button class="bgMapButton" id="stadiaAlidadeSmoothDark"
-                            onclick="toggleMap('stadiaAlidadeSmoothDark', 'backgroundMaps')">
-                            <span class="mapBtnTitle">Smooth-Dark</span>
-                            <img class="mapImg" src="https://a.basemaps.cartocdn.com/dark_all/10/537/348.png" alt="">
-                        </button>
-                        <button class="bgMapButton" id="openTopoMap" onclick="toggleMap('openTopoMap', 'backgroundMaps')">
-                            <span class="mapBtnTitle">Open-Topo-Map</span>
-                            <img class="mapImg" src="https://b.tile.opentopomap.org/10/536/347.png" alt="">
-                        </button>
+                    <div class="allBackgroundMaps smallMenu">
+                        <div class="bgMapsMenu">
+                            <button class="bgMapButton" id="topPlusOpenLight"
+                                onclick="toggleMap('topPlusOpenLight', 'backgroundMaps')">
+                                <span class="mapBtnTitle">top Plus Open Light</span>
+                                <img class="mapImg"
+                                    src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light/default/WEBMERCATOR/10/345/537.png"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="topPlusOpen"
+                                onclick="toggleMap('topPlusOpen', 'backgroundMaps')">
+                                <span class="mapBtnTitle">top Plus Open</span>
+                                <img class="mapImg"
+                                    src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/10/347/537.png"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="topPlusOpenLightGray"
+                                onclick="toggleMap('topPlusOpenLightGray', 'backgroundMaps')">
+                                <span class="mapBtnTitle">top Plus Open White</span>
+                                <img class="mapImg"
+                                    src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light_grau/default/WEBMERCATOR/10/346/535.png"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="googleSatelite"
+                                onclick="toggleMap('googleSatelite', 'backgroundMaps')">
+                                <span class="mapBtnTitle">googleSatelite</span>
+                                <img class="mapImg" src="https://mt1.google.com/vt/lyrs=y&x=537&y=348&z=10&hl=de"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="googleMaps"
+                                onclick="toggleMap('googleMaps', 'backgroundMaps')">
+                                <span class="mapBtnTitle">googleMaps</span>
+                                <img class="mapImg" src="https://mt1.google.com/vt/lyrs=m&x=538&y=347&z=10&hl=de"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="topPlusOpenGrey"
+                                onclick="toggleMap('topPlusOpenGrey', 'backgroundMaps')">
+                                <span class="mapBtnTitle"> top Plus Open Grey</span>
+                                <img class="mapImg"
+                                    src="https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_grau/default/WEBMERCATOR/10/347/538.png"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="stadiaAlidadeSmooth"
+                                onclick="toggleMap('stadiaAlidadeSmooth', 'backgroundMaps')">
+                                <span class="mapBtnTitle">Smooth</span>
+                                <img class="mapImg" src="https://c.basemaps.cartocdn.com/light_all/10/535/346.png"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="stadiaAlidadeSmoothDark"
+                                onclick="toggleMap('stadiaAlidadeSmoothDark', 'backgroundMaps')">
+                                <span class="mapBtnTitle">Smooth-Dark</span>
+                                <img class="mapImg" src="https://a.basemaps.cartocdn.com/dark_all/10/537/348.png"
+                                    alt="">
+                            </button>
+                            <button class="bgMapButton" id="openTopoMap"
+                                onclick="toggleMap('openTopoMap', 'backgroundMaps')">
+                                <span class="mapBtnTitle">Open-Topo-Map</span>
+                                <img class="mapImg" src="https://b.tile.opentopomap.org/10/536/347.png" alt="">
+                            </button>
+                        </div>
+                        <div id="slider-container">
+                            <input id="opacity-slider" type="range" min="0" max="100" step="10" value="0">
+                            <span id="slider-value">0%</span>
+                        </div>
                     </div>
                 </div>
                 <div class="mapBtn detailMaps smallMenuBtn">Detaillayer
@@ -117,7 +135,8 @@
                             <img class="mapImg" src="https://ais.dfs.de/static-maps/icao500/tiles/10/536/346.png"
                                 alt="">
                         </button>
-                        <button class="bgMapButton" id="openFlightMaps" onclick="toggleMap('openFlightMaps', 'additionalLayers')">
+                        <button class="bgMapButton" id="openFlightMaps"
+                            onclick="toggleMap('openFlightMaps', 'additionalLayers')">
                             <span class="mapBtnTitle">openflightmaps</span>
                             <img class="mapImg"
                                 src="https://nwy-tiles-api.prod.newaydata.com/tiles/11/1073/693.png?path=2503/aero/latest"
@@ -128,7 +147,8 @@
                 <div class="mapBtn weatherMaps smallMenuBtn">Wetter
                     <div class="allWeatherMaps smallMenu">
                         <button class="mapBtn" id="rainviewerWeather" onclick="getWeather('weather')">Wetter</button>
-                        <button class="mapBtn" id="dwdWeather" onclick="toggleMap('dwdWeather', 'additionalLayers')">DWD</button>
+                        <button class="mapBtn" id="dwdWeather"
+                            onclick="toggleMap('dwdWeather', 'additionalLayers')">DWD</button>
                         <button class="mapBtn" id="rainviewerClouds" onclick="getWeather('clouds')">Wolken</button>
                     </div>
                 </div>
@@ -149,10 +169,8 @@
                 <div class="mapBtn objects smallMenuBtn">Objekte
                     <div class="allObjects smallMenu">
                         <button class="mapBtn" id="navaid" onclick="toggleMarkers('navaid')">NAV-AID</button>
-                        <button class="mapBtn" id="aerodrome"
-                            onclick="toggleMarkers('aerodrome')">Aerodromes</button>
-                        <button class="mapBtn" id="obstacle"
-                            onclick="toggleMarkers('obstacle')">Hindernisse</button>
+                        <button class="mapBtn" id="aerodrome" onclick="toggleMarkers('aerodrome')">Aerodromes</button>
+                        <button class="mapBtn" id="obstacle" onclick="toggleMarkers('obstacle')">Hindernisse</button>
                     </div>
                 </div>
 
@@ -172,10 +190,7 @@
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
     </div>
-    <input type="range" id="brightness-slider" min="0" max="200" value="100">
-    <div id="map">
-        <div class="dim-layer" ></div>
-    </div>
+    <div id="map"></div>
     <div class="hiddenTrackedAcft" id="trackedAcft">
         <h2 id="trackedCallsign">BPO345</h2>
         <h3 id="trackedReg">D-HVGM</h3>
