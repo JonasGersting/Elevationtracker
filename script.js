@@ -183,7 +183,6 @@ let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
     format: 'image/png',      // Bildformat
     transparent: true,        // Transparenz aktivieren
     version: '1.3.0',         // WMS-Version
-    minZoom: 4,
     maxZoom: 20,              // Maximale Zoomstufe
     attribution: '&copy; Deutscher Wetterdienst (DWD)' // Attribution
 });
@@ -203,12 +202,12 @@ const mapStates = {
         googleMaps: { layer: googleMaps, isHidden: true, opacity: 0 }
     },
     additionalLayers: {
-        openFlightMaps: { layer: openFlightMaps, isHidden: true },
-        openAIP: { layer: openAIP, isHidden: true },
-        icaoCard: { layer: icaoCard, isHidden: true },
-        dwdWeather: { layer: dwdWeather, isHidden: true },
-        rainviewerWeather: { layer: null, isHidden: true },
-        rainviewerClouds: { layer: null, isHidden: true }
+        openFlightMaps: { layer: openFlightMaps, isHidden: true, opacity: 0 },
+        openAIP: { layer: openAIP, isHidden: true, opacity: 0 },
+        icaoCard: { layer: icaoCard, isHidden: true, opacity: 0 },
+        dwdWeather: { layer: dwdWeather, isHidden: true, opacity: 0 },
+        rainviewerWeather: { layer: null, isHidden: true, opacity: 0 },
+        rainviewerClouds: { layer: null, isHidden: true, opacity: 0 }
     }
 };
 

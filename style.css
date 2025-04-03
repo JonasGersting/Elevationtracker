@@ -126,7 +126,7 @@ h3 {
 }
 
 .bgMapButton:hover {
-    background-color: rgb(219, 231, 249);
+    background-color: white;
     color: rgb(40, 40, 126);
 }
 
@@ -243,7 +243,7 @@ h3 {
 }
 
 .radarBtn:hover {
-    background-color: rgb(219, 231, 249) !important;
+    background-color: white !important;
     background-image: url('img/radarBlue.png') !important;
 }
 
@@ -427,7 +427,7 @@ h3 {
 }
 
 .mapBtn:hover {
-    background-color: rgb(219, 231, 249);
+    background-color: rgb(195, 245, 25);
     color: rgb(40, 40, 126);
 }
 
@@ -494,7 +494,7 @@ h3 {
 }
 
 #searchBtn:hover {
-    background-color: rgb(219, 231, 249);
+    background-color: rgb(195, 245, 25);
     color: rgb(40, 40, 126);
 }
 
@@ -832,7 +832,7 @@ h3 {
 }
 
 .rotateButton:hover {
-    background-color: rgb(219, 231, 249);
+    background-color: white;
     color: rgb(40, 40, 126)
 }
 
