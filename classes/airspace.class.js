@@ -132,6 +132,18 @@ class AirspacePolygon {
                     }
                 });
                 resolve(id);
+            } else if (this instanceof EddAirspace) {
+                const cleanName = name.replace(/ED-D(\S+).*/, '$1').trim();
+                console.log('Cleaned EDR name:', cleanName);
+                eddInfo.forEach(edd => {
+                    const lowerCaseEdrArray = edd["ED-D"].map(item => item.toLowerCase());
+                    console.log(lowerCaseEdrArray, 'array EDD');
+                    
+                    if (lowerCaseEdrArray.includes(cleanName.toLowerCase())) {
+                        id = edd.ID;
+                    }
+                });
+                resolve(id);
             }
             else {
                 resolve(null);
