@@ -760,6 +760,17 @@ h3 {
 
 }
 
+.airspaceInfoCard {
+    font-size: 1.4em;
+    height: 800px;
+    width: 900px;
+    color: white;
+    border-radius: 16px;
+    display: flex;
+    position: relative;
+    background: linear-gradient(45deg, rgb(10, 60, 135), rgb(15, 90, 210));
+}
+
 .switchButton {
     position: absolute;
     top: 50%;

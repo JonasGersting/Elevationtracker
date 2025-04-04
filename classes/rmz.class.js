@@ -29,6 +29,16 @@ class RmzAirspace extends AirspacePolygon {
                     layer.unbindTooltip(); // Verbindung lösen
                     layer.setStyle(this.getStyle()); // Stil zurücksetzen
                 });
+
+                layer.on('click', async () => {
+                    currentAirspace = this;
+                    const id = await this.setAipInfoAirspace(this.name);
+                    if (id) {
+                        this.showInfoPdf(id);
+                    } else {
+                        console.log('No PDF ID found for:', this.name);
+                    }
+                });
             }
         }).addTo(this.map);
     }

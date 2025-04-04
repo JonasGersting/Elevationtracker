@@ -3,6 +3,7 @@ let polygonIsBroughtUpToFront = false;
 let isCursorOverPolygon = false;
 let searchCat = 'Adresse';
 let currentAerodrome;
+let currentAirspace;
 
 //current acft variables
 let currentTrack;
@@ -99,7 +100,7 @@ let openFlightMaps = L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 });
 // https://api.tiles.openaip.net/api/data/openaip/9/272/174.png?apiKey=addef49a85fb3c7c7fdea8a653d7122c
-let openAIP = L.tileLayer('https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=c1a16fde6c6d3f6d23a802f70db5d6b6', {
+let openAIP = L.tileLayer('https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=75acf00ad8bb52144424ce0655147c55', {
     minZoom: 4,
     maxZoom: 20,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -234,7 +235,7 @@ function toggleMap(mapKey, category) {
         });
 
         if (mapState.layer) {
-            mapState.layer.addTo(map);         
+            mapState.layer.addTo(map);
             if (category === 'backgroundMaps' || mapKey === 'icaoCard') {
                 slider.value = mapState.opacity * 100;
                 setOpacity();
@@ -287,6 +288,13 @@ let navAids;
 let aerodromes;
 let obstacles;
 let aipInfo;
+let ctrInfo;
+let eddInfo;
+let edrInfo;
+let tmzInfo;
+let rmzInfo;
+let pjeInfo;
+
 
 
 
@@ -1239,16 +1247,16 @@ let tmzAirspace = [];
 let atzAirspace = [];
 
 const airspaceStates = {
-    fis: { name: 'fisAirspace', airspace: fisAirspace },
-    edr: { name: 'edrAirspace', airspace: edrAirspace },
-    edd: { name: 'eddAirspace', airspace: eddAirspace },
-    ctr: { name: 'ctrAirspace', airspace: ctrAirspace },
-    rmz: { name: 'rmzAirspace', airspace: rmzAirspace },
-    fir: { name: 'firAirspace', airspace: firAirspace },
-    gafor: { name: 'gaforAirspace', airspace: gaforAirspace },
-    pje: { name: 'pjeAirspace', airspace: pjeAirspace },
-    tmz: { name: 'tmzAirspace', airspace: tmzAirspace },
-    atz: { name: 'atzAirspace', airspace: atzAirspace },
+    fis: { name: 'fisAirspace', airspace: fisAirspace, info: 'null' },
+    edr: { name: 'edrAirspace', airspace: edrAirspace, info: 'edrInfo' },
+    edd: { name: 'eddAirspace', airspace: eddAirspace, info: 'eddInfo' },
+    ctr: { name: 'ctrAirspace', airspace: ctrAirspace, info: 'ctrInfo' },
+    rmz: { name: 'rmzAirspace', airspace: rmzAirspace, info: 'rmzInfo' },
+    fir: { name: 'firAirspace', airspace: firAirspace, info: 'null' },
+    gafor: { name: 'gaforAirspace', airspace: gaforAirspace, info: 'null' },
+    pje: { name: 'pjeAirspace', airspace: pjeAirspace, info: 'pjeInfo' },
+    tmz: { name: 'tmzAirspace', airspace: tmzAirspace, info: 'tmzInfo' },
+    atz: { name: 'atzAirspace', airspace: atzAirspace, info: 'null' },
 };
 
 // Objekt zum Speichern der Polygone nach AirspaceKey
@@ -1256,7 +1264,22 @@ let polygonLayers = {};
 
 // Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
 async function togglePolygons(airspaceKey) {
-    toggleActBtn(airspaceKey)
+    toggleActBtn(airspaceKey);
+    // Prüfen, ob es Polygone für den aktuellen Key gibt
+    if (polygonLayers[airspaceKey] && polygonLayers[airspaceKey].length > 0) {
+        // Entferne bestehende Polygone für diesen Key
+        polygonLayers[airspaceKey].forEach(polygon => polygon.removeFromMap());
+        polygonLayers[airspaceKey] = [];
+        if (airspaceKey === 'gafor') {
+            gaforCalc.style.display = 'none';
+            if (currentGaforCircle) {
+                currentGaforCircle.removeFromMap();
+            }
+        }
+        return;
+    }
+
+
     let gaforCalc = document.getElementById('calcGaforRadius');
     if (airspaceKey === 'gafor') {
         let gaforInput = document.getElementById('gaforNumbers');
@@ -1275,23 +1298,13 @@ async function togglePolygons(airspaceKey) {
     airspaceStates[airspaceKey].airspace = data;
     airspaceArray = data;
 
-
-
-
-    // Prüfen, ob es Polygone für den aktuellen Key gibt
-    if (polygonLayers[airspaceKey] && polygonLayers[airspaceKey].length > 0) {
-        // Entferne bestehende Polygone für diesen Key
-        polygonLayers[airspaceKey].forEach(polygon => polygon.removeFromMap());
-        polygonLayers[airspaceKey] = [];
-        if (airspaceKey === 'gafor') {
-            gaforCalc.style.display = 'none';
-            if (currentGaforCircle) {
-                currentGaforCircle.removeFromMap();
-
-            }
-        }
-        return;
+    if (airspaceStates[airspaceKey].info !== 'null') {
+        let info = airspaceStates[airspaceKey].info;
+        await getData(info);
     }
+
+
+
 
     // Initialisiere, falls noch nicht vorhanden
     if (!polygonLayers[airspaceKey]) {
@@ -1432,6 +1445,30 @@ function processDataByKey(key, data) {
         tmzAirspace = data[0]?.features;
     } else if (key === 'atzAirspace') {
         atzAirspace = data[0]?.features;
+    } else if (key === 'ctrInfo') {
+        ctrInfo = data;
+        console.log(data);
+
+    } else if (key === 'eddInfo') {
+        eddInfo = data;
+        console.log(data);
+
+    } else if (key === 'edrInfo') {
+        edrInfo = data;
+        console.log(data);
+
+    } else if (key === 'rmzInfo') {
+        rmzInfo = data;
+        console.log(data);
+
+    } else if (key === 'tmzInfo') {
+        tmzInfo = data;
+        console.log(data);
+
+    } else if (key === 'pjeInfo') {
+        pjeInfo = data;
+        console.log(data);
+
     }
 }
 

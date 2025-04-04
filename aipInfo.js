@@ -1,175 +1,89 @@
-
-
 let edrInfo = [
     {
-        "ED-R": "1, 3, 4, 5, 6, 7, 8, 10A",
+        "ED-R": ["1", "3", "4", "5", "6", "7", "8", "10A"],
         "ID": "39122"
     },
     {
-        "ED-R": "10AZ, 10B, 10BZ, 10C, 10CZ, 10D, 10E",
+        "ED-R": ["10AZ", "10B", "10BZ", "10C", "10CZ", "10D", "10E"],
         "ID": "35432"
     },
     {
-        "ED-R": "11A, 11AZ, 11B, 11BZ, 12A, ",
+        "ED-R": ["11A", "11AZ", "11B", "11BZ", "12A"],
         "ID": "39947"
     },
     {
-        "ED-R": "12B, 13A, 13AZ, 13B, 13BZ, 14",
+        "ED-R": ["12B", "13A", "13AZ", "13B", "13BZ", "14"],
         "ID": "39948"
     },
     {
-        "ED-R": "15, 17A, 17B, 17Z, 22, ",
+        "ED-R": ["15", "17A", "17B", "17Z", "22"],
         "ID": "41639"
     },
     {
-        "ED-R": "23, 24, 25, 27, 30, 31, 31Z",
+        "ED-R": ["23", "24", "25", "27", "30", "31", "31Z"],
         "ID": "41640"
     },
     {
-        "ED-R": "32A, 32AZ, 32B, 32BZ, 33A, 33AZ",
+        "ED-R": ["32A", "32AZ", "32B", "32BZ", "33A", "33AZ"],
         "ID": "39951"
     },
     {
-        "ED-R": "33B, 33BZ, 34A, 34AZ, 34B ",
+        "ED-R": ["33B", "33BZ", "34A", "34AZ", "34B"],
         "ID": "39126"
     },
     {
-        "ED-R": "34BZ, 34C, 37A, 37B, 38, 39, 40",
+        "ED-R": ["34BZ", "34C", "37A", "37B", "38", "39", "40"],
         "ID": "39127"
     },
     {
-        "ED-R": "41, 43A, 43B, 43C, 44, 45",
+        "ED-R": ["41", "43A", "43B", "43C", "44", "45"],
         "ID": "39952"
     },
     {
-        "ED-R": "50, 54, 55, 56, 60, ",
+        "ED-R": ["50", "54", "55", "56", "60"],
         "ID": "39129"
     },
     {
-        "ED-R": "70, 71, 73A, 73AZ, 73B, 73C",
+        "ED-R": ["70", "71", "73A", "73AZ", "73B", "73C"],
         "ID": "39130"
     },
     {
-        "ED-R": "74A, 74B, 74C, 76A, 76AZ, 76B",
+        "ED-R": ["74A", "74B", "74C", "76A", "76AZ", "76B"],
         "ID": "39131"
     },
     {
-        "ED-R": "76BZ, 76C, 76D, 77, 90, 92, ",
+        "ED-R": ["76BZ", "76C", "76D", "77", "90", "92"],
         "ID": "39132"
     },
     {
-        "ED-R": "93, 94, 95A, 95AZ, 95B, 96",
+        "ED-R": ["93", "94", "95A", "95AZ", "95B", "96"],
         "ID": "39133"
     },
     {
-        "ED-R": "97A, 97B, 111, 112A, 112AZ, 112B, 112BZ",
+        "ED-R": ["97A", "97B", "111", "112A", "112AZ", "112B", "112BZ"],
         "ID": "39134"
-    },
-    {
-        "ED-R": "116, 116Z, 117, 117Z, 118",
-        "ID": "42036"
-    },
-    {
-        "ED-R": "131, 132A, 132B, 133, 134",
-        "ID": "39136"
-    },
-    {
-        "ED-R": "135A, 135B, 135C, 136A, 136AZ, 136B, 136C",
-        "ID": "39137"
-    },
-    {
-        "ED-R": "137A, 137AZ, 137B, 137BZ, 138A",
-        "ID": "39138"
-    },
-    {
-        "ED-R": "138B, 139, 141, 142, 143, 144, ",
-        "ID": "39139"
-    },
-    {
-        "ED-R": "145, 146, 147, 148, ",
-        "ID": "39140"
-    },
-    {
-        "ED-R": "150, 161A",
-        "ID": "42037"
-    },
-    {
-        "ED-R": "161B, 162, 163A, 163B",
-        "ID": "42038"
-    },
-    {
-        "ED-R": "164, 165A, 165B, 166",
-        "ID": "39143"
-    },
-    {
-        "ED-R": "170A, 170B, 171, 171Z, 172",
-        "ID": "36127"
-    },
-    {
-        "ED-R": "107C, 107CZ, 107W, 107WZ, 201A, ",
-        "ID": "39144"
-    },
-    {
-        "ED-R": "201AZ, 201B, 201BZ, 201C, 201CZ, 201D, 201DZ, 201E, 201EZ, 201F",
-        "ID": "35463"
-    },
-    {
-        "ED-R": "201FZ, 202A, 202AZ, 202B, 202BZ, 202C, 202CZ, 202D, 202DZ, 202E",
-        "ID": "35464"
-    },
-    {
-        "ED-R": "202EZ, 203A, 203AZ, 203B, 203BZ, 205A",
-        "ID": "35465"
-    },
-    {
-        "ED-R": "205AZ, 205B, 205BZ",
-        "ID": "35466"
-    },
-    {
-        "ED-R": "205C, 205CZ",
-        "ID": "35467"
-    },
-    {
-        "ED-R": "205D, 205DZ, 207C, 207CZ, 207S, 207SZ",
-        "ID": "39145"
-    },
-    {
-        "ED-R": "207W, 207WZ, 208A, 208AZ, 208B, 208BZ, 302",
-        "ID": "35469"
-    },
-    {
-        "ED-R": "302Z, 302A, 302AZ,302B, 302BZ, 302C, 302CZ",
-        "ID": "39146"
-    },
-    {
-        "ED-R": "305, 305Z",
-        "ID": "36126"
-    },
-    {
-        "ED-R": "308, 308Z, 312, 407C, 407CZ, 407N, 407NZ,  407S, 407SZ",
-        "ID": "39147"
     }
 ]
 
 let eddInfo = [
     {
-        "ED-D": "19A, 19AZ, 19B, 19BZ, 28, 28Z",
+        "ED-D": ["19A", "19AZ", "19B", "19BZ", "28", "28Z"],
         "ID": "42404"
     },
     {
-        "ED-D": "41A, 41AZ, 41B, 41BZ, 44, 44Z, 46A",
+        "ED-D": ["41A", "41AZ", "41B", "41BZ", "44", "44Z", "46A"],
         "ID": "42405"
     },
     {
-        "ED-D": "46AZ, 46B, 46BZ, 47A, 47AZ, 47B, 47BZ, 47C",
+        "ED-D": ["46AZ", "46B", "46BZ", "47A", "47AZ", "47B", "47BZ", "47C"],
         "ID": "42406"
     },
     {
-        "ED-D": "47CZ, 100, 100Z, 100A, 101A, 101AZ",
+        "ED-D": ["47CZ", "100", "100Z", "100A", "101A", "101AZ"],
         "ID": "42407"
     },
     {
-        "ED-D": "101B, 101BZ",
+        "ED-D": ["101B", "101BZ"],
         "ID": "42408"
     }
 ]
@@ -177,117 +91,117 @@ let eddInfo = [
 let ctrInfo = [
     {
         "ID": "42386",
-        "CTRs": "ETEB, EDMA EDDB, EDVE, EDDW, ETSB"
+        "CTRs": ["CTR ANSBACH", "CTR AUGSBURG", "CTR BERLIN", "CTR BRAUNSCHWEIG", "CTR BREMEN", "CTR BUECHEL"]
     },
     {
         "ID": "42387",
-        "CTRs": "ETHB, ETHC, ETND, EDLW, EDDC, EDDL"
+        "CTRs": ["CTR BUECKEBURG", "CTR CELLE", "CTR DIEPHOLZ", "CTR DORTMUND", "CTR DRESDEN", "CTR DUESSELDORF"]
     },
     {
         "ID": "42388",
-        "CTRs": "EDDE, ETHS, EDDF, EDNY, ETHF"
+        "CTRs": ["CTR ERFURT", "CTR FASSBERG", "CTR FRANKFURT", "CTR FRIEDRICHSHAFEN", "CTR FRITZLAR"]
     },
     {
         "ID": "42389",
-        "CTRs": "ETNG, ETIC, EDFH, EDDH, EDDH2, EDDH3, EDDV, EDDV1, EDDV2"
+        "CTRs": ["CTR GEILENKIRCHEN", "CTR GRAFENWOEHR", "CTR HAHN", "CTR HAMBURG", "CTR SECTOR BOBERG HX", "CTR SECTOR FINKENWERDER HX", "CTR HANNOVER", "EDDV1", "EDDV2"]
     },
     {
         "ID": "42390",
-        "CTRs": "EDAH, EDQM, ETNH,  ETSH, "
+        "CTRs": ["CTR HERINGSDORF", "CTR HOF", "CTR HOHN", "CTR HOLZDORF"]
     },
     {
         "ID": "42391",
-        "CTRs": "ETIK, ETSI, EDSB, EDVK, EDDK, EDDK1"
+        "CTRs": ["CTR ILLESHEIM", "CTR INGOLSTADT", "CTR KARLSRUHE-BADEN", "CTR KASSEL", "CTR KOELN/BONN", "CTR SEKTOR DUENNWALD (HX)"]
     },
     {
         "ID": "42392",
-        "CTRs": "ETNL, EDTL, ETHL, ETSL, EDDP, EDHL"
+        "CTRs": ["CTR LAAGE", "CTR LAHR", "CTR LAUPHEIM", "CTR LECHFELD", "CTR LEIPZIG", "CTR LUEBECK"]
     },
     {
         "ID": "41232",
-        "CTRs": "EDFM, EDJA, EDLN, "
+        "CTRs": ["CTR MANNHEIM", "CTR MEMMINGEN", "CTR MOENCHENGLADBACH"]
     },
     {
         "ID": "42393",
-        "CTRs": "EDDM, EDDG, ETSN, EDLV, ETHN, ETNN, ETMN, EDDN"
+        "CTRs": ["CTR MUENCHEN", "CTR MUENSTER", "CTR NEUBURG", "CTR NIEDERRHEIN", "CTR NIEDERSTETTEN", "CTR NOERVENNICH", "CTR NORDHOLZ", "CTR NUERNBERG"]
     },
     {
         "ID": "42394",
-        "CTRs": "EDMO, EDLP, ETAR, EDDR, ETNS, ETAD, EDDS"
+        "CTRs": ["CTR OBERPFAFFENHOFEN", "CTR PADERBORN", "CTR RAMSTEIN", "CTR SAARBRUECKEN", "CTR SCHLESWIG", "CTR SPANGDAHLEM", "CTR STUTTGART"]
     },
     {
         "ID": "42395",
-        "CTRs": "EDXW, ETOU, ETNT"
+        "CTRs": ["CTR SYLT", "CTR WIESBADEN", "CTR WITTMUND"]
     }
 ]
 
 let tmzInfo = [
-    {
-        "ID": "40801",
-        "TMZ": "Bremen, Dortmund"
-    },
-    {
-        "ID": "39102",
-        "TMZ": "Dresden, DresdenSüd"
-    },
-    {
-        "ID": "39103",
-        "TMZ": "DresdenNord, Egelsbach"
-    },
-    {
-        "ID": "39720",
-        "TMZ": "Erfurt, FriedrichshafenA,  FriedrichshafenB,  FriedrichshafenC,  FriedrichshafenD,  FriedrichshafenE"
-    },
-    {
-        "ID": "39105",
-        "TMZ": "Hahn, Hamburg"
-    },
-    {
-        "ID": "39106",
-        "TMZ": "Hannover"
-    },
-    {
-        "ID": "39107",
-        "TMZ": "Hannover, Leipzig"
-    },
-    {
-        "ID": "39108",
-        "TMZ": "Leipzig-Mitte, Leipzig-Ost, Memmingen"
-    },
-    {
-        "ID": "39109",
-        "TMZ": "Münster-Osnabrück, Niederrhein"
-    },
-    {
-        "ID": "39110",
-        "TMZ": "Nordholz, Nürnberg"
-    },
-    {
-        "ID": "39111",
-        "TMZ": "Paderborn, Schleswig"
-    },
-    {
-        "ID": "39112",
-        "TMZ": "Wittmund"
-    }
+        {
+            "ID": "40801",
+            "TMZ": ["Bremen", "Dortmund A", "Dortmund B", "Dortmund C", "Dortmund D"]
+        },
+        {
+            "ID": "39102",
+            "TMZ": ["Dresden", "Dresden Süd"]
+        },
+        {
+            "ID": "39103",
+            "TMZ": ["Dresden Nord", "Egelsbach"]
+        },
+        {
+            "ID": "39720",
+            "TMZ": ["Erfurt A", "Erfurt B", "Erfurt C", "Friedrichshafen A", "Friedrichshafen B", "Friedrichshafen C", "Friedrichshafen D", "Friedrichshafen Ost"]
+        },
+        {
+            "ID": "39105",
+            "TMZ": ["Hahn A", "Hahn B", "Hahn C", "Hahn D", "Hahn E"]
+        },
+        {
+            "ID": "39106",
+            "TMZ": ["Hannover"]
+        },
+        {
+            "ID": "39107",
+            "TMZ": ["Leipzig A", "Leipzig B", "Leipzig C"]
+        },
+        {
+            "ID": "39108",
+            "TMZ": ["Memmingen A", "Memmingen B", "Memmingen C", "Memmingen D", "Memmingen E", "Memmingen F", "Memmingen G"]
+        },
+        {
+            "ID": "39109",
+            "TMZ": ["Niederrhein A", "Niederrhein B", "Niederrhein C", "Niederrhein D", "Niederrhein E", "Niederrhein F", "Niederrhein G"]
+        },
+        {
+            "ID": "39110",
+            "TMZ": ["Nordholz A", "Nordholz B", "Nürnberg"]
+        },
+        {
+            "ID": "39111",
+            "TMZ": ["Paderborn A", "Paderborn B", "Paderborn C", "Paderborn D", "Paderborn E"]
+        },
+        {
+            "ID": "39112",
+            "TMZ": ["Wittmund A", "Wittmund B"]
+        }
 ]
 
 let rmzInfo = [
     {
         "ID": "39097",
-        "RMZ": "Allendorf, Altenburg, Bamberg, Barth, Bautzen"
+        "RMZ": ["Allendorf", "Altenburg", "Bamberg", "Barth", "Bautzen"]
     },
     {
         "ID": "39098",
-        "RMZ": "Bayreuth, Coburg, Cochstedt, Donaueschingen, Donauwörth, Egelsbach, Eggenfelden, Emden, Giebelstadt, Kiel, Magdenburg, Mengen, Neubrandenburg"
+        "RMZ": ["Bayreuth", "Coburg", "Cochstedt", "Donaueschingen", "Donauwoerth", "Egelsbach", "Eggenfelden", "Emden", "Giebelstadt", "Kiel", "Magdeburg", "Mengen", "Neubrandenburg"]
     },
     {
         "ID": "39099",
-        "RMZ": "Nordholz, Oberschleißheim, Schleswig, Schönhagen, Schwäbisch Hall"
+        "RMZ": ["Nordholz A", "Nordholz B", "Oberschleißheim", "Schleswig A", "Schleswig B", "Schoenhagen", "Schwaebisch Hall"]
     },
     {
         "ID": "39100",
-        "RMZ": "Siegerland, Speyer, Straubing, Strausberg, Wilhelmshaven, Zweibrücken"
+        "RMZ": ["Siegerland", "Speyer", "Straubing", "Strausberg", "Wilhelmshaven", "Zweibrücken"]
     }
 ]
 
@@ -295,22 +209,22 @@ let pjeInfo = [
     {
         "Wochenende": "42051",
         "ID": "42047",
-        "PJE": "EDGA, ETHA, EDBA, EDPB, EDRF, EDOF, EDNH, EDCB, EDBH, EDAB, EDOI, EDRB, EDKB, EDVE, EDTG, Burnsiek-Meißendorf, Burgheim, Caöw-Muckberg, EDKV, EDWC, EDMW, EDAD"
+        "PJE": ["EDGA", "ETHA", "EDBA", "EDPB", "EDRF", "EDOF", "EDNH", "EDCB", "EDBH", "EDAB", "EDOI", "EDRB", "EDKB", "EDVE", "EDTG", "Burnsiek-Meißendorf", "Burgheim", "Caöw-Muckberg", "EDKV", "EDWC", "EDMW", "EDAD"]
     },
     {
         "Wochenende": "42051",
         "ID": "42048",
-        "PJE": "EDND, EDME, EDCE, EDGE, EDBF, EDUS, EDXF, EDMF, EDWQ, EDFG, EDAJ, EDFL, EDUG, EDLF, EDAG, EDMG, EDHM, EDQT, EDEH, EDVM, EDVH, EDXU, EDMI, EDHF, EDBJ, EDWK"
+        "PJE": ["EDND", "EDME", "EDCE", "EDGE", "EDBF", "EDUS", "EDXF", "EDMF", "EDWQ", "EDFG", "EDAJ", "EDFL", "EDUG", "EDLF", "EDAG", "EDMG", "EDHM", "EDQT", "EDEH", "EDVM", "EDVH", "EDXU", "EDMI", "EDHF", "EDBJ", "EDWK"]
     },
     {
         "Wochenende": "42051",
         "ID": "42049",
-        "PJE": "EDVK, EDHK, EDRL, EDAC, EDNL, EDHC, EDBM, EDLM, EDAM, EDAT, EDAP, EDQN, EDAN, EDLP, EDSR, EDXE, EDAW, EDQP, EDFR, EDSZ, EDCG, EDRJ"
+        "PJE": ["EDVK", "EDHK", "EDRL", "EDAC", "EDNL", "EDHC", "EDBM", "EDLM", "EDAM", "EDAT", "EDAP", "EDQN", "EDAN", "EDLP", "EDSR", "EDXE", "EDAW", "EDQP", "EDFR", "EDSZ", "EDCG", "EDRJ"]
     },
     {
         "Wochenende": "42051",
         "ID": "42050",
-        "PJE": "EDTU, Schlierstadt-Seligenberg, EDKR, EDBZ, EDRO, EDTS, EDXS, Sendenhorst, EDLZ, EDHS, EDLS, EDXW, EDMT, EDPW, EDRT, EDGU, EDWU, EDGX, EDWX, EDUZ, EDRZ"
+        "PJE": ["EDTU", "Schlierstadt-Seligenberg", "EDKR", "EDBZ", "EDRO", "EDTS", "EDXS", "Sendenhorst", "EDLZ", "EDHS", "EDLS", "EDXW", "EDMT", "EDPW", "EDRT", "EDGU", "EDWU", "EDGX", "EDWX", "EDUZ", "EDRZ"]
     }
 ]
 
@@ -1062,7 +976,7 @@ let aipInfo = [
     {
         "Flugplatz": "EDFH",
         "AD": "23918",
-        "VFRchart": ["21741", "21696", "21229",  "21228"],
+        "VFRchart": ["21741", "21696", "21229", "21228"],
         "Adinfo": "23815"
     },
     {

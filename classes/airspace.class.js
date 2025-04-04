@@ -1,5 +1,6 @@
 // Basisklasse für Airspace-Polygone
 class AirspacePolygon {
+    aipInfoAirspace;
     constructor(geometry, name, ident, map, polygonLayers) {
         this.geometry = geometry;
         this.name = name;
@@ -56,6 +57,82 @@ class AirspacePolygon {
             this.layer.remove();
             this.layer = null;
         }
+    }
+
+    showInfoPdf(pdfId) {
+        console.log('PDF ID:', pdfId);
+        let detailDiv = document.getElementById('aerodromeInfoDetail');
+        detailDiv.style.height = '100vh';
+
+        // Create container for PDF
+        detailDiv.innerHTML = `
+            <div class="overlay"></div>
+            <div class="cardWrapper">
+                <div class="airspaceInfoCard"">
+                    <button onclick="currentAirspace.closeInfoPdf()" class="closeButton" style="position: absolute; right: 10px; top: 10px; z-index: 1000;">X</button>
+                    <iframe 
+                        id="pdfIframe" 
+                        src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=155" 
+                        frameborder="0"
+                        style="width: 100%; height: 100%;">
+                    </iframe>
+                </div>
+            </div>
+        `;
+    }
+
+    setAipInfoAirspace(name) {
+        return new Promise((resolve) => {
+            let id = null;
+            
+            if (this instanceof RmzAirspace) {
+                rmzInfo.forEach(rmz => {
+                    const lowerCaseRmzArray = rmz.RMZ.map(item => item.toLowerCase());
+                    if (lowerCaseRmzArray.includes(name.toLowerCase())) {
+                        id = rmz.ID;
+                    }
+                });
+                resolve(id);
+            } else if (this instanceof CtrAirspace) {
+                ctrInfo.forEach(ctr => {
+                    const lowerCaseCtrArray = ctr.CTRs.map(item => item.toLowerCase());                    
+                    if (lowerCaseCtrArray.includes(name.toLowerCase())) {
+                        id = ctr.ID;
+                    }
+                });
+                resolve(id);
+            } else if (this instanceof PjeAirspace) {
+                const cleanName = name.replace('PJA', '').trim();
+                console.log(cleanName);
+                
+                pjeInfo.forEach(pje => {
+                    const lowerCasePjeArray = pje.PJE.map(item => item.toLowerCase());                    
+                    if (lowerCasePjeArray.includes(cleanName.toLowerCase())) {
+                        id = pje.ID;
+                    }
+                });
+                resolve(id);
+            } else if (this instanceof TmzAirspace) {
+                tmzInfo.forEach(tmz => {
+                    const lowerCaseRmzArray = tmz.TMZ.map(item => item.toLowerCase());
+                    if (lowerCaseRmzArray.includes(name.toLowerCase())) {
+                        id = tmz.ID;
+                    }
+                });
+                resolve(id);
+            }
+            else {
+                resolve(null);
+            }
+        });
+    }
+
+    closeInfoPdf() {
+        let detailDiv = document.getElementById('aerodromeInfoDetail');
+        detailDiv.style.height = '0px';
+        setTimeout(() => {
+            detailDiv.innerHTML = '';
+        }, 1000);
     }
 
     // Überschreiben in spezifischen Klassen

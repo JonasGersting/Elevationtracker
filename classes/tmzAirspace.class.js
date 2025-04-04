@@ -26,6 +26,16 @@ class TmzAirspace extends AirspacePolygon {
                     layer.unbindTooltip();       // Tooltip-Verbindung lösen
                     layer.setStyle(this.getStyle()); // Ursprünglicher Stil
                 });
+
+                layer.on('click', async () => {
+                    currentAirspace = this;
+                    const id = await this.setAipInfoAirspace(this.name);
+                    if (id) {
+                        this.showInfoPdf(id);
+                    } else {
+                        console.log('No PDF ID found for:', this.name);
+                    }
+                });
             }
         }).addTo(this.map);
     }
