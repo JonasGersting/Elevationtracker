@@ -32,6 +32,16 @@ class EdrAirspace extends AirspacePolygon {
                     layer.unbindTooltip(); // Verbindung lösen
                     layer.setStyle({fillColor: 'red', fillOpacity: 0.2});
                 });
+
+                layer.on('click', async () => {
+                    currentAirspace = this;
+                    const id = await this.setAipInfoAirspace(this.name);
+                    if (id) {
+                        this.showInfoPdf(id);
+                    } else {
+                        console.log('No PDF ID found for:', this.name);
+                    }
+                });
             }
         }).addTo(this.map);
     }

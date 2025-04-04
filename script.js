@@ -1264,6 +1264,7 @@ let polygonLayers = {};
 
 // Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
 async function togglePolygons(airspaceKey) {
+    let gaforCalc = document.getElementById('calcGaforRadius');
     toggleActBtn(airspaceKey);
     // Prüfen, ob es Polygone für den aktuellen Key gibt
     if (polygonLayers[airspaceKey] && polygonLayers[airspaceKey].length > 0) {
@@ -1280,7 +1281,6 @@ async function togglePolygons(airspaceKey) {
     }
 
 
-    let gaforCalc = document.getElementById('calcGaforRadius');
     if (airspaceKey === 'gafor') {
         let gaforInput = document.getElementById('gaforNumbers');
         gaforInput.value = '';

@@ -84,7 +84,7 @@ class AirspacePolygon {
     setAipInfoAirspace(name) {
         return new Promise((resolve) => {
             let id = null;
-            
+
             if (this instanceof RmzAirspace) {
                 rmzInfo.forEach(rmz => {
                     const lowerCaseRmzArray = rmz.RMZ.map(item => item.toLowerCase());
@@ -95,7 +95,7 @@ class AirspacePolygon {
                 resolve(id);
             } else if (this instanceof CtrAirspace) {
                 ctrInfo.forEach(ctr => {
-                    const lowerCaseCtrArray = ctr.CTRs.map(item => item.toLowerCase());                    
+                    const lowerCaseCtrArray = ctr.CTRs.map(item => item.toLowerCase());
                     if (lowerCaseCtrArray.includes(name.toLowerCase())) {
                         id = ctr.ID;
                     }
@@ -104,9 +104,9 @@ class AirspacePolygon {
             } else if (this instanceof PjeAirspace) {
                 const cleanName = name.replace('PJA', '').trim();
                 console.log(cleanName);
-                
+
                 pjeInfo.forEach(pje => {
-                    const lowerCasePjeArray = pje.PJE.map(item => item.toLowerCase());                    
+                    const lowerCasePjeArray = pje.PJE.map(item => item.toLowerCase());
                     if (lowerCasePjeArray.includes(cleanName.toLowerCase())) {
                         id = pje.ID;
                     }
@@ -117,6 +117,18 @@ class AirspacePolygon {
                     const lowerCaseRmzArray = tmz.TMZ.map(item => item.toLowerCase());
                     if (lowerCaseRmzArray.includes(name.toLowerCase())) {
                         id = tmz.ID;
+                    }
+                });
+                resolve(id);
+            } else if (this instanceof EdrAirspace) {
+                const cleanName = name.replace(/ED-R(\S+).*/, '$1').trim();
+                console.log('Cleaned EDR name:', cleanName);
+                edrInfo.forEach(edr => {
+                    const lowerCaseEdrArray = edr["ED-R"].map(item => item.toLowerCase());
+                    console.log(lowerCaseEdrArray, 'array EDR');
+                    
+                    if (lowerCaseEdrArray.includes(cleanName.toLowerCase())) {
+                        id = edr.ID;
                     }
                 });
                 resolve(id);
