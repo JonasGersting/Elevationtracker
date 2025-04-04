@@ -179,7 +179,7 @@ let googleMaps = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={
 });
 
 let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
-    layers: 'dwd:RX-Produkt', // Der Layername, z. B. Radar-Produkte
+    layers: 'dwd:Niederschlagsradar', // Der Layername, z. B. Radar-Produkte
     format: 'image/png',      // Bildformat
     transparent: true,        // Transparenz aktivieren
     version: '1.3.0',         // WMS-Version
@@ -234,11 +234,11 @@ function toggleMap(mapKey, category) {
         });
 
         if (mapState.layer) {
-            mapState.layer.addTo(map);
-            // Setze die Opacity direkt auf dem Layer
-            // Aktualisiere auch den Slider-Wert
-            slider.value = mapState.opacity * 100;
-            setOpacity();
+            mapState.layer.addTo(map);         
+            if (category === 'backgroundMaps' || mapKey === 'icaoCard') {
+                slider.value = mapState.opacity * 100;
+                setOpacity();
+            }
 
 
             currentTileLayer = mapState.layer; // Aktuelle Karte setzen
