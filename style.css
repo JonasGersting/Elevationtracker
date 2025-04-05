@@ -971,8 +971,24 @@ h3 {
 }
 
 
+.fir-label {
+    background: transparent;
+    border: none;
+}
 
+.fir-label div {
+    color: gray;
+    font-size: 26px;
+    font-weight: 500;
+    text-shadow: 10 10 20px white;
+    opacity: 1;
+    white-space: nowrap;
+    transform: translateX(-50%) translateY(-50%);
+}
 
+.fir-polygon {
+    cursor: grab;
+}
 
 
 

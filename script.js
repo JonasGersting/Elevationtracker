@@ -1946,6 +1946,8 @@ function validateInput(input) {
 
 let currentGaforCircle = null;  // Variable, die die aktuelle GaforCircle-Instanz speichert
 
+
+
 // Berechnet den GAFOR-Radius basierend auf den Eingaben
 function calcGaforRadius() {
     const input = document.getElementById("gaforNumbers").value;

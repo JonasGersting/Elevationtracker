@@ -1,42 +1,41 @@
 class FirAirspace extends AirspacePolygon {
     constructor(geometry, name, ident, map, polygonLayers) {
-        super(geometry, name, ident, map, polygonLayers);        
+        super(geometry, name, ident, map, polygonLayers);
+        this.labelMarker = null; // Neue Eigenschaft für das Label
     }
-
-    
     
     addToMap() {
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
             onEachFeature: (feature, layer) => {
-                const tooltip = L.tooltip({
-                    permanent: false,
-                    direction: 'right',
-                    offset: L.point(20, 0),
-                    className: 'polygon-label',
-                }).setContent(this.name);
-
-                layer.on('mouseover', () => {
-                    isCursorOverPolygon = true;
-                    if (!polygonIsBroughtUpToFront) {
-                        this.handlePolygonOverlap(this.geometry);
-                    }
-                      // Prüfen auf Überlappung
-                    layer.bindTooltip(tooltip).openTooltip();
-                    layer.setStyle({fillColor: 'white', fillOpacity: 0.8});
+                const center = layer.getBounds().getCenter();
+                
+                const label = L.divIcon({
+                    className: 'fir-label',
+                    html: `<div>${this.name}</div>`,
+                    iconSize: null
                 });
-
-                layer.on('mouseout', () => {
-                    isCursorOverPolygon = false;  // Setze den globalen Zustand zurück
-                    layer.closeTooltip();
-                    layer.unbindTooltip(); // Verbindung lösen
-                    layer.setStyle({fillColor: 'gray', fillOpacity: 0.2});
-                });
+                
+                // Speichere die Referenz zum Label-Marker
+                this.labelMarker = L.marker(center, {
+                    icon: label,
+                    interactive: false
+                }).addTo(this.map);
             }
         }).addTo(this.map);
     }
 
-  
+    // Überschreibe die removeFromMap Methode
+    removeFromMap() {
+        if (this.layer) {
+            this.layer.remove();
+            this.layer = null;
+        }
+        if (this.labelMarker) {
+            this.labelMarker.remove();
+            this.labelMarker = null;
+        }
+    }
 
 
     getStyle() {
@@ -44,8 +43,8 @@ class FirAirspace extends AirspacePolygon {
             color: 'gray',  // Farbe des Polygons
             weight: 2,     // Randdicke
             opacity: 0.6,  // Randtransparenz
-            fillOpacity: 0.2 // Fülltransparenz
-        };
+            fillOpacity: 0.2, // Fülltransparenz
+            className: 'fir-polygon'        };
     }
 
 }
