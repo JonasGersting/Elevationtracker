@@ -25,11 +25,10 @@
         <div class="standardInput">
             <div class="searchDropDown">
                 <div class="relativeDiv shadow">
-                    <span id="searchCategoryHeadline">Adresse</span><img class="arrowImg" src="img/arrowLeft.png"
+                    <span id="searchCategoryHeadline">Position</span><img class="arrowImg" src="img/arrowLeft.png"
                         alt="">
                     <div class="shadow" id="dropDownCategory">
-                        <button class="searchButton" onclick="setSearchCat('Adresse')">Adresse</button>
-                        <button class="searchButton" onclick="setSearchCat('Koordinate')">Koordinate</button>
+                        <button class="searchButton" onclick="setSearchCat('Position')">Position</button>
                         <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
                         <button class="searchButton" onclick="setSearchCat('Callsign')">Callsign</button>
                         <button class="searchButton" onclick="setSearchCat('Registrierung')">Registrierung</button>
@@ -41,7 +40,7 @@
                     </div>
                 </div>
             </div>
-            <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse">
+            <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse oder Koordinate">
             <div class="address-list shadow" id="addressList" style="display: none;"></div>
             <div class="searchBtnWithLoader">
                 <button class="shadow z-index1100" id="searchBtn" onclick="search()">Suche</button><span
@@ -148,7 +147,7 @@
                     <div class="allWeatherMaps smallMenu">
                         <button class="mapBtn" id="rainviewerWeather" onclick="getWeather('weather')">Wetter</button>
                         <button class="mapBtn" id="dwdWeather"
-                            onclick="toggleMap('dwdWeather', 'additionalLayers')">DWD</button>
+                            onclick="toggleMap('dwdWeather', 'weatherLayers')">DWD</button>
                         <button class="mapBtn" id="rainviewerClouds" onclick="getWeather('clouds')">Wolken</button>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 // Hovervariable
 let polygonIsBroughtUpToFront = false;
 let isCursorOverPolygon = false;
-let searchCat = 'Adresse';
+let searchCat = 'Position';
 let currentAerodrome;
 let currentAirspace;
 
@@ -206,6 +206,9 @@ const mapStates = {
         openFlightMaps: { layer: openFlightMaps, isHidden: true, opacity: 0 },
         openAIP: { layer: openAIP, isHidden: true, opacity: 0 },
         icaoCard: { layer: icaoCard, isHidden: true, opacity: 0 },
+
+    },
+    weatherLayers: {
         dwdWeather: { layer: dwdWeather, isHidden: true, opacity: 0 },
         rainviewerWeather: { layer: null, isHidden: true, opacity: 0 },
         rainviewerClouds: { layer: null, isHidden: true, opacity: 0 }
@@ -222,17 +225,20 @@ function toggleMap(mapKey, category) {
     const mapState = categoryStates[mapKey];
 
     if (mapState.isHidden) {
-        Object.keys(categoryStates).forEach(key => {
-            const otherMapState = categoryStates[key];
-            if (!otherMapState.isHidden && otherMapState.layer) {
-                map.removeLayer(otherMapState.layer);
-                otherMapState.isHidden = true;
-                const otherMapBtn = document.getElementById(key);
-                if (otherMapBtn) {
-                    otherMapBtn.classList.remove('bgMapButtonActive');
+        // Wenn es sich um additionalLayers oder backgroundMaps handelt, andere Layer dieser Kategorie ausblenden
+        if (category === 'additionalLayers' || category === 'backgroundMaps') {
+            Object.keys(categoryStates).forEach(key => {
+                const otherMapState = categoryStates[key];
+                if (!otherMapState.isHidden && otherMapState.layer) {
+                    map.removeLayer(otherMapState.layer);
+                    otherMapState.isHidden = true;
+                    const otherMapBtn = document.getElementById(key);
+                    if (otherMapBtn) {
+                        otherMapBtn.classList.remove('bgMapButtonActive');
+                    }
                 }
-            }
-        });
+            });
+        }
 
         if (mapState.layer) {
             mapState.layer.addTo(map);
@@ -240,9 +246,7 @@ function toggleMap(mapKey, category) {
                 slider.value = mapState.opacity * 100;
                 setOpacity();
             }
-
-
-            currentTileLayer = mapState.layer; // Aktuelle Karte setzen
+            currentTileLayer = mapState.layer;
         }
 
         mapState.isHidden = false;
@@ -1642,62 +1646,53 @@ function toggleMarkers(key) {
 
 
 
-
-
 async function getWeather(weatherType) {
     try {
-        // API-Endpunkt
-        const apiUrl = "https://api.rainviewer.com/public/weather-maps.json";
-        // Fetch-Daten abrufen
-        const response = await fetch(apiUrl);
+        const response = await fetch('https://api.rainviewer.com/public/weather-maps.json');
         if (!response.ok) {
-            throw new Error(`Fehler beim Abrufen der API: ${response.statusText}`);
+            throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        // Wetter-Pfad basierend auf dem Wettertyp auslesen
+        
+        // Setze den korrekten Pfad je nach Wettertyp
         if (weatherType === 'weather') {
-            weatherPath = data.radar.nowcast.at(-1).path;
+            weatherPath = data.radar.past[0].path;
         } else if (weatherType === 'clouds') {
-            weatherPath = data.satellite.infrared.at(-1).path;
-
-        } else {
-            throw new Error(`Ungültiger Wettertyp oder Daten fehlen für: ${weatherType}`);
+            weatherPath = data.satellite.infrared[0].path;
         }
 
         // Layer für Weather oder Clouds erstellen
         if (weatherType === 'weather' && !rainviewerWeather) {
-            rainviewerWeather = L.tileLayer(`https://tilecache.rainviewer.com${weatherPath}/512/{z}/{x}/{y}/2/1_1.png`, {
+            rainviewerWeather = L.tileLayer('https://tilecache.rainviewer.com' + weatherPath + '/512/{z}/{x}/{y}/2/1_1.png', {
                 minZoom: 0,
                 maxZoom: 20,
                 ext: 'png',
             });
 
             // Layer in mapStates aktualisieren
-            mapStates.additionalLayers.rainviewerWeather.layer = rainviewerWeather;
+            mapStates.weatherLayers.rainviewerWeather.layer = rainviewerWeather;
         } else if (weatherType === 'clouds' && !rainviewerClouds) {
-            rainviewerClouds = L.tileLayer(`https://tilecache.rainviewer.com${weatherPath}/256/{z}/{x}/{y}/0/1_0.png`, {
+            rainviewerClouds = L.tileLayer('https://tilecache.rainviewer.com' + weatherPath + '/256/{z}/{x}/{y}/0/1_0.png', {
                 minZoom: 0,
                 maxZoom: 20,
                 ext: 'png',
             });
 
             // Layer in mapStates aktualisieren
-            mapStates.additionalLayers.rainviewerClouds.layer = rainviewerClouds;
+            mapStates.weatherLayers.rainviewerClouds.layer = rainviewerClouds;
         } else {
             // Aktualisiere die URL des bestehenden Layers, falls nötig
             if (weatherType === 'weather') {
-                rainviewerWeather.setUrl(`https://tilecache.rainviewer.com${weatherPath}/512/{z}/{x}/{y}/2/1_1.png`);
+                rainviewerWeather.setUrl('https://tilecache.rainviewer.com' + weatherPath + '/512/{z}/{x}/{y}/2/1_1.png');
             } else if (weatherType === 'clouds') {
-                rainviewerClouds.setUrl(`https://tilecache.rainviewer.com${weatherPath}/256/{z}/{x}/{y}/0/1_0.png`);
+                rainviewerClouds.setUrl('https://tilecache.rainviewer.com' + weatherPath + '/256/{z}/{x}/{y}/0/1_0.png');
             }
         }
-        toggleMap((weatherType === 'weather' ? 'rainviewerWeather' : 'rainviewerClouds'), 'additionalLayers');
+        toggleMap((weatherType === 'weather' ? 'rainviewerWeather' : 'rainviewerClouds'), 'weatherLayers');
     } catch (error) {
         console.error(`Fehler: ${error.message}`);
     }
 }
-
-
 let currentAdressGeoJSONLayer = null;
 let currentAddresses = [];
 
@@ -1788,30 +1783,94 @@ async function handleAddressClick(index) {
 
 
 function setSearchCat(cat) {
-    // let searchInput = document.getElementById('searchInput');
-    // searchInput.value = '';
-    searchInput.placeholder = `Suche nach ${cat}`;
+    let searchInput = document.getElementById('searchInput');
+    searchInput.placeholder = returnSearchPlaceholder(cat);
     let head = document.getElementById('searchCategoryHeadline');
     head.innerHTML = cat;
     searchCat = cat;
 }
 
 
+function returnSearchPlaceholder(cat) {
+    if (cat === 'Position') {
+        return `Suche nach Adresse oder Koordinate`;
+    } else {
+        return `Suche nach ${cat}`;
+
+    }
+}
+
+
+function validateCoordinates(northPart, eastPart) {
+    // Prüfen und korrigieren von Minuten und Sekunden für den nördlichen Teil
+    if (northPart.length >= 4) {
+        const minutes = parseInt(northPart.substr(-4, 2));
+        if (minutes >= 60) {
+            alert("Ungültige Minuten im Breitengrad (muss < 60 sein)");
+            return false;
+        }
+    }
+    if (northPart.length === 6) {
+        const seconds = parseInt(northPart.substr(-2));
+        if (seconds >= 60) {
+            alert("Ungültige Sekunden im Breitengrad (muss < 60 sein)");
+            return false;
+        }
+    }
+
+    // Prüfen und korrigieren von Minuten und Sekunden für den östlichen Teil
+    if (eastPart.length >= 5) {
+        const minutes = parseInt(eastPart.substr(-4, 2));
+        if (minutes >= 60) {
+            alert("Ungültige Minuten im Längengrad (muss < 60 sein)");
+            return false;
+        }
+    }
+    if (eastPart.length === 7) {
+        const seconds = parseInt(eastPart.substr(-2));
+        if (seconds >= 60) {
+            alert("Ungültige Sekunden im Längengrad (muss < 60 sein)");
+            return false;
+        }
+    }
+
+    return true;
+}
 
 function search() {
-    if (searchCat == 'Adresse') {
+    const input = document.getElementById('searchInput').value.toUpperCase();
+    const dmsPattern = /^(\d{4,6})[NSns](\d{5,7})[EWew]$/;
+
+    if (dmsPattern.test(input.replace(/\s/g, ''))) {
+        let cleanInput = input.replace(/\s/g, '');
+        
+        // N/S Teil extrahieren
+        let northPart = cleanInput.match(/(\d{4,6})[NSns]/)[1];
+        // E/W Teil extrahieren
+        let eastPart = cleanInput.match(/(\d{5,7})[EWew]/)[1];
+
+        // Koordinaten validieren
+        if (!validateCoordinates(northPart, eastPart)) {
+            return;
+        }
+
+        // Mit Nullen auffüllen
+        while (northPart.length < 6) {
+            northPart += '0';
+        }
+        while (eastPart.length < 7) {
+            eastPart += '0';
+        }
+        
+        const formattedInput = `${northPart}${cleanInput.match(/[NSns]/)[0].toUpperCase()}${eastPart}${cleanInput.match(/[EWew]/)[0].toUpperCase()}`;
+        document.getElementById('searchInput').value = formattedInput;
+        
+        searchCoordinate();
+    } else if (searchCat === 'Callsign') {
+        searchAcft();
+    } else {
         searchAdress();
     }
-    if (searchCat == 'Callsign') {
-        searchAcft();
-    }
-    if (searchCat == 'Koordinate') {
-        searchCoordinate();
-    }
-    else {
-        console.log('Suche nicht erfolgreich');
-    }
-
 }
 
 
