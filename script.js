@@ -146,15 +146,6 @@ let googleSatelite = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}
 
 });
 
-let googleMaps = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl={language}', {
-    attribution: 'Map data &copy;2025 Google',
-    subdomains: '0123',
-    minZoom: 4,
-    maxZoom: 22,
-    language: 'de',
-
-});
-
 let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
     layers: 'dwd:Niederschlagsradar', // Der Layername, z. B. Radar-Produkte
     format: 'image/png',      // Bildformat
@@ -176,9 +167,8 @@ const mapStates = {
         topPlusOpenGrey: { layer: topPlusOpenGrey, isHidden: true, opacity: 0 },
         topPlusOpenLight: { layer: topPlusOpenLight, isHidden: true, opacity: 0.5 },
         topPlusOpenLightGray: { layer: topPlusOpenLightGray, isHidden: true, opacity: 0 },
-        googleSatelite: { layer: googleSatelite, isHidden: true, opacity: 0 },
-        googleMaps: { layer: googleMaps, isHidden: true, opacity: 0 }
-    },
+        googleSatelite: { layer: googleSatelite, isHidden: true, opacity: 0 }
+        },
     additionalLayers: {
         openFlightMaps: { layer: openFlightMaps, isHidden: true, opacity: 0 },
         openAIP: { layer: openAIP, isHidden: true, opacity: 0 },
