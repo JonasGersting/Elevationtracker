@@ -31,41 +31,17 @@ let rainviewerClouds;
 var map = L.map('map', {
 }).setView([50.505, 12], 9);
 
-// map.createPane('bg');
-// map.getPane('bg').style.zIndex = 200;
-
-// map.createPane('additionalLayer');
-// map.getPane('additionalLayer').style.zIndex = 500;
-
-// // Neues Pane für den Dim-Layer erstellen
-// map.createPane('dimPane');
-// map.getPane('dimPane').style.zIndex = 400; // Über den Tile-Layern, aber unter den Markern und Polygonen
-
-// const dimLayer = L.DomUtil.create('div', 'dimPane', map.getPane('dimPane')); // Füge den Layer direkt zum Body hinzu
-// dimLayer.style.position = 'absolute'; // Fixiere den Layer
-// dimLayer.style.top = '0';
-// dimLayer.style.left = '0';
-// dimLayer.style.width = '100vw';
-// dimLayer.style.height = '100vh';
-// dimLayer.style.backgroundColor = 'white'; // Hintergrundfarbe des Layers
-// dimLayer.style.zIndex = '400'; // Stelle sicher, dass der Layer über der Karte liegt
-// dimLayer.style.pointerEvents = 'none'; // Erlaube Interaktionen mit der Karte
-// dimLayer.style.opacity = 0.5;
-// dimLayer.style.transform = 'none'; // Deaktiviere die Leaflet-Transformation
-
-
 
 // OpenStreetMap-Kacheln hinzufügen
-var tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
-
+});
 
 
 // Aktuelle Hintergrundkarte speichern
-var currentTileLayer = tileLayer; // Standard ist OSM
+var currentTileLayer; // Standard ist OSM
 
 // Add a polygon that covers the entire world with no pointer events
 var worldPolygon = L.polygon([
@@ -192,6 +168,7 @@ let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
 
 const mapStates = {
     backgroundMaps: {
+        osm: { layer: osm, isHidden: false, opacity: 0 },
         openTopoMap: { layer: openTopoMap, isHidden: true, opacity: 0 },
         stadiaAlidadeSmooth: { layer: stadiaAlidadeSmooth, isHidden: true, opacity: 0 },
         stadiaAlidadeSmoothDark: { layer: stadiaAlidadeSmoothDark, isHidden: true, opacity: 0 },
@@ -215,14 +192,19 @@ const mapStates = {
     }
 };
 
+toggleMap('topPlusOpen', 'backgroundMaps'); // Standardkarte setzen
 
-var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
-
-// Funktion zum Wechseln der Karten mit Helligkeitseinstellung
 function toggleMap(mapKey, category) {
-    toggleActBtn(mapKey);
     const categoryStates = mapStates[category];
     const mapState = categoryStates[mapKey];
+
+    // Wenn die Karte bereits sichtbar ist und es sich um eine Hintergrundkarte handelt
+    // dann nicht ausblenden (früher Return)
+    if (!mapState.isHidden && category === 'backgroundMaps') {
+        return;
+    }
+
+    toggleActBtn(mapKey);
 
     if (mapState.isHidden) {
         // Wenn es sich um additionalLayers oder backgroundMaps handelt, andere Layer dieser Kategorie ausblenden
@@ -255,10 +237,13 @@ function toggleMap(mapKey, category) {
             updateAdditionalLayerOrder();
         }
     } else {
-        if (mapState.layer) {
-            map.removeLayer(mapState.layer);
+        // Nur ausblenden wenn es KEINE Hintergrundkarte ist
+        if (category !== 'backgroundMaps') {
+            if (mapState.layer) {
+                map.removeLayer(mapState.layer);
+            }
+            mapState.isHidden = true;
         }
-        mapState.isHidden = true;
     }
 }
 
