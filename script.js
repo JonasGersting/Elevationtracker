@@ -70,89 +70,96 @@ function setOpacity() {
 }
 
 
+// OpenStreetMap Layer
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    minZoom: 4,
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+
+// OpenFlightMaps Layer
 let openFlightMaps = L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles/{z}/{x}/{y}.png?path=2503/aero/latest', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    attribution: '&copy; <a href="https://www.openflightmaps.org/">OpenFlightMaps</a>'
 });
-// https://api.tiles.openaip.net/api/data/openaip/9/272/174.png?apiKey=addef49a85fb3c7c7fdea8a653d7122c
+
+// OpenAIP Layer
 let openAIP = L.tileLayer('https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=75acf00ad8bb52144424ce0655147c55', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    attribution: '&copy; <a href="https://www.openaip.net/">OpenAIP</a>'
 });
 
-
+// ICAO Card Layer
 let icaoCard = L.tileLayer('https://ais.dfs.de/static-maps/icao500/tiles/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    attribution: '&copy; <a href="https://www.dfs.de">Deutsche Flugsicherung</a>'
 });
 
+// OpenTopoMap Layer
 var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
 });
 
+// Stadia Maps Layers
 var stadiaAlidadeSmooth = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    ext: 'png',
-
+    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
 
 var stadiaAlidadeSmoothDark = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    ext: 'png',
-
+    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
 
+// TopPlus Open Layers
 let topPlusOpen = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-    tileSize: 256,
-
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
 });
 
 let topPlusOpenGrey = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_grau/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
 });
 
 let topPlusOpenLight = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
 });
 
 let topPlusOpenLightGray = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light_grau/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
 });
 
+// Google Satellite Layer
 let googleSatelite = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl={language}', {
-    attribution: 'Map data &copy;2025 Google',
     subdomains: '0123',
     minZoom: 4,
     maxZoom: 22,
     language: 'de',
-
+    attribution: '&copy; Google Maps'
 });
 
+// DWD Weather Layer
 let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
-    layers: 'dwd:Niederschlagsradar', // Der Layername, z. B. Radar-Produkte
-    format: 'image/png',      // Bildformat
-    transparent: true,        // Transparenz aktivieren
-    version: '1.3.0',         // WMS-Version
-    maxZoom: 20,              // Maximale Zoomstufe
-    attribution: '&copy; Deutscher Wetterdienst (DWD)' // Attribution
+    layers: 'dwd:Niederschlagsradar',
+    format: 'image/png',
+    transparent: true,
+    version: '1.3.0',
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.dwd.de">Deutscher Wetterdienst</a>'
 });
 
 
@@ -183,6 +190,9 @@ const mapStates = {
 };
 
 toggleMap('topPlusOpen', 'backgroundMaps'); // Standardkarte setzen
+
+// OSM Buildings Layer
+var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
 function toggleMap(mapKey, category) {
     const categoryStates = mapStates[category];
