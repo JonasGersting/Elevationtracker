@@ -243,6 +243,22 @@ function toggleMap(mapKey, category) {
                 map.removeLayer(mapState.layer);
             }
             mapState.isHidden = true;
+
+            // Wenn eine ICAO-Karte entfernt wird, stelle die Opacity der Hintergrundkarte wieder her
+            if (mapKey === 'icaoCard') {
+                // Finde die aktive Hintergrundkarte
+                const activeBackgroundMap = Object.entries(mapStates.backgroundMaps).find(
+                    ([_, state]) => !state.isHidden
+                );
+                
+                if (activeBackgroundMap) {
+                    const [_, bgMapState] = activeBackgroundMap;
+                    if (bgMapState.opacity !== undefined) {
+                        slider.value = bgMapState.opacity * 100;
+                        setOpacity();
+                    }
+                }
+            }
         }
     }
 }
