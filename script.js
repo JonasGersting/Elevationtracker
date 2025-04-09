@@ -1838,24 +1838,19 @@ function validateCoordinates(northPart, eastPart) {
     return true;
 }
 
-function search() {
+async function search() {
     const input = document.getElementById('searchInput').value.toUpperCase();
     const dmsPattern = /^(\d{4,6})[NSns](\d{5,7})[EWew]$/;
 
     if (dmsPattern.test(input.replace(/\s/g, ''))) {
         let cleanInput = input.replace(/\s/g, '');
-        
-        // N/S Teil extrahieren
         let northPart = cleanInput.match(/(\d{4,6})[NSns]/)[1];
-        // E/W Teil extrahieren
         let eastPart = cleanInput.match(/(\d{5,7})[EWew]/)[1];
 
-        // Koordinaten validieren
         if (!validateCoordinates(northPart, eastPart)) {
             return;
         }
 
-        // Mit Nullen auffüllen
         while (northPart.length < 6) {
             northPart += '0';
         }
@@ -1869,11 +1864,72 @@ function search() {
         searchCoordinate();
     } else if (searchCat === 'Callsign') {
         searchAcft();
+    } else if (searchCat === 'Flugplatz') {
+        // Prüfen ob Flugplatzdaten geladen sind
+        if (!aerodromes || aerodromes.length === 0) {
+            await getData('aerodromes');
+        }
+
+        // Suche nach passenden Flugplätzen
+        const matchingAerodromes = aerodromes.filter(ad => {
+            const name = ad.name ? ad.name.toUpperCase() : '';
+            const icao = ad.icaoCode ? ad.icaoCode.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm) || icao.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse
+        displayAerodromeList(matchingAerodromes);
     } else {
         searchAdress();
     }
 }
 
+function displayAerodromeList(matchingAerodromes) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = ''; 
+    addressList.style.display = 'flex'; 
+
+    if (matchingAerodromes.length > 0) {
+        const limitedResults = matchingAerodromes.slice(0, 10);
+        
+        limitedResults.forEach((aerodrome) => {
+            if (!aerodrome.icaoCode) {
+                addressList.innerHTML += `
+                <button class="searchButton">
+                     ${aerodrome.name}
+                </button>
+                `;
+            } else {
+                addressList.innerHTML += `
+                <button class="searchButton" onclick="goToAd('${aerodrome.icaoCode}', ${aerodrome.geometry.coordinates[1]}, ${aerodrome.geometry.coordinates[0]})">
+                     ${aerodrome.name} - ${aerodrome.icaoCode}
+                </button>
+                `;
+            }
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde kein Flugplatz gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToAd(icaoCode, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+    
+    // Prüfe ob der Aerodrome Layer aktiv ist
+    if (!markerData.aerodrome.added) {
+        toggleMarkers('aerodrome');
+    }
+    
+    // Setze die Kartenansicht auf die Position des Flugplatzes
+    map.setView([lat, lon], 13);
+}
 
 
 
