@@ -944,7 +944,7 @@ let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22',
 let turboAcft = ['B350', 'L2T', 'F406', 'SF34', 'V22', 'BE30', 'C414', 'DA62', 'AT76', 'SW4', 'DA42', 'SC7', 'PA34', 'DA42', 'P68', 'BE9L', 'DHC6', 'AT75', 'AN30', 'C212', 'D228', 'C310', 'AT45',
     'PA31', 
 ];
-let helAcft = ['EC35', 'EC45', 'EC30', 'H60', 'R44', 'MI8', 'A139', 'AS32', 'G2CA', 'EC20', 'B505', 'EC75', 'A169', 'A109', 'AS55', 'R22', 'AS3B', 'LYNX' ];
+let helAcft = ['EC35', 'EC45', 'EC30', 'EC55', 'H60', 'R44', 'MI8', 'A139', 'AS32', 'G2CA', 'EC20', 'B505', 'EC75', 'A169', 'A109', 'AS55', 'R22', 'AS3B', 'LYNX' ];
 let twoEngAcft = ['B738', 'B737', 'A321', 'B752', 'A320', 'A333', 'B38M', 'A20N', 'B789', 'B77W', 'A21N', 'B789', 'B38M', 'B739', 'BCS3', 'B762', 'B763', 'A332', 'A319', 'B734', 'A359', 'B788', 'B77W', 'B77L', 'B763', 'A339',
     'B734', 'B78X', 'A35K', 'A332', 'E75L', 'E190', 'B753', 'E190', 'E295', 'B78X', 'E190',
 ];
@@ -1880,6 +1880,54 @@ async function search() {
 
         // Anzeigen der Ergebnisse
         displayAerodromeList(matchingAerodromes);
+    } else if (searchCat === 'ED-R') {
+        // Prüfen ob ED-R Daten geladen sind
+        if (!edrAirspace || edrAirspace.length === 0) {
+            await getData('edrAirspace');
+            await getData('edrInfo');
+        }
+
+        // Suche nach passenden ED-Rs
+        const matchingEdrs = edrAirspace.filter(edr => {
+            const name = edr.name ? edr.name.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse
+        displayEdrList(matchingEdrs);
+    }  else if (searchCat === 'ED-D') {
+        // Prüfen ob ED-D Daten geladen sind
+        if (!eddAirspace || eddAirspace.length === 0) {
+            await getData('eddAirspace');
+            await getData('eddInfo');
+        }
+
+        // Suche nach passenden ED-Ds
+        const matchingEdds = eddAirspace.filter(edd => {
+            const name = edd.name ? edd.name.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse
+        displayEddList(matchingEdds);
+    } else if (searchCat === 'RMZ') {
+        // Prüfen ob RMZ Daten geladen sind
+        if (!rmzAirspace || rmzAirspace.length === 0) {
+            await getData('rmzAirspace');
+            await getData('rmzInfo');
+        }
+    
+        // Suche nach passenden RMZs
+        const matchingRmzs = rmzAirspace.filter(rmz => {
+            const name = rmz.properties.Name ? rmz.properties.Name.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm);
+        });
+    
+        // Anzeigen der Ergebnisse
+        displayRmzList(matchingRmzs);
     } else {
         searchAdress();
     }
@@ -1933,6 +1981,120 @@ function goToAd(icaoCode, lat, lon) {
 
 
 
+function displayEdrList(matchingEdrs) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
+
+    if (matchingEdrs.length > 0) {
+        const limitedResults = matchingEdrs.slice(0, 10);
+
+        limitedResults.forEach((edr) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToEdr('${edr.name}', ${edr.geometry.coordinates[0][0][1]}, ${edr.geometry.coordinates[0][0][0]})">
+                 ${edr.name}
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde kein ED-R gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToEdr(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der ED-R Layer aktiv ist
+    if (!polygonLayers['edr'] || polygonLayers['edr'].length === 0) {
+        togglePolygons('edr');
+    }
+
+    // Setze die Kartenansicht auf die Position des ED-R
+    map.setView([lat, lon], 11);
+}
+
+
+function displayEddList(matchingEdds) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
+
+    if (matchingEdds.length > 0) {
+        const limitedResults = matchingEdds.slice(0, 10);
+
+        limitedResults.forEach((edd) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToEdd('${edd.name}', ${edd.geometry.coordinates[0][0][1]}, ${edd.geometry.coordinates[0][0][0]})">
+                 ${edd.name}
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde kein ED-D gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToEdd(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der ED-D Layer aktiv ist
+    if (!polygonLayers['edd'] || polygonLayers['edd'].length === 0) {
+        togglePolygons('edd');
+    }
+
+    // Setze die Kartenansicht auf die Position des ED-D
+    map.setView([lat, lon], 9);
+}
+
+function displayRmzList(matchingRmzs) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
+
+    if (matchingRmzs.length > 0) {
+        const limitedResults = matchingRmzs.slice(0, 10);
+
+        limitedResults.forEach((rmz) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToRmz('${rmz.properties.Name}', ${rmz.geometry.coordinates[0][0][1]}, ${rmz.geometry.coordinates[0][0][0]})">
+                 ${rmz.properties.Name}
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde keine RMZ gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToRmz(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der RMZ Layer aktiv ist
+    if (!polygonLayers['rmz'] || polygonLayers['rmz'].length === 0) {
+        togglePolygons('rmz');
+    }
+
+    // Setze die Kartenansicht auf die Position der RMZ
+    map.setView([lat, lon], 11);
+}
 
 
 
