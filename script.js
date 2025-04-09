@@ -936,14 +936,22 @@ function returnCorrectSvgForAcft(rotation, color, r, t) {
 }
 
 
-let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22', 'C82R', 'AP32', 'C208', 'LA4', 'AA5', 'DV20',];
-let turboAcft = ['B350', 'L2T', 'F406', 'SF34', 'V22', 'BE30',];
-let helAcft = ['EC35', 'EC45', 'EC30',];
-let twoEngAcft = ['B738', 'B737', 'A321', 'B752', 'A320', 'A333', 'B38M', 'A20N', 'B789', 'B77W', 'A21N', 'B789', 'B38M', 'B739', 'BCS3', 'B763', 'A332', 'A319', 'B734', 'A359', 'B788', 'B77W', 'B77L', 'B763', 'A339',
-    'B734', 'B78X', 'A35K', 'A332', 'E75L',
+let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22', 'C82R', 'AP32', 'C208', 'LA4', 'AA5', 'DV20', 'P28S', 'SR22', 'M20T', 'C42', 'TB20', 'VL3', 'ULAC', 'B36T', 'P32R', 'DIMO', 'PC12',
+    'M20P', 'EFOX', 'PNR3', 'RV9', 'PIVI', 'NG5', 'SIRA', 'SHRK', 'RV14', 'S22T', 'SF25', 'DA40', 'A210', 'DR40', 'DIAMO02', 'AC11', 'B209', 'WT9', 'BW6T', 'DG80', 'BR23', 'PC9', 'TL30',
+    'P208', 'P28T', 'PC21', 'TL20', 'BU31', 'GLID', 'F260', 'PRIM', 'PC7', 'Z42', 'DA50', 'TOBA', 'HR20', 'BREZ', 'TBM9', 'PA32', 'G115', 'BDOG', 'JAB4', 'SKRA', 'RV10', 'PA24', 'CRUZ', 'RV8', 'BE36', 'PA11',
+    'AUJ2', 'G109', 'PA46', 'BE33', 'RV4', 'DR10', 'P28R', 'SUBA', 'P210', 'TWEN', 'YK52', 'RF6',         
 ];
-let fourEngAcft = ['C17', 'A388', 'B748', 'B744', 'A343',];
-let businessAcft = ['LJ45', 'GL5T', 'CL60', 'GL7T', 'GLF5', 'GA6C', 'GLEX', 'C525', 'PRM1', 'F900', 'C700',]
+let turboAcft = ['B350', 'L2T', 'F406', 'SF34', 'V22', 'BE30', 'C414', 'DA62', 'AT76', 'SW4', 'DA42', 'SC7', 'PA34', 'DA42', 'P68', 'BE9L', 'DHC6', 'AT75', 'AN30', 'C212', 'D228', 'C310', 'AT45',
+    'PA31', 
+];
+let helAcft = ['EC35', 'EC45', 'EC30', 'H60', 'R44', 'MI8', 'A139', 'AS32', 'G2CA', 'EC20', 'B505', 'EC75', 'A169', 'A109', 'AS55', 'R22', 'AS3B', 'LYNX' ];
+let twoEngAcft = ['B738', 'B737', 'A321', 'B752', 'A320', 'A333', 'B38M', 'A20N', 'B789', 'B77W', 'A21N', 'B789', 'B38M', 'B739', 'BCS3', 'B762', 'B763', 'A332', 'A319', 'B734', 'A359', 'B788', 'B77W', 'B77L', 'B763', 'A339',
+    'B734', 'B78X', 'A35K', 'A332', 'E75L', 'E190', 'B753', 'E190', 'E295', 'B78X', 'E190',
+];
+let fourEngAcft = ['C17', 'A388', 'B748', 'B744', 'A343', 'A400'];
+let businessAcft = ['LJ45', 'GL5T', 'CL60', 'GL7T', 'GLF5', 'GA6C', 'GLEX', 'C525', 'PRM1', 'F900', 'C700', 'C550', 'E55P', 'C56X', 'E55P', 'LJ35', 'PC24', 'C25C', 'C25A', 'CRJX', 'SF50', 'C680',
+    'CRJ9', 'E145', 'E50P', 
+]
 
 function returnAircraftImg(alt) {
     if (alt === 'ground') {
