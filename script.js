@@ -939,18 +939,18 @@ function returnCorrectSvgForAcft(rotation, color, r, t) {
 let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22', 'C82R', 'AP32', 'C208', 'LA4', 'AA5', 'DV20', 'P28S', 'SR22', 'M20T', 'C42', 'TB20', 'VL3', 'ULAC', 'B36T', 'P32R', 'DIMO', 'PC12',
     'M20P', 'EFOX', 'PNR3', 'RV9', 'PIVI', 'NG5', 'SIRA', 'SHRK', 'RV14', 'S22T', 'SF25', 'DA40', 'A210', 'DR40', 'DIAMO02', 'AC11', 'B209', 'WT9', 'BW6T', 'DG80', 'BR23', 'PC9', 'TL30',
     'P208', 'P28T', 'PC21', 'TL20', 'BU31', 'GLID', 'F260', 'PRIM', 'PC7', 'Z42', 'DA50', 'TOBA', 'HR20', 'BREZ', 'TBM9', 'PA32', 'G115', 'BDOG', 'JAB4', 'SKRA', 'RV10', 'PA24', 'CRUZ', 'RV8', 'BE36', 'PA11',
-    'AUJ2', 'G109', 'PA46', 'BE33', 'RV4', 'DR10', 'P28R', 'SUBA', 'P210', 'TWEN', 'YK52', 'RF6',         
+    'AUJ2', 'G109', 'PA46', 'BE33', 'RV4', 'DR10', 'P28R', 'SUBA', 'P210', 'TWEN', 'YK52', 'RF6',
 ];
 let turboAcft = ['B350', 'L2T', 'F406', 'SF34', 'V22', 'BE30', 'C414', 'DA62', 'AT76', 'SW4', 'DA42', 'SC7', 'PA34', 'DA42', 'P68', 'BE9L', 'DHC6', 'AT75', 'AN30', 'C212', 'D228', 'C310', 'AT45',
-    'PA31', 
+    'PA31',
 ];
-let helAcft = ['EC35', 'EC45', 'EC30', 'EC55', 'H60', 'R44', 'MI8', 'A139', 'AS32', 'G2CA', 'EC20', 'B505', 'EC75', 'A169', 'A109', 'AS55', 'R22', 'AS3B', 'LYNX' ];
+let helAcft = ['EC35', 'EC45', 'EC30', 'EC55', 'H60', 'R44', 'MI8', 'A139', 'AS32', 'G2CA', 'EC20', 'B505', 'EC75', 'A169', 'A109', 'AS55', 'R22', 'AS3B', 'LYNX'];
 let twoEngAcft = ['B738', 'B737', 'A321', 'B752', 'A320', 'A333', 'B38M', 'A20N', 'B789', 'B77W', 'A21N', 'B789', 'B38M', 'B739', 'BCS3', 'B762', 'B763', 'A332', 'A319', 'B734', 'A359', 'B788', 'B77W', 'B77L', 'B763', 'A339',
     'B734', 'B78X', 'A35K', 'A332', 'E75L', 'E190', 'B753', 'E190', 'E295', 'B78X', 'E190',
 ];
 let fourEngAcft = ['C17', 'A388', 'B748', 'B744', 'A343', 'A400'];
 let businessAcft = ['LJ45', 'GL5T', 'CL60', 'GL7T', 'GLF5', 'GA6C', 'GLEX', 'C525', 'PRM1', 'F900', 'C700', 'C550', 'E55P', 'C56X', 'E55P', 'LJ35', 'PC24', 'C25C', 'C25A', 'CRJX', 'SF50', 'C680',
-    'CRJ9', 'E145', 'E50P', 
+    'CRJ9', 'E145', 'E50P',
 ]
 
 function returnAircraftImg(alt) {
@@ -1439,15 +1439,15 @@ function processDataByKey(key, data) {
     } else if (key === 'aipInfo') {
         aipInfo = data;
     } else if (key === 'rmzAirspace') {
-        rmzAirspace = data[0]?.features;
+        rmzAirspace = data;
     } else if (key === 'firAirspace') {
         firAirspace = data[0]?.features;
     } else if (key === 'gaforAirspace') {
         gaforAirspace = data[0]?.features;
     } else if (key === 'pjeAirspace') {
-        pjeAirspace = data[0]?.features;
+        pjeAirspace = data;
     } else if (key === 'tmzAirspace') {
-        tmzAirspace = data[0]?.features;
+        tmzAirspace = data;
     } else if (key === 'atzAirspace') {
         atzAirspace = data[0]?.features;
     } else if (key === 'ctrInfo') {
@@ -1786,6 +1786,7 @@ async function handleAddressClick(index) {
 function setSearchCat(cat) {
     let searchInput = document.getElementById('searchInput');
     searchInput.placeholder = returnSearchPlaceholder(cat);
+    searchInput.value = '';
     let head = document.getElementById('searchCategoryHeadline');
     head.innerHTML = cat;
     searchCat = cat;
@@ -1896,7 +1897,7 @@ async function search() {
 
         // Anzeigen der Ergebnisse
         displayEdrList(matchingEdrs);
-    }  else if (searchCat === 'ED-D') {
+    } else if (searchCat === 'ED-D') {
         // Prüfen ob ED-D Daten geladen sind
         if (!eddAirspace || eddAirspace.length === 0) {
             await getData('eddAirspace');
@@ -1918,16 +1919,65 @@ async function search() {
             await getData('rmzAirspace');
             await getData('rmzInfo');
         }
-    
+
         // Suche nach passenden RMZs
         const matchingRmzs = rmzAirspace.filter(rmz => {
             const name = rmz.properties.Name ? rmz.properties.Name.toUpperCase() : '';
             const searchTerm = input.toUpperCase();
             return name.includes(searchTerm);
         });
-    
+
         // Anzeigen der Ergebnisse
         displayRmzList(matchingRmzs);
+    } else if (searchCat === 'CTR') {
+        // Prüfen ob CTR Daten geladen sind
+        if (!ctrAirspace || ctrAirspace.length === 0) {
+            await getData('ctrAirspace');
+            await getData('ctrInfo');
+        }
+
+        // Suche nach passenden CTRs
+        const matchingCtrs = ctrAirspace.filter(ctr => {
+            const name = ctr.name ? ctr.name.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse
+        displayCtrList(matchingCtrs);
+    } else if (searchCat === 'TMZ') {
+        // Prüfen ob TMZ Daten geladen sind
+        if (!tmzAirspace || tmzAirspace.length === 0) {
+            await getData('tmzAirspace');
+            await getData('tmzInfo');
+        }
+
+        // Suche nach passenden TMZs
+        const matchingTmzs = tmzAirspace.filter(tmz => {
+            const name = tmz.properties.Name ? tmz.properties.Name.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse
+        displayTmzList(matchingTmzs);
+    } else if (searchCat === 'PJE') {
+        // Prüfen ob PJE Daten geladen sind
+        if (!pjeAirspace || pjeAirspace.length === 0) {
+            await getData('pjeAirspace');
+            await getData('pjeInfo');
+        }
+
+        // Suche nach passenden PJEs
+        const matchingPjes = pjeAirspace.filter(pje => {
+            const name = pje.properties.Name ? pje.properties.Name.toUpperCase() : '';
+            const ident = pje.properties.Ident ? pje.properties.Ident.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm) || ident.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse 
+        displayPjeList(matchingPjes);
     } else {
         searchAdress();
     }
@@ -2097,7 +2147,120 @@ function goToRmz(name, lat, lon) {
 }
 
 
+function displayCtrList(matchingCtrs) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
 
+    if (matchingCtrs.length > 0) {
+        const limitedResults = matchingCtrs.slice(0, 10);
+
+        limitedResults.forEach((ctr) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToCtr('${ctr.name}', ${ctr.geometry.coordinates[0][0][1]}, ${ctr.geometry.coordinates[0][0][0]})">
+                 ${ctr.name}
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde keine CTR gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToCtr(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der CTR Layer aktiv ist
+    if (!polygonLayers['ctr'] || polygonLayers['ctr'].length === 0) {
+        togglePolygons('ctr');
+    }
+
+    // Setze die Kartenansicht auf die Position der CTR
+    map.setView([lat, lon], 11);
+}
+
+
+function displayTmzList(matchingTmzs) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
+
+    if (matchingTmzs.length > 0) {
+        const limitedResults = matchingTmzs.slice(0, 10);
+
+        limitedResults.forEach((tmz) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToTmz('${tmz.properties.Name}', ${tmz.geometry.coordinates[0][0][1]}, ${tmz.geometry.coordinates[0][0][0]})">
+                 ${tmz.properties.Name}
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde keine TMZ gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToTmz(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der TMZ Layer aktiv ist
+    if (!polygonLayers['tmz'] || polygonLayers['tmz'].length === 0) {
+        togglePolygons('tmz');
+    }
+
+    // Setze die Kartenansicht auf die Position der TMZ
+    map.setView([lat, lon], 11);
+}
+
+function displayPjeList(matchingPjes) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
+
+    if (matchingPjes.length > 0) {
+        const limitedResults = matchingPjes.slice(0, 10);
+
+        limitedResults.forEach((pje) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToPje('${pje.properties.Name}', ${pje.geometry.coordinates[0][0][1]}, ${pje.geometry.coordinates[0][0][0]})">
+                 ${pje.properties.Name}
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde keine PJE gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToPje(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der PJE Layer aktiv ist
+    if (!polygonLayers['pje'] || polygonLayers['pje'].length === 0) {
+        togglePolygons('pje');
+    }
+
+    // Setze die Kartenansicht auf die Position der PJE
+    map.setView([lat, lon], 11);
+}
 
 function initializeImageInteractions() {
     const img = document.querySelector('#currentAipImg'); // Finde das Bild, nachdem es geladen wurde
