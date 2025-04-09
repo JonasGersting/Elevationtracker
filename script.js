@@ -939,18 +939,19 @@ function returnCorrectSvgForAcft(rotation, color, r, t) {
 let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22', 'C82R', 'AP32', 'C208', 'LA4', 'AA5', 'DV20', 'P28S', 'SR22', 'M20T', 'C42', 'TB20', 'VL3', 'ULAC', 'B36T', 'P32R', 'DIMO', 'PC12',
     'M20P', 'EFOX', 'PNR3', 'RV9', 'PIVI', 'NG5', 'SIRA', 'SHRK', 'RV14', 'S22T', 'SF25', 'DA40', 'A210', 'DR40', 'DIAMO02', 'AC11', 'B209', 'WT9', 'BW6T', 'DG80', 'BR23', 'PC9', 'TL30',
     'P208', 'P28T', 'PC21', 'TL20', 'BU31', 'GLID', 'F260', 'PRIM', 'PC7', 'Z42', 'DA50', 'TOBA', 'HR20', 'BREZ', 'TBM9', 'PA32', 'G115', 'BDOG', 'JAB4', 'SKRA', 'RV10', 'PA24', 'CRUZ', 'RV8', 'BE36', 'PA11',
-    'AUJ2', 'G109', 'PA46', 'BE33', 'RV4', 'DR10', 'P28R', 'SUBA', 'P210', 'TWEN', 'YK52', 'RF6',
+    'AUJ2', 'G109', 'PA46', 'BE33', 'RV4', 'DR10', 'P28R', 'SUBA', 'P210', 'TWEN', 'YK52', 'RF6', 'G3', 'AS31', 'BE35', 'ALTO', 'EV97', 'FK9', 'NIMB', 'EB29', 'ARCP', 'CH60', 'GX', 'E500', 'PA18', 'S10S',
+    'RALL', 'PA44', 'C206', 'PNR2', 'C10T', 'EVSS', 'FDCT', 'STRE', 'SLG2', 'TAMP', 'SLG2', 'DG40',    
 ];
 let turboAcft = ['B350', 'L2T', 'F406', 'SF34', 'V22', 'BE30', 'C414', 'DA62', 'AT76', 'SW4', 'DA42', 'SC7', 'PA34', 'DA42', 'P68', 'BE9L', 'DHC6', 'AT75', 'AN30', 'C212', 'D228', 'C310', 'AT45',
-    'PA31',
+    'PA31', 'C404', 'P06T', 'DH8A', 'P3', 'BN2P', 'C425',  
 ];
 let helAcft = ['EC35', 'EC45', 'EC30', 'EC55', 'H60', 'R44', 'MI8', 'A139', 'AS32', 'G2CA', 'EC20', 'B505', 'EC75', 'A169', 'A109', 'AS55', 'R22', 'AS3B', 'LYNX'];
 let twoEngAcft = ['B738', 'B737', 'A321', 'B752', 'A320', 'A333', 'B38M', 'A20N', 'B789', 'B77W', 'A21N', 'B789', 'B38M', 'B739', 'BCS3', 'B762', 'B763', 'A332', 'A319', 'B734', 'A359', 'B788', 'B77W', 'B77L', 'B763', 'A339',
     'B734', 'B78X', 'A35K', 'A332', 'E75L', 'E190', 'B753', 'E190', 'E295', 'B78X', 'E190',
 ];
-let fourEngAcft = ['C17', 'A388', 'B748', 'B744', 'A343', 'A400'];
+let fourEngAcft = ['C17', 'A388', 'B748', 'B744', 'A343', 'A400', 'A346', 'A124'];
 let businessAcft = ['LJ45', 'GL5T', 'CL60', 'GL7T', 'GLF5', 'GA6C', 'GLEX', 'C525', 'PRM1', 'F900', 'C700', 'C550', 'E55P', 'C56X', 'E55P', 'LJ35', 'PC24', 'C25C', 'C25A', 'CRJX', 'SF50', 'C680',
-    'CRJ9', 'E145', 'E50P',
+    'CRJ9', 'E145', 'E50P', 'C68A',
 ]
 
 function returnAircraftImg(alt) {
@@ -1978,6 +1979,37 @@ async function search() {
 
         // Anzeigen der Ergebnisse 
         displayPjeList(matchingPjes);
+    } else if (searchCat === 'Hinderniss') {
+        // Prüfen ob Hinderniss Daten geladen sind
+        if (!obstacles || obstacles.length === 0) {
+            await getData('obstacles');
+        }
+
+        // Suche nach passenden Hindernissen
+        const matchingObstacles = obstacles.filter(obstacle => {
+            const name = obstacle['Parent Designator'] ? obstacle['Parent Designator'].toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse
+        displayObstacleList(matchingObstacles);
+    } else if (searchCat === 'NAV-Aid') {
+        // Prüfen ob NAV-Aid Daten geladen sind
+        if (!navAids || navAids.length === 0) {
+            await getData('navaids');
+        }
+
+        // Suche nach passenden NAV-Aids
+        const matchingNavaids = navAids.filter(navaid => {
+            const name = navaid.properties.txtname ? navaid.properties.txtname.toUpperCase() : '';
+            const ident = navaid.properties.ident ? navaid.properties.ident.toUpperCase() : '';
+            const searchTerm = input.toUpperCase();
+            return name.includes(searchTerm) || ident.includes(searchTerm);
+        });
+
+        // Anzeigen der Ergebnisse
+        displayNavaidList(matchingNavaids);
     } else {
         searchAdress();
     }
@@ -2260,6 +2292,92 @@ function goToPje(name, lat, lon) {
 
     // Setze die Kartenansicht auf die Position der PJE
     map.setView([lat, lon], 11);
+}
+
+
+function displayObstacleList(matchingObstacles) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
+
+    if (matchingObstacles.length > 0) {
+        // Erstelle ein Set mit eindeutigen Parent Designators
+        const uniqueObstacles = matchingObstacles.reduce((unique, obstacle) => {
+            const parentDesignator = obstacle['Parent Designator'];
+            if (!unique.some(item => item['Parent Designator'] === parentDesignator)) {
+                unique.push(obstacle);
+            }
+            return unique;
+        }, []);
+
+        // Begrenze auf 10 Ergebnisse
+        const limitedResults = uniqueObstacles.slice(0, 10);
+
+        limitedResults.forEach((obstacle) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToObstacle('${obstacle['Parent Designator']}', ${obstacle.geoLat}, ${obstacle.geoLong})">
+                 ${obstacle['Parent Designator']}
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde kein Hinderniss gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+function goToObstacle(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der Obstacle Layer aktiv ist
+    if (!markerData.obstacle.added) {
+        toggleMarkers('obstacle');
+    }
+
+    // Setze die Kartenansicht auf die Position des Hindernisses
+    map.setView([lat, lon], 14);
+}
+
+function displayNavaidList(matchingNavaids) {
+    const addressList = document.getElementById('addressList');
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
+
+    if (matchingNavaids.length > 0) {
+        const limitedResults = matchingNavaids.slice(0, 10);
+
+        limitedResults.forEach((navaid) => {
+            addressList.innerHTML += `
+            <button class="searchButton" onclick="goToNavaid('${navaid.properties.txtname}', ${navaid.geometry.coordinates[1]}, ${navaid.geometry.coordinates[0]})">
+                 ${navaid.properties.txtname} - ${navaid.properties.ident} (${navaid.properties['select-source-layer']})
+            </button>
+            `;
+        });
+    } else {
+        addressList.innerHTML += `
+        <span class="addressError">Es wurde kein NAV-Aid gefunden.</span>
+        `;
+        setTimeout(() => {
+            addressList.style.display = 'none';
+        }, 1000);
+    }
+}
+
+function goToNavaid(name, lat, lon) {
+    const addressList = document.getElementById('addressList');
+    addressList.style.display = 'none';
+
+    // Prüfe ob der NAV-Aid Layer aktiv ist
+    if (!markerData.navaid.added) {
+        toggleMarkers('navaid');
+    }
+
+    // Setze die Kartenansicht auf die Position des NAV-Aids
+    map.setView([lat, lon], 13);
 }
 
 function initializeImageInteractions() {
