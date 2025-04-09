@@ -1657,9 +1657,9 @@ async function getWeather(weatherType) {
 
         // Setze den korrekten Pfad je nach Wettertyp
         if (weatherType === 'weather') {
-            weatherPath = data.radar.past[0].path;
+            weatherPath = data.radar.past[data.radar.past.length - 1].path;
         } else if (weatherType === 'clouds') {
-            weatherPath = data.satellite.infrared[0].path;
+            weatherPath = data.satellite.infrared[data.satellite.infrared.length - 1].path;
         }
 
         // Layer für Weather oder Clouds erstellen
