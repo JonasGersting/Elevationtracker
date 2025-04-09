@@ -1849,7 +1849,7 @@ const searchConfig = {
             const icao = item.icaoCode ? item.icaoCode.toUpperCase() : '';
             return name.includes(searchTerm) || icao.includes(searchTerm);
         },
-        display: (items) => displayAerodromeList(items)
+        display: (items) => displaySearchResults(items, 'Flugplatz')
     },
     'ED-R': {
         dataGetter: async () => {
@@ -1862,7 +1862,7 @@ const searchConfig = {
             const name = item.name ? item.name.toUpperCase() : '';
             return name.includes(searchTerm);
         },
-        display: (items) => displayEdrList(items)
+        display: (items) => displaySearchResults(items, 'ED-R')
     },
     'ED-D': {
         dataGetter: async () => {
@@ -1875,7 +1875,7 @@ const searchConfig = {
             const name = item.name ? item.name.toUpperCase() : '';
             return name.includes(searchTerm);
         },
-        display: (items) => displayEddList(items)
+        display: (items) => displaySearchResults(items, 'ED-D')
     },
     'RMZ': {
         dataGetter: async () => {
@@ -1888,7 +1888,7 @@ const searchConfig = {
             const name = item.properties.Name ? item.properties.Name.toUpperCase() : '';
             return name.includes(searchTerm);
         },
-        display: (items) => displayRmzList(items)
+        display: (items) => displaySearchResults(items, 'RMZ')
     },
     'CTR': {
         dataGetter: async () => {
@@ -1901,7 +1901,7 @@ const searchConfig = {
             const name = item.name ? item.name.toUpperCase() : '';
             return name.includes(searchTerm);
         },
-        display: (items) => displayCtrList(items)
+        display: (items) => displaySearchResults(items, 'CTR')
     },
     'TMZ': {
         dataGetter: async () => {
@@ -1914,7 +1914,7 @@ const searchConfig = {
             const name = item.properties.Name ? item.properties.Name.toUpperCase() : '';
             return name.includes(searchTerm);
         },
-        display: (items) => displayTmzList(items)
+        display: (items) => displaySearchResults(items, 'TMZ')
     },
     'PJE': {
         dataGetter: async () => {
@@ -1928,7 +1928,7 @@ const searchConfig = {
             const ident = item.properties.Ident ? item.properties.Ident.toUpperCase() : '';
             return name.includes(searchTerm) || ident.includes(searchTerm);
         },
-        display: (items) => displayPjeList(items)
+        display: (items) => displaySearchResults(items, 'PJE')
     },
     'Hinderniss': {
         dataGetter: async () => {
@@ -1940,7 +1940,7 @@ const searchConfig = {
             const parentDesignator = item['Parent Designator'] ? item['Parent Designator'].toUpperCase() : '';
             return parentDesignator.includes(searchTerm);
         },
-        display: (items) => displayObstacleList(items)
+        display: (items) => displaySearchResults(items, 'Hinderniss')
     },
     'NAV-Aid': {
         dataGetter: async () => {
@@ -1953,7 +1953,7 @@ const searchConfig = {
             const ident = item.properties.ident ? item.properties.ident.toUpperCase() : '';
             return name.includes(searchTerm) || ident.includes(searchTerm);
         },
-        display: (items) => displayNavaidList(items)
+        display: (items) => displaySearchResults(items, 'NAV-Aid')
     }
 };
 
@@ -2118,16 +2118,6 @@ function showNoResults(type) {
     }, 1000);
 }
 
-// Ersetze die einzelnen display*List Funktionen durch Aufrufe von displaySearchResults
-const displayAerodromeList = items => displaySearchResults(items, 'Flugplatz');
-const displayNavaidList = items => displaySearchResults(items, 'NAV-Aid');
-const displayObstacleList = items => displaySearchResults(items, 'Hinderniss');
-const displayEdrList = items => displaySearchResults(items, 'ED-R');
-const displayEddList = items => displaySearchResults(items, 'ED-D');
-const displayRmzList = items => displaySearchResults(items, 'RMZ');
-const displayCtrList = items => displaySearchResults(items, 'CTR');
-const displayTmzList = items => displaySearchResults(items, 'TMZ');
-const displayPjeList = items => displaySearchResults(items, 'PJE');
 
 function initializeImageInteractions() {
     const img = document.querySelector('#currentAipImg'); // Finde das Bild, nachdem es geladen wurde
