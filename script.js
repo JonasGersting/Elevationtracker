@@ -940,10 +940,10 @@ let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22',
     'M20P', 'EFOX', 'PNR3', 'RV9', 'PIVI', 'NG5', 'SIRA', 'SHRK', 'RV14', 'S22T', 'SF25', 'DA40', 'A210', 'DR40', 'DIAMO02', 'AC11', 'B209', 'WT9', 'BW6T', 'DG80', 'BR23', 'PC9', 'TL30',
     'P208', 'P28T', 'PC21', 'TL20', 'BU31', 'GLID', 'F260', 'PRIM', 'PC7', 'Z42', 'DA50', 'TOBA', 'HR20', 'BREZ', 'TBM9', 'PA32', 'G115', 'BDOG', 'JAB4', 'SKRA', 'RV10', 'PA24', 'CRUZ', 'RV8', 'BE36', 'PA11',
     'AUJ2', 'G109', 'PA46', 'BE33', 'RV4', 'DR10', 'P28R', 'SUBA', 'P210', 'TWEN', 'YK52', 'RF6', 'G3', 'AS31', 'BE35', 'ALTO', 'EV97', 'FK9', 'NIMB', 'EB29', 'ARCP', 'CH60', 'GX', 'E500', 'PA18', 'S10S',
-    'RALL', 'PA44', 'C206', 'PNR2', 'C10T', 'EVSS', 'FDCT', 'STRE', 'SLG2', 'TAMP', 'SLG2', 'DG40',    
+    'RALL', 'PA44', 'C206', 'PNR2', 'C10T', 'EVSS', 'FDCT', 'STRE', 'SLG2', 'TAMP', 'SLG2', 'DG40',
 ];
 let turboAcft = ['B350', 'L2T', 'F406', 'SF34', 'V22', 'BE30', 'C414', 'DA62', 'AT76', 'SW4', 'DA42', 'SC7', 'PA34', 'DA42', 'P68', 'BE9L', 'DHC6', 'AT75', 'AN30', 'C212', 'D228', 'C310', 'AT45',
-    'PA31', 'C404', 'P06T', 'DH8A', 'P3', 'BN2P', 'C425',  
+    'PA31', 'C404', 'P06T', 'DH8A', 'P3', 'BN2P', 'C425',
 ];
 let helAcft = ['EC35', 'EC45', 'EC30', 'EC55', 'H60', 'R44', 'MI8', 'A139', 'AS32', 'G2CA', 'EC20', 'B505', 'EC75', 'A169', 'A109', 'AS55', 'R22', 'AS3B', 'LYNX'];
 let twoEngAcft = ['B738', 'B737', 'A321', 'B752', 'A320', 'A333', 'B38M', 'A20N', 'B789', 'B77W', 'A21N', 'B789', 'B38M', 'B739', 'BCS3', 'B762', 'B763', 'A332', 'A319', 'B734', 'A359', 'B788', 'B77W', 'B77L', 'B763', 'A339',
@@ -1840,6 +1840,124 @@ function validateCoordinates(northPart, eastPart) {
     return true;
 }
 
+// Konfigurationsobjekt für die verschiedenen Suchtypen hinzufügen
+const searchConfig = {
+    'Flugplatz': {
+        dataGetter: async () => (!aerodromes || aerodromes.length === 0) ? await getData('aerodromes') : null,
+        filter: (item, searchTerm) => {
+            const name = item.name ? item.name.toUpperCase() : '';
+            const icao = item.icaoCode ? item.icaoCode.toUpperCase() : '';
+            return name.includes(searchTerm) || icao.includes(searchTerm);
+        },
+        display: (items) => displayAerodromeList(items)
+    },
+    'ED-R': {
+        dataGetter: async () => {
+            if (!edrAirspace || edrAirspace.length === 0) {
+                await getData('edrAirspace');
+                await getData('edrInfo');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const name = item.name ? item.name.toUpperCase() : '';
+            return name.includes(searchTerm);
+        },
+        display: (items) => displayEdrList(items)
+    },
+    'ED-D': {
+        dataGetter: async () => {
+            if (!eddAirspace || eddAirspace.length === 0) {
+                await getData('eddAirspace');
+                await getData('eddInfo');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const name = item.name ? item.name.toUpperCase() : '';
+            return name.includes(searchTerm);
+        },
+        display: (items) => displayEddList(items)
+    },
+    'RMZ': {
+        dataGetter: async () => {
+            if (!rmzAirspace || rmzAirspace.length === 0) {
+                await getData('rmzAirspace');
+                await getData('rmzInfo');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const name = item.properties.Name ? item.properties.Name.toUpperCase() : '';
+            return name.includes(searchTerm);
+        },
+        display: (items) => displayRmzList(items)
+    },
+    'CTR': {
+        dataGetter: async () => {
+            if (!ctrAirspace || ctrAirspace.length === 0) {
+                await getData('ctrAirspace');
+                await getData('ctrInfo');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const name = item.name ? item.name.toUpperCase() : '';
+            return name.includes(searchTerm);
+        },
+        display: (items) => displayCtrList(items)
+    },
+    'TMZ': {
+        dataGetter: async () => {
+            if (!tmzAirspace || tmzAirspace.length === 0) {
+                await getData('tmzAirspace');
+                await getData('tmzInfo');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const name = item.properties.Name ? item.properties.Name.toUpperCase() : '';
+            return name.includes(searchTerm);
+        },
+        display: (items) => displayTmzList(items)
+    },
+    'PJE': {
+        dataGetter: async () => {
+            if (!pjeAirspace || pjeAirspace.length === 0) {
+                await getData('pjeAirspace');
+                await getData('pjeInfo');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const name = item.properties.Name ? item.properties.Name.toUpperCase() : '';
+            const ident = item.properties.Ident ? item.properties.Ident.toUpperCase() : '';
+            return name.includes(searchTerm) || ident.includes(searchTerm);
+        },
+        display: (items) => displayPjeList(items)
+    },
+    'Hinderniss': {
+        dataGetter: async () => {
+            if (!obstacles || obstacles.length === 0) {
+                await getData('obstacles');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const parentDesignator = item['Parent Designator'] ? item['Parent Designator'].toUpperCase() : '';
+            return parentDesignator.includes(searchTerm);
+        },
+        display: (items) => displayObstacleList(items)
+    },
+    'NAV-Aid': {
+        dataGetter: async () => {
+            if (!navAids || navAids.length === 0) {
+                await getData('navAids');
+            }
+        },
+        filter: (item, searchTerm) => {
+            const name = item.properties.txtname ? item.properties.txtname.toUpperCase() : '';
+            const ident = item.properties.ident ? item.properties.ident.toUpperCase() : '';
+            return name.includes(searchTerm) || ident.includes(searchTerm);
+        },
+        display: (items) => displayNavaidList(items)
+    }
+};
+
+// Modifizierte search Funktion
 async function search() {
     const input = document.getElementById('searchInput').value.toUpperCase();
     const dmsPattern = /^(\d{4,6})[NSns](\d{5,7})[EWew]$/;
@@ -1859,526 +1977,157 @@ async function search() {
         while (eastPart.length < 7) {
             eastPart += '0';
         }
-
+        
         const formattedInput = `${northPart}${cleanInput.match(/[NSns]/)[0].toUpperCase()}${eastPart}${cleanInput.match(/[EWew]/)[0].toUpperCase()}`;
         document.getElementById('searchInput').value = formattedInput;
-
+        
         searchCoordinate();
     } else if (searchCat === 'Callsign') {
         searchAcft();
-    } else if (searchCat === 'Flugplatz') {
-        // Prüfen ob Flugplatzdaten geladen sind
-        if (!aerodromes || aerodromes.length === 0) {
-            await getData('aerodromes');
+    } else if (searchConfig[searchCat]) {
+        const config = searchConfig[searchCat];
+        await config.dataGetter();
+
+        let sourceData;
+        switch (searchCat) {
+            case 'Flugplatz': sourceData = aerodromes; break;
+            case 'ED-R': sourceData = edrAirspace; break;
+            case 'ED-D': sourceData = eddAirspace; break;
+            case 'RMZ': sourceData = rmzAirspace; break;
+            case 'CTR': sourceData = ctrAirspace; break;
+            case 'TMZ': sourceData = tmzAirspace; break;
+            case 'PJE': sourceData = pjeAirspace; break;
+            case 'Hinderniss': sourceData = obstacles; break;
+            case 'NAV-Aid': sourceData = navAids; break;
+            default: sourceData = [];
         }
 
-        // Suche nach passenden Flugplätzen
-        const matchingAerodromes = aerodromes.filter(ad => {
-            const name = ad.name ? ad.name.toUpperCase() : '';
-            const icao = ad.icaoCode ? ad.icaoCode.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm) || icao.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayAerodromeList(matchingAerodromes);
-    } else if (searchCat === 'ED-R') {
-        // Prüfen ob ED-R Daten geladen sind
-        if (!edrAirspace || edrAirspace.length === 0) {
-            await getData('edrAirspace');
-            await getData('edrInfo');
-        }
-
-        // Suche nach passenden ED-Rs
-        const matchingEdrs = edrAirspace.filter(edr => {
-            const name = edr.name ? edr.name.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayEdrList(matchingEdrs);
-    } else if (searchCat === 'ED-D') {
-        // Prüfen ob ED-D Daten geladen sind
-        if (!eddAirspace || eddAirspace.length === 0) {
-            await getData('eddAirspace');
-            await getData('eddInfo');
-        }
-
-        // Suche nach passenden ED-Ds
-        const matchingEdds = eddAirspace.filter(edd => {
-            const name = edd.name ? edd.name.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayEddList(matchingEdds);
-    } else if (searchCat === 'RMZ') {
-        // Prüfen ob RMZ Daten geladen sind
-        if (!rmzAirspace || rmzAirspace.length === 0) {
-            await getData('rmzAirspace');
-            await getData('rmzInfo');
-        }
-
-        // Suche nach passenden RMZs
-        const matchingRmzs = rmzAirspace.filter(rmz => {
-            const name = rmz.properties.Name ? rmz.properties.Name.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayRmzList(matchingRmzs);
-    } else if (searchCat === 'CTR') {
-        // Prüfen ob CTR Daten geladen sind
-        if (!ctrAirspace || ctrAirspace.length === 0) {
-            await getData('ctrAirspace');
-            await getData('ctrInfo');
-        }
-
-        // Suche nach passenden CTRs
-        const matchingCtrs = ctrAirspace.filter(ctr => {
-            const name = ctr.name ? ctr.name.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayCtrList(matchingCtrs);
-    } else if (searchCat === 'TMZ') {
-        // Prüfen ob TMZ Daten geladen sind
-        if (!tmzAirspace || tmzAirspace.length === 0) {
-            await getData('tmzAirspace');
-            await getData('tmzInfo');
-        }
-
-        // Suche nach passenden TMZs
-        const matchingTmzs = tmzAirspace.filter(tmz => {
-            const name = tmz.properties.Name ? tmz.properties.Name.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayTmzList(matchingTmzs);
-    } else if (searchCat === 'PJE') {
-        // Prüfen ob PJE Daten geladen sind
-        if (!pjeAirspace || pjeAirspace.length === 0) {
-            await getData('pjeAirspace');
-            await getData('pjeInfo');
-        }
-
-        // Suche nach passenden PJEs
-        const matchingPjes = pjeAirspace.filter(pje => {
-            const name = pje.properties.Name ? pje.properties.Name.toUpperCase() : '';
-            const ident = pje.properties.Ident ? pje.properties.Ident.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm) || ident.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse 
-        displayPjeList(matchingPjes);
-    } else if (searchCat === 'Hinderniss') {
-        // Prüfen ob Hinderniss Daten geladen sind
-        if (!obstacles || obstacles.length === 0) {
-            await getData('obstacles');
-        }
-
-        // Suche nach passenden Hindernissen
-        const matchingObstacles = obstacles.filter(obstacle => {
-            const name = obstacle['Parent Designator'] ? obstacle['Parent Designator'].toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayObstacleList(matchingObstacles);
-    } else if (searchCat === 'NAV-Aid') {
-        // Prüfen ob NAV-Aid Daten geladen sind
-        if (!navAids || navAids.length === 0) {
-            await getData('navaids');
-        }
-
-        // Suche nach passenden NAV-Aids
-        const matchingNavaids = navAids.filter(navaid => {
-            const name = navaid.properties.txtname ? navaid.properties.txtname.toUpperCase() : '';
-            const ident = navaid.properties.ident ? navaid.properties.ident.toUpperCase() : '';
-            const searchTerm = input.toUpperCase();
-            return name.includes(searchTerm) || ident.includes(searchTerm);
-        });
-
-        // Anzeigen der Ergebnisse
-        displayNavaidList(matchingNavaids);
+        const matchingItems = sourceData.filter(item => config.filter(item, input));
+        config.display(matchingItems);
     } else {
         searchAdress();
     }
 }
-
-function displayAerodromeList(matchingAerodromes) {
+// Generische Display-Funktion für alle Arten von Suchergebnissen
+function displaySearchResults(items, type) {
     const addressList = document.getElementById('addressList');
     addressList.innerHTML = '';
     addressList.style.display = 'flex';
 
-    if (matchingAerodromes.length > 0) {
-        const limitedResults = matchingAerodromes.slice(0, 10);
-
-        limitedResults.forEach((aerodrome) => {
-            if (!aerodrome.icaoCode) {
+    if (items.length > 0) {
+        const limitedResults = items.slice(0, 10);
+        
+        limitedResults.forEach((item) => {
+            // Bestimme die Anzeigeparameter basierend auf dem Typ
+            const displayParams = getDisplayParams(item, type);
+            
+            if (displayParams.shouldDisplay) {
                 addressList.innerHTML += `
-                <button class="searchButton">
-                     ${aerodrome.name}
-                </button>
-                `;
-            } else {
-                addressList.innerHTML += `
-                <button class="searchButton" onclick="goToAd('${aerodrome.icaoCode}', ${aerodrome.geometry.coordinates[1]}, ${aerodrome.geometry.coordinates[0]})">
-                     ${aerodrome.name} - ${aerodrome.icaoCode}
+                <button class="searchButton" onclick="goToLocation('${type}', ${displayParams.lat}, ${displayParams.lon}, '${displayParams.name}')">
+                     ${displayParams.buttonText}
                 </button>
                 `;
             }
         });
     } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde kein Flugplatz gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
+        showNoResults(type);
     }
 }
 
-function goToAd(icaoCode, lat, lon) {
+// Hilfsfunktion zum Ermitteln der Anzeigeparameter
+function getDisplayParams(item, type) {
+    switch(type) {
+        case 'Flugplatz':
+            return {
+                shouldDisplay: true,
+                lat: item.geometry.coordinates[1],
+                lon: item.geometry.coordinates[0],
+                name: item.icaoCode || item.name,
+                buttonText: item.icaoCode ? `${item.name} - ${item.icaoCode}` : item.name
+            };
+        case 'NAV-Aid':
+            return {
+                shouldDisplay: true,
+                lat: item.geometry.coordinates[1],
+                lon: item.geometry.coordinates[0],
+                name: item.properties.txtname,
+                buttonText: `${item.properties.txtname} - ${item.properties.ident} (${item.properties['select-source-layer']})`
+            };
+        case 'Hinderniss':
+            return {
+                shouldDisplay: true,
+                lat: item.geoLat,
+                lon: item.geoLong,
+                name: item['Parent Designator'],
+                buttonText: item['Parent Designator']
+            };
+        default: // Für ED-R, ED-D, RMZ, CTR, TMZ, PJE
+            return {
+                shouldDisplay: true,
+                lat: item.geometry.coordinates[0][0][1],
+                lon: item.geometry.coordinates[0][0][0],
+                name: item.name || item.properties.Name,
+                buttonText: item.name || item.properties.Name
+            };
+    }
+}
+
+// Generische GoTo-Funktion für alle Typen
+function goToLocation(type, lat, lon, name) {
     const addressList = document.getElementById('addressList');
     addressList.style.display = 'none';
 
-    // Prüfe ob der Aerodrome Layer aktiv ist
-    if (!markerData.aerodrome.added) {
-        toggleMarkers('aerodrome');
-    }
+    // Konfigurationsobjekt für verschiedene Typen
+    const typeConfig = {
+        'Flugplatz': { markerKey: 'aerodrome', zoom: 13, isMarker: true },
+        'NAV-Aid': { markerKey: 'navaid', zoom: 13, isMarker: true },
+        'Hinderniss': { markerKey: 'obstacle', zoom: 14, isMarker: true },
+        'ED-R': { polygonKey: 'edr', zoom: 11, isMarker: false },
+        'ED-D': { polygonKey: 'edd', zoom: 9, isMarker: false },
+        'RMZ': { polygonKey: 'rmz', zoom: 11, isMarker: false },
+        'CTR': { polygonKey: 'ctr', zoom: 11, isMarker: false },
+        'TMZ': { polygonKey: 'tmz', zoom: 11, isMarker: false },
+        'PJE': { polygonKey: 'pje', zoom: 11, isMarker: false }
+    };
 
-    // Setze die Kartenansicht auf die Position des Flugplatzes
-    map.setView([lat, lon], 13);
-}
+    const config = typeConfig[type];
 
-
-
-function displayEdrList(matchingEdrs) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingEdrs.length > 0) {
-        const limitedResults = matchingEdrs.slice(0, 10);
-
-        limitedResults.forEach((edr) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToEdr('${edr.name}', ${edr.geometry.coordinates[0][0][1]}, ${edr.geometry.coordinates[0][0][0]})">
-                 ${edr.name}
-            </button>
-            `;
-        });
+    // Aktiviere den entsprechenden Layer falls nötig
+    if (config.isMarker) {
+        if (!markerData[config.markerKey].added) {
+            toggleMarkers(config.markerKey);
+        }
     } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde kein ED-R gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
+        if (!polygonLayers[config.polygonKey] || polygonLayers[config.polygonKey].length === 0) {
+            togglePolygons(config.polygonKey);
+        }
     }
+
+    // Setze die Kartenansicht
+    map.setView([lat, lon], config.zoom);
 }
 
-function goToEdr(name, lat, lon) {
+// Hilfsfunktion für "Keine Ergebnisse" Meldung
+function showNoResults(type) {
     const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der ED-R Layer aktiv ist
-    if (!polygonLayers['edr'] || polygonLayers['edr'].length === 0) {
-        togglePolygons('edr');
-    }
-
-    // Setze die Kartenansicht auf die Position des ED-R
-    map.setView([lat, lon], 11);
+    addressList.innerHTML = `
+        <span class="addressError">Es wurde kein ${type} gefunden.</span>
+    `;
+    setTimeout(() => {
+        addressList.style.display = 'none';
+    }, 1000);
 }
 
-
-function displayEddList(matchingEdds) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingEdds.length > 0) {
-        const limitedResults = matchingEdds.slice(0, 10);
-
-        limitedResults.forEach((edd) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToEdd('${edd.name}', ${edd.geometry.coordinates[0][0][1]}, ${edd.geometry.coordinates[0][0][0]})">
-                 ${edd.name}
-            </button>
-            `;
-        });
-    } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde kein ED-D gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
-    }
-}
-
-function goToEdd(name, lat, lon) {
-    const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der ED-D Layer aktiv ist
-    if (!polygonLayers['edd'] || polygonLayers['edd'].length === 0) {
-        togglePolygons('edd');
-    }
-
-    // Setze die Kartenansicht auf die Position des ED-D
-    map.setView([lat, lon], 9);
-}
-
-function displayRmzList(matchingRmzs) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingRmzs.length > 0) {
-        const limitedResults = matchingRmzs.slice(0, 10);
-
-        limitedResults.forEach((rmz) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToRmz('${rmz.properties.Name}', ${rmz.geometry.coordinates[0][0][1]}, ${rmz.geometry.coordinates[0][0][0]})">
-                 ${rmz.properties.Name}
-            </button>
-            `;
-        });
-    } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde keine RMZ gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
-    }
-}
-
-function goToRmz(name, lat, lon) {
-    const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der RMZ Layer aktiv ist
-    if (!polygonLayers['rmz'] || polygonLayers['rmz'].length === 0) {
-        togglePolygons('rmz');
-    }
-
-    // Setze die Kartenansicht auf die Position der RMZ
-    map.setView([lat, lon], 11);
-}
-
-
-function displayCtrList(matchingCtrs) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingCtrs.length > 0) {
-        const limitedResults = matchingCtrs.slice(0, 10);
-
-        limitedResults.forEach((ctr) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToCtr('${ctr.name}', ${ctr.geometry.coordinates[0][0][1]}, ${ctr.geometry.coordinates[0][0][0]})">
-                 ${ctr.name}
-            </button>
-            `;
-        });
-    } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde keine CTR gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
-    }
-}
-
-function goToCtr(name, lat, lon) {
-    const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der CTR Layer aktiv ist
-    if (!polygonLayers['ctr'] || polygonLayers['ctr'].length === 0) {
-        togglePolygons('ctr');
-    }
-
-    // Setze die Kartenansicht auf die Position der CTR
-    map.setView([lat, lon], 11);
-}
-
-
-function displayTmzList(matchingTmzs) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingTmzs.length > 0) {
-        const limitedResults = matchingTmzs.slice(0, 10);
-
-        limitedResults.forEach((tmz) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToTmz('${tmz.properties.Name}', ${tmz.geometry.coordinates[0][0][1]}, ${tmz.geometry.coordinates[0][0][0]})">
-                 ${tmz.properties.Name}
-            </button>
-            `;
-        });
-    } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde keine TMZ gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
-    }
-}
-
-function goToTmz(name, lat, lon) {
-    const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der TMZ Layer aktiv ist
-    if (!polygonLayers['tmz'] || polygonLayers['tmz'].length === 0) {
-        togglePolygons('tmz');
-    }
-
-    // Setze die Kartenansicht auf die Position der TMZ
-    map.setView([lat, lon], 11);
-}
-
-function displayPjeList(matchingPjes) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingPjes.length > 0) {
-        const limitedResults = matchingPjes.slice(0, 10);
-
-        limitedResults.forEach((pje) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToPje('${pje.properties.Name}', ${pje.geometry.coordinates[0][0][1]}, ${pje.geometry.coordinates[0][0][0]})">
-                 ${pje.properties.Name}
-            </button>
-            `;
-        });
-    } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde keine PJE gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
-    }
-}
-
-function goToPje(name, lat, lon) {
-    const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der PJE Layer aktiv ist
-    if (!polygonLayers['pje'] || polygonLayers['pje'].length === 0) {
-        togglePolygons('pje');
-    }
-
-    // Setze die Kartenansicht auf die Position der PJE
-    map.setView([lat, lon], 11);
-}
-
-
-function displayObstacleList(matchingObstacles) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingObstacles.length > 0) {
-        // Erstelle ein Set mit eindeutigen Parent Designators
-        const uniqueObstacles = matchingObstacles.reduce((unique, obstacle) => {
-            const parentDesignator = obstacle['Parent Designator'];
-            if (!unique.some(item => item['Parent Designator'] === parentDesignator)) {
-                unique.push(obstacle);
-            }
-            return unique;
-        }, []);
-
-        // Begrenze auf 10 Ergebnisse
-        const limitedResults = uniqueObstacles.slice(0, 10);
-
-        limitedResults.forEach((obstacle) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToObstacle('${obstacle['Parent Designator']}', ${obstacle.geoLat}, ${obstacle.geoLong})">
-                 ${obstacle['Parent Designator']}
-            </button>
-            `;
-        });
-    } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde kein Hinderniss gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
-    }
-}
-function goToObstacle(name, lat, lon) {
-    const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der Obstacle Layer aktiv ist
-    if (!markerData.obstacle.added) {
-        toggleMarkers('obstacle');
-    }
-
-    // Setze die Kartenansicht auf die Position des Hindernisses
-    map.setView([lat, lon], 14);
-}
-
-function displayNavaidList(matchingNavaids) {
-    const addressList = document.getElementById('addressList');
-    addressList.innerHTML = '';
-    addressList.style.display = 'flex';
-
-    if (matchingNavaids.length > 0) {
-        const limitedResults = matchingNavaids.slice(0, 10);
-
-        limitedResults.forEach((navaid) => {
-            addressList.innerHTML += `
-            <button class="searchButton" onclick="goToNavaid('${navaid.properties.txtname}', ${navaid.geometry.coordinates[1]}, ${navaid.geometry.coordinates[0]})">
-                 ${navaid.properties.txtname} - ${navaid.properties.ident} (${navaid.properties['select-source-layer']})
-            </button>
-            `;
-        });
-    } else {
-        addressList.innerHTML += `
-        <span class="addressError">Es wurde kein NAV-Aid gefunden.</span>
-        `;
-        setTimeout(() => {
-            addressList.style.display = 'none';
-        }, 1000);
-    }
-}
-
-function goToNavaid(name, lat, lon) {
-    const addressList = document.getElementById('addressList');
-    addressList.style.display = 'none';
-
-    // Prüfe ob der NAV-Aid Layer aktiv ist
-    if (!markerData.navaid.added) {
-        toggleMarkers('navaid');
-    }
-
-    // Setze die Kartenansicht auf die Position des NAV-Aids
-    map.setView([lat, lon], 13);
-}
+// Ersetze die einzelnen display*List Funktionen durch Aufrufe von displaySearchResults
+const displayAerodromeList = items => displaySearchResults(items, 'Flugplatz');
+const displayNavaidList = items => displaySearchResults(items, 'NAV-Aid');
+const displayObstacleList = items => displaySearchResults(items, 'Hinderniss');
+const displayEdrList = items => displaySearchResults(items, 'ED-R');
+const displayEddList = items => displaySearchResults(items, 'ED-D');
+const displayRmzList = items => displaySearchResults(items, 'RMZ');
+const displayCtrList = items => displaySearchResults(items, 'CTR');
+const displayTmzList = items => displaySearchResults(items, 'TMZ');
+const displayPjeList = items => displaySearchResults(items, 'PJE');
 
 function initializeImageInteractions() {
     const img = document.querySelector('#currentAipImg'); // Finde das Bild, nachdem es geladen wurde
