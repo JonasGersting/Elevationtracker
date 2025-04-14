@@ -15,9 +15,6 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
-
-
-
 </head>
 
 <body onload="init()">
@@ -25,10 +22,10 @@
         <div class="standardInput">
             <div class="searchDropDown">
                 <div class="relativeDiv shadow">
-                    <span id="searchCategoryHeadline">Position</span><img class="arrowImg" src="img/arrowLeft.png"
+                    <span id="searchCategoryHeadline">Standort</span><img class="arrowImg" src="img/arrowLeft.png"
                         alt="">
                     <div class="shadow" id="dropDownCategory">
-                        <button class="searchButton" onclick="setSearchCat('Position')">Position</button>
+                        <button class="searchButton" onclick="setSearchCat('Standort')">Standort</button>
                         <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
                         <button class="searchButton" onclick="setSearchCat('Callsign')">Callsign</button>
                         <button class="searchButton" onclick="setSearchCat('ED-R')">ED-R</button>
@@ -238,6 +235,14 @@
 <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script src="mapService.js" ></script>
+<script src="airspaceService.js" ></script>
+<script src="radarService.js" ></script>
+<script src="datamanagementService.js" ></script>
+<script src="addressService.js" ></script>
+<script src="showPositionService.js" ></script>
+<script src="gaforService.js" ></script>
 <script src="classes/airspace.class.js"></script>
 <script src="classes/edrAirspace.class.js"></script>
 <script src="classes/fisAirspace.class.js"></script>
@@ -253,15 +258,9 @@
 <script src="classes/eddAirspace.class.js"></script>
 <script src="classes/ctr.class.js"></script>
 <script src="classes/aerodrome.class.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script src="mapService.js" ></script>
-<script src="airspaceService.js" ></script>
-<script src="radarService.js" ></script>
-<script src="datamanagementService.js" ></script>
-<script src="addressService.js" ></script>
-<script src="showPositionService.js" ></script>
-<script src="gaforService.js" ></script>
+<script src="classes/aircraft.class.js" ></script>
+
+
 
 
 

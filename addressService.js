@@ -1,6 +1,6 @@
 let currentAdressGeoJSONLayer = null;
 let currentAddresses = [];
-
+let searchCat = 'Standort';
 // Adress API
 async function searchAdress() {
     currentAddresses = [];
@@ -98,7 +98,7 @@ function setSearchCat(cat) {
 
 
 function returnSearchPlaceholder(cat) {
-    if (cat === 'Position') {
+    if (cat === 'Standort') {
         return `Suche nach Adresse oder Koordinate`;
     } else {
         return `Suche nach ${cat}`;

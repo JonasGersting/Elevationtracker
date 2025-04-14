@@ -9,6 +9,14 @@ let tmzInfo;
 let rmzInfo;
 let pjeInfo;
 
+let polygonIsBroughtUpToFront = false;
+let isCursorOverPolygon = false;
+
+let markers = [];
+let polylines = [];
+let initialMarkerLat = null; 
+let initialMarkerLon = null; 
+
 async function init() {
     getData('navAids');
     getData('aerodromes');
@@ -17,13 +25,23 @@ async function init() {
     showCursorCoordinates(map);
 }
 
-// Arrays zum Speichern von Markern
-let markers = [];
-// Array zum Speichern der Polylines
-let polylines = [];
-let initialMarkerLat = null; // Speichern der ursprünglichen Marker Latitude
-let initialMarkerLon = null; // Speichern der ursprünglichen Marker Longitude
-// Funktion zum Erstellen des Markers und Abfragen der Höhe
+
+function checkCursorOverPolygon() {
+    if (!isCursorOverPolygon) {
+        polygonIsBroughtUpToFront = false;
+    } else {
+        polygonIsBroughtUpToFront = true;
+    }
+}
+
+document.addEventListener('mousemove', () => {
+    checkCursorOverPolygon();
+});
+
+
+
+
+
 function createMarker(lat, lng) {
     initialMarkerLat = lat;
     initialMarkerLon = lng;
@@ -228,13 +246,29 @@ function calculateAngle(lat1, lon1, lat2, lon2) {
 function resetMap() {
     let trackedAcftDiv = document.getElementById('trackedAcft');
     trackedAcftDiv.classList.add('hiddenTrackedAcft');
-    trackedHex = null;
 
     currentAddresses = [];
-    if (currentTrack) {
-        map.removeLayer(currentTrack);
+    if (trackedAcft) {
+        if (currentTrackLine) {
+            map.removeLayer(currentTrackLine);
+            currentTrackLine = null;
+        }
+        trackedAcft.isTracked = false;
+        trackedAcft.updateMarkerStyle();
+        trackedAcft = null;
     }
-    currentTrack = null;
+
+    // Reset destination and flight line
+    if (flightDistLine) {
+        map.removeLayer(flightDistLine);
+        flightDistLine = null;
+    }
+    if (trackedIcaoDest) {
+        trackedIcaoDest = null;
+        trackedEta = '';
+        let icaoDestInput = document.getElementById('icaoDest');
+        icaoDestInput.value = '';
+    }
     if (currentAdressGeoJSONLayer) {
         map.removeLayer(currentAdressGeoJSONLayer);
     }
