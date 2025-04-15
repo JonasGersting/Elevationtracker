@@ -181,6 +181,7 @@ async function fetchAircraftData(centerLat, centerLon, radius) {
         const response = await fetch(`https://api.adsb.one/v2/point/${centerLat}/${centerLon}/${radius}`);
         if (!response.ok) throw new Error(`API error: ${response.statusText}`);
         const data = await response.json();
+        console.log(data);
         
         // Lösche alle alten Aircraft von der Karte
         aircraftLayer.clearLayers();

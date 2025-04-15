@@ -17,6 +17,10 @@ let polylines = [];
 let initialMarkerLat = null; 
 let initialMarkerLon = null; 
 
+
+let distanceMeasurements = [];
+let activeMeasurement = null;
+
 async function init() {
     getData('navAids');
     getData('aerodromes');
@@ -39,7 +43,13 @@ document.addEventListener('mousemove', () => {
 });
 
 
-
+// Korrekter Weg, um ein benutzerdefiniertes Icon zu erstellen
+const customIcon = L.icon({
+    iconUrl: 'img/mapPin.png',
+    iconSize: [48, 48],     // Größe des Icons
+    iconAnchor: [24, 48],   // Ankerpunkt des Icons (Mitte unten)
+    popupAnchor: [0, -48]   // Punkt, von dem aus das Popup geöffnet wird
+});
 
 
 function createMarker(lat, lng) {
@@ -48,7 +58,9 @@ function createMarker(lat, lng) {
     if (!markerData.navaid.added) {
         toggleMarkers('navaid');
     }
-    const marker = L.marker([lat, lng]).addTo(map);
+    const marker = L.marker([lat, lng],{
+        icon: customIcon,
+    }).addTo(map);
     markers.push(marker);
 
     // Karte auf den Marker zentrieren und näher heranzoomen
@@ -57,8 +69,203 @@ function createMarker(lat, lng) {
     // Abfrage der Höhe von der Open Elevation API
     getElevation(lat, lng).then(elevation => {
         marker.bindPopup(`<b>Höhe:</b> ${elevation}FT<br>
-            <button onclick="findClosestNavAid(${lat},${lng})">NAV-AID</button>`).openPopup();
+            <button class="navAidBtn marginTop16"  onclick="findClosestNavAid(${lat},${lng})">NAV-AID</button>
+            <button class="navAidBtn marginTop16" onclick="startDistanceMeasurement(${lat},${lng})">DIST</button>`).openPopup();
     });
+}
+
+function startDistanceMeasurement(lat, lng) {
+    // Nur eine aktive Messung gleichzeitig erlauben
+    if (activeMeasurement) return;
+    
+    const startPoint = [lat, lng];
+    
+    // Messobjekt erstellen
+    activeMeasurement = {
+        id: Date.now(),
+        startPoint: startPoint,
+        line: L.polyline([startPoint, startPoint], {
+            color: 'red',
+            weight: 2,
+            dashArray: '5, 10'
+        }).addTo(map),
+        label: createDistanceLabel()
+    };
+    
+    // Mousemove-Event für Aktualisierung der Linie
+    map.on('mousemove', updateActiveDistanceLine);
+    
+    // Click-Event für Abschluss der Messung
+    map.once('click', finishDistanceMeasurement);
+    
+    // NavAid-Marker-Popups temporär deaktivieren
+    modifyNavaidMarkers(true);
+}
+
+
+function createDistanceLabel() {
+    const label = L.DomUtil.create('div', 'distance-label');
+    document.getElementById('map').appendChild(label);
+    return label;
+}
+
+
+function updateActiveDistanceLine(e) {
+    if (!activeMeasurement) return;
+    
+    const endPoint = [e.latlng.lat, e.latlng.lng];
+    activeMeasurement.line.setLatLngs([activeMeasurement.startPoint, endPoint]);
+    
+    // Distanz berechnen
+    const distance = calculateDistanceNavAid(
+        activeMeasurement.startPoint[0], activeMeasurement.startPoint[1],
+        endPoint[0], endPoint[1]
+    );
+    
+    // Label aktualisieren
+    updateDistanceLabel(activeMeasurement, distance, endPoint);
+}
+
+
+function calculateDistanceNavAid(lat1, lon1, lat2, lon2) {
+    const toRad = deg => deg * (Math.PI / 180);
+    const R = 3440; // Erdradius in nautischen Meilen
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Entfernung in nautischen Meilen
+}
+
+function updateDistanceLabel(measurement, distance, endPoint) {
+    // Mittelpunkt berechnen für Position des Labels
+    const midPoint = [
+        (measurement.startPoint[0] + endPoint[0]) / 2,
+        (measurement.startPoint[1] + endPoint[1]) / 2
+    ];
+    
+    // Position auf dem Bildschirm berechnen
+    const point = map.latLngToContainerPoint(midPoint);
+    
+    // Label Position und Text setzen
+    measurement.label.style.left = (point.x - 30) + 'px';
+    measurement.label.style.top = (point.y - 10) + 'px';
+    measurement.label.textContent = `${distance.toFixed(1)} NM`;
+}
+
+
+function finishDistanceMeasurement(e) {
+    // Überprüfen, ob die Messung noch aktiv ist
+    if (!activeMeasurement) return;
+    
+    // Speichere eine lokale Referenz, um sicherzustellen, dass sie nicht null wird
+    const measurement = activeMeasurement;
+    
+    // Endpunkt setzen
+    const endPoint = [e.latlng.lat, e.latlng.lng];
+    
+    // Bestimme den tatsächlichen Endpunkt (Check ob auf Marker geklickt wurde)
+    const finalEndPoint = (e.target instanceof L.Marker) ? 
+        [e.target.getLatLng().lat, e.target.getLatLng().lng] : endPoint;
+    
+    // Linie aktualisieren - nutze die lokale Referenz
+    measurement.line.setLatLngs([measurement.startPoint, finalEndPoint]);
+    
+    // Distanz berechnen
+    const distance = calculateDistanceNavAid(
+        measurement.startPoint[0], measurement.startPoint[1],
+        finalEndPoint[0], finalEndPoint[1]
+    );
+    
+    // Label aktualisieren - nutze die lokale Referenz
+    updateDistanceLabel(measurement, distance, finalEndPoint);
+    
+    // Event-Handler entfernen
+    map.off('mousemove', updateActiveDistanceLine);
+    
+    // Map-Move-Listener hinzufügen für Label-Aktualisierung beim Zoomen/Verschieben
+    const moveListener = () => {
+        const latLngs = measurement.line.getLatLngs();
+        if (!latLngs || latLngs.length < 2) return;
+        
+        const mid = [
+            (latLngs[0].lat + latLngs[1].lat) / 2,
+            (latLngs[0].lng + latLngs[1].lng) / 2
+        ];
+        const newPoint = map.latLngToContainerPoint(mid);
+        
+        measurement.label.style.left = (newPoint.x - 30) + 'px';
+        measurement.label.style.top = (newPoint.y - 10) + 'px';
+    };
+    map.on('move', moveListener);
+    
+    // Messung speichern
+    measurement.moveListener = moveListener;
+    distanceMeasurements.push(measurement);
+    
+    // NavAid-Marker-Popups wiederherstellen
+    modifyNavaidMarkers(false);
+    
+    // Aktive Messung zurücksetzen - erst NACHDEM wir alle Operationen abgeschlossen haben
+    activeMeasurement = null;
+}
+
+
+function modifyNavaidMarkers(isForMeasurement) {
+    if (!markerData.navaid.markers) return;
+    
+    markerData.navaid.markers.forEach(navaid => {
+        if (!navaid.marker) return;
+        
+        if (isForMeasurement) {
+            // Für Messung vorbereiten
+            // Popup speichern und entfernen
+            navaid.marker._originalPopup = navaid.marker.getPopup();
+            navaid.marker.unbindPopup();
+            
+            // Click-Event für Messung (kein Popup)
+            navaid.marker.on('click', finishDistanceMeasurement);
+        } else {
+            // Normalen Zustand wiederherstellen
+            navaid.marker.off('click', finishDistanceMeasurement);
+            
+            // Popup wiederherstellen
+            if (navaid.marker._originalPopup) {
+                navaid.marker.bindPopup(navaid.marker._originalPopup);
+                delete navaid.marker._originalPopup;
+            }
+        }
+    });
+}
+
+
+function clearAllDistanceMeasurements() {
+    // Aktive Messung abbrechen
+    if (activeMeasurement) {
+        map.off('mousemove', updateActiveDistanceLine);
+        map.off('click', finishDistanceMeasurement);
+        
+        activeMeasurement.line.remove();
+        activeMeasurement.label.remove();
+        activeMeasurement = null;
+        
+        modifyNavaidMarkers(false);
+    }
+    
+    // Bestehende Messungen entfernen
+    distanceMeasurements.forEach(measurement => {
+        measurement.line.remove();
+        measurement.label.remove();
+        
+        if (measurement.moveListener) {
+            map.off('move', measurement.moveListener);
+        }
+    });
+    
+    distanceMeasurements = [];
 }
 
 let closestNavAid = null;
@@ -119,8 +326,9 @@ function findClosestNavAid(markerLat, markerLon, isNext = false) {
             [initialMarkerLat, initialMarkerLon], // Benutze die ursprünglichen Koordinaten
             closestNavAidLatLng
         ], {
-            color: 'blue',
-            weight: 2
+            color: 'red',
+            weight: 2,
+            dashArray: '5, 10'
         }).addTo(map);
 
         // Füge die Linie zum Array hinzu
@@ -130,7 +338,7 @@ function findClosestNavAid(markerLat, markerLon, isNext = false) {
         const popupContent = `
             <div>
                 <p>${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAid.properties.txtname} ${closestNavAid.properties['select-source-layer']} ${closestNavAid.properties.ident}</p>
-                <button id="nextNavAidBtn${foundNavaidId}">Finde nächstes Navaid</button>
+                <button class="navAidBtn" id="nextNavAidBtn${foundNavaidId}">Finde nächstes Navaid</button>
             </div>
         `;
         line.bindPopup(popupContent).openPopup();
@@ -242,63 +450,6 @@ function calculateAngle(lat1, lon1, lat2, lon2) {
 
 
 
-// Funktion zum Reset der Karte
-function resetMap() {
-    let trackedAcftDiv = document.getElementById('trackedAcft');
-    trackedAcftDiv.classList.add('hiddenTrackedAcft');
-
-    currentAddresses = [];
-    if (trackedAcft) {
-        if (currentTrackLine) {
-            map.removeLayer(currentTrackLine);
-            currentTrackLine = null;
-        }
-        trackedAcft.isTracked = false;
-        trackedAcft.updateMarkerStyle();
-        trackedAcft = null;
-    }
-
-    // Reset destination and flight line
-    if (flightDistLine) {
-        map.removeLayer(flightDistLine);
-        flightDistLine = null;
-    }
-    if (trackedIcaoDest) {
-        trackedIcaoDest = null;
-        trackedEta = '';
-        let icaoDestInput = document.getElementById('icaoDest');
-        icaoDestInput.value = '';
-    }
-    if (currentAdressGeoJSONLayer) {
-        map.removeLayer(currentAdressGeoJSONLayer);
-    }
-    currentAdressGeoJSONLayer = null;
-
-    trackedAcftReg = 'nothing';
-    if (markerData.navaid.added) {
-        toggleMarkers('navaid');
-    }
-    // Entferne alle Marker
-    markers.forEach(marker => map.removeLayer(marker));
-    markers = [];
-
-    // Entferne alle Polylines
-    polylines.forEach(line => map.removeLayer(line));
-    polylines = [];
-    if (flightDistLine) {
-        flightDistLine.remove();
-    }
-    if (trackedIcaoDest) {
-        trackedIcaoDest = '';
-        let icaoDestInput = document.getElementById('icaoDest');
-        icaoDestInput.value = '';
-    }
-    initialMarkerLat = null;
-    initialMarkerLon = null;
-    closestNavAid = null;
-    foundNavAids = []; // Array zum Speichern bereits gefundener Navaids
-    foundNavaidId = 0;
-}
 
 
 // Funktion zur Abfrage der Höhe von der Open Elevation API

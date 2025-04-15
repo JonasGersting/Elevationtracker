@@ -6,6 +6,8 @@ let weatherPath;
 let rainviewerWeather;
 let rainviewerClouds;
 let currentTileLayer;
+let osmb;
+
 var slider = document.getElementById('opacity-slider');
 var sliderValue = document.getElementById('slider-value');
 slider.addEventListener('input', setOpacity);
@@ -24,6 +26,32 @@ var worldPolygon = L.polygon([
     fillColor: 'white',
     fillOpacity: 0
 }).addTo(map).bringToBack();
+
+// Angepasster OSM Buildings Funktionsblock
+const buildingsCheckbox = document.getElementById('buildings-checkbox');
+buildingsCheckbox.addEventListener('change', toggleBuildings);
+
+function toggleBuildings() {
+    if (buildingsCheckbox.checked) {
+        // Aktiviere 3D-Gebäude
+        console.log("Aktiviere OSM Buildings");
+        try {
+            // Immer ein neues OSMBuildings-Objekt erstellen
+            osmb = new OSMBuildings(map);
+            osmb.load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
+            console.log("OSM Buildings aktiviert");
+        } catch (e) {
+            console.error("Fehler beim Aktivieren von OSM Buildings:", e);
+        }
+    } else {
+        if (osmb) {
+            console.log("Setze OSM Buildings-Referenz zurück");
+            map.removeLayer(osmb);
+            osmb = null;
+        }
+    }
+}
+
 
 
 function setOpacity() {
@@ -98,12 +126,10 @@ let topPlusOpenLightGray = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topp
     attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
 });
 
-let googleSatelite = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl={language}', {
-    subdomains: '0123',
+let googleSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     minZoom: 4,
     maxZoom: 22,
-    language: 'de',
-    attribution: '&copy; Google Maps'
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
 });
 
 let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
@@ -115,7 +141,6 @@ let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
     attribution: '&copy; <a href="https://www.dwd.de">Deutscher Wetterdienst</a>'
 });
 
-let osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
 const mapStates = {
     backgroundMaps: {

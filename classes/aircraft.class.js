@@ -7,7 +7,7 @@ class Aircraft {
 
         // Aircraft properties
         const { lat, lon, t, alt_baro, ias, true_heading,
-            track, r, flight, hex, gs } = aircraftData;
+            track, r, flight, hex, gs, seen_pos } = aircraftData;
 
         this.position = [lat, lon];
         this.type = t;
@@ -20,7 +20,8 @@ class Aircraft {
         this.hex = hex;
         this.groundSpeed = gs;
         this.isTracked = false;
-        
+        this.lastPos = seen_pos
+
 
         this.createMarker();
 
@@ -113,7 +114,24 @@ class Aircraft {
         document.getElementById('trackedIas').innerHTML = `${this.groundSpeed}kts`;
         document.getElementById('trackedHeading').innerHTML = `${this.heading}°`;
         document.getElementById('trackedTrack').innerHTML = `${this.track}°`;
+        this.checkLastPos();
+
+    }
+
+    checkLastPos() {
+        // Überprüfe den lastPos-Wert und setze die Farbe entsprechend
+        const lastPosElement = document.getElementById('lastPos');
+        if (this.lastPos > 10) {
+            lastPosElement.style.color = 'rgb(181, 117, 33)';
+            lastPosElement.style.fontWeight = 'bolder';
+        } else {
+            lastPosElement.style.color = '';
+            lastPosElement.style.fontWeight = 'normal';
+        }
+        lastPosElement.innerHTML = `${this.lastPos.toFixed(2)}s`;
+
         document.getElementById('ETA').innerHTML = `${trackedEta}min`;
+
     }
 
     async getImage() {
@@ -189,7 +207,7 @@ class Aircraft {
     }
 
     getSvgForType(rotation, color) {
-        if (helAcft.includes(this.type)) {
+        if (helAcft.includes(this.type) || (this.callsign && (this.callsign.startsWith('DH') || this.callsign.startsWith('CHX') || this.callsign.startsWith('HSO')))) {
             return `
                     <div style="transform: rotate(${rotation - 90}deg);">
            <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg height="24pt" width="24pt" viewBox="0 0 129 97" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M10.641,51.985l-7.247,-0c-1.608,-0 -2.914,-1.583 -2.914,-3.532c-0,-1.949 1.306,-3.531 2.914,-3.531l7.247,0l-0,-11.939l-2.222,-3.862l10.382,-0l-0,15.801l29.212,0c3.128,-4.619 12.252,-8.389 24.205,-10.161l-23.317,-28.254c-1.137,-1.378 -1.137,-3.615 0,-4.994c1.138,-1.378 2.984,-1.378 4.121,0l26.761,32.428c2.543,-0.18 5.169,-0.275 7.856,-0.275c2.686,0 5.313,0.095 7.855,0.275l26.761,-32.428c1.137,-1.378 2.984,-1.378 4.121,0c1.137,1.379 1.137,3.616 0,4.994l-23.316,28.254c14.881,2.206 25.377,7.509 25.377,13.692c-0,6.184 -10.496,11.486 -25.377,13.693l23.316,28.253c1.137,1.379 1.137,3.616 0,4.994c-1.137,1.378 -2.984,1.378 -4.121,0l-26.761,-32.427c-2.542,0.18 -5.169,0.274 -7.855,0.274c-2.687,0 -5.313,-0.094 -7.856,-0.274l-26.761,32.427c-1.137,1.378 -2.983,1.378 -4.121,0c-1.137,-1.378 -1.137,-3.615 0,-4.994l23.317,-28.253c-11.953,-1.772 -21.077,-5.542 -24.205,-10.161l-29.212,-0l-0,15.801l-10.609,0l2.449,-3.882l-0,-11.919Z" style="fill:${color};stroke:#000;stroke-width:0.96px;"/></svg>
@@ -202,7 +220,7 @@ class Aircraft {
             
             </div>
             `
-        } else if (pistonAcft.includes(this.type)) {
+        } else if (pistonAcft.includes(this.type) || (this.callsign && (this.callsign.startsWith('DM')))) {
             return `
             <div style="transform: rotate(${rotation + 90}deg);">
             <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg height="28pt" width="28pt" viewBox="0 0 375 375" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M59.724,188.988l-3.537,-0.97l3.535,-0.969c0.006,-27.991 2.095,-50.692 4.668,-50.692c2.493,-0 4.532,21.331 4.661,48.134l3.149,-0.863l0,-8.239l40.291,-6.337l8.621,0l0,-69.706l5.796,-88.053c0,0 0.611,-5.314 6.809,-5.83c8.604,-0.717 30.721,-0.426 30.721,-0.426l10.863,94.309l0,69.706l8.621,0l79.836,11.278l8.537,-51.482l25.727,-0.016l8.651,51.758l-14.048,3.818l25.563,3.61l-25.079,3.543l13.564,3.686l-8.651,51.758l-25.727,-0.016l-8.505,-51.286l-79.868,11.281l-8.621,0l0,69.707l-10.676,92.682c0,-0 -22.304,0.191 -30.908,-0.526c-6.198,-0.517 -6.915,-5.713 -6.915,-5.713l-5.69,-86.443l0,-69.707l-8.621,0l-40.291,-6.336l0,-8.239l-3.159,-0.866c-0.204,26.018 -2.21,46.475 -4.651,46.475c-2.521,-0 -4.578,-21.808 -4.666,-49.03Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="0" width="374.375" height="374.375" style="fill:none;"/></svg>

@@ -397,3 +397,68 @@ function toggleMarkers(key) {
 
     markerData[key].added = !added;
 }
+
+
+
+// Funktion zum Reset der Karte
+function resetMap() {
+    let trackedAcftDiv = document.getElementById('trackedAcft');
+    trackedAcftDiv.classList.add('hiddenTrackedAcft');
+
+    currentAddresses = [];
+    if (trackedAcft) {
+        if (currentTrackLine) {
+            map.removeLayer(currentTrackLine);
+            currentTrackLine = null;
+        }
+        trackedAcft.isTracked = false;
+        trackedAcft.updateMarkerStyle();
+        trackedAcft = null;
+    }
+
+    // Reset destination and flight line
+    if (flightDistLine) {
+        map.removeLayer(flightDistLine);
+        flightDistLine = null;
+    }
+    if (trackedIcaoDest) {
+        trackedIcaoDest = null;
+        trackedEta = '';
+        let icaoDestInput = document.getElementById('icaoDest');
+        icaoDestInput.value = '';
+    }
+    if (currentAdressGeoJSONLayer) {
+        map.removeLayer(currentAdressGeoJSONLayer);
+    }
+    currentAdressGeoJSONLayer = null;
+
+    trackedAcftReg = 'nothing';
+    if (markerData.navaid.added) {
+        toggleMarkers('navaid');
+    }
+    
+    // Entferne alle Marker
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+
+    // Entferne alle Polylines
+    polylines.forEach(line => map.removeLayer(line));
+    polylines = [];
+    
+    // Lösche Distanzmessungen aus airspaceService.js
+    clearAllDistanceMeasurements();
+    
+    if (flightDistLine) {
+        flightDistLine.remove();
+    }
+    if (trackedIcaoDest) {
+        trackedIcaoDest = '';
+        let icaoDestInput = document.getElementById('icaoDest');
+        icaoDestInput.value = '';
+    }
+    initialMarkerLat = null;
+    initialMarkerLon = null;
+    closestNavAid = null;
+    foundNavAids = []; // Array zum Speichern bereits gefundener Navaids
+    foundNavaidId = 0;
+}

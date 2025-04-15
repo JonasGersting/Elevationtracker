@@ -87,8 +87,8 @@
                             </button>
                             <button class="bgMapButton" id="googleSatelite"
                                 onclick="toggleMap('googleSatelite', 'backgroundMaps')">
-                                <span class="mapBtnTitle">googleSatelite</span>
-                                <img class="mapImg" src="https://mt1.google.com/vt/lyrs=y&x=537&y=348&z=10&hl=de"
+                                <span class="mapBtnTitle">Satelite</span>
+                                <img class="mapImg" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/346/535"
                                     alt="">
                             </button>
                             <button class="bgMapButton" id="topPlusOpenGrey"
@@ -117,6 +117,10 @@
                             </button>
                         </div>
                         <div id="slider-container">
+                            <div class="buildings-toggle">
+                                <input type="checkbox" id="buildings-checkbox">
+                                <label for="buildings-checkbox">3D Gebäude</label>
+                            </div>
                             <input id="opacity-slider" type="range" min="0" max="100" step="10" value="0">
                             <span id="slider-value">0%</span>
                         </div>
@@ -220,6 +224,10 @@
             <span id="trackedTrack">91deg</span>
         </div>
         <div class="trackedAcftRow">
+            <span>Last Pos:</span>
+            <span id="lastPos">91deg</span>
+        </div>
+        <div class="trackedAcftRow">
             <input placeholder="destination" id="icaoDest" oninput="validateLength(this)" type="text">
             <button class="etaBtn" onclick="showETA()">calc ETA</button>
         </div>
@@ -237,13 +245,13 @@
 <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 <script src="acftType.js" ></script>
-<script src="mapService.js" ></script>
-<script src="airspaceService.js" ></script>
-<script src="radarService.js" ></script>
-<script src="datamanagementService.js" ></script>
-<script src="addressService.js" ></script>
-<script src="showPositionService.js" ></script>
-<script src="gaforService.js" ></script>
+<script src="services/mapService.js" ></script>
+<script src="services/airspaceService.js" ></script>
+<script src="services/radarService.js" ></script>
+<script src="services/datamanagementService.js" ></script>
+<script src="services/addressService.js" ></script>
+<script src="services/showPositionService.js" ></script>
+<script src="services/gaforService.js" ></script>
 <script src="classes/airspace.class.js"></script>
 <script src="classes/edrAirspace.class.js"></script>
 <script src="classes/fisAirspace.class.js"></script>
