@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@turf/turf": "^7.2.0",
+    "idb": "^8.0.2",
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
+    "osmbuildings": "^0.2.0-b"
+  }
+}
