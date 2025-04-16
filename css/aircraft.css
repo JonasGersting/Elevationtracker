@@ -1,0 +1,81 @@
+/* Aircraft Tracking */
+.planeIcon {
+    width: 16px;
+    height: 16px;
+}
+
+#trackedAcft {
+    transition: 0.5s;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Roboto', sans-serif;
+    z-index: 1000;
+    position: absolute;
+    height: 650px;
+    width: 300px;
+    overflow: hidden;
+    right: 0;
+    top: 100px;
+    background-color: rgb(10, 60, 135);
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+    color: white;
+    box-sizing: border-box;
+    padding: 40px;
+}
+
+.hiddenTrackedAcft {
+    width: 0 !important;
+    padding: 0 !important;
+}
+
+.trackedAcftRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0 8px 0;
+    width: 100%;
+}
+
+#trackedCallsign {
+    margin-top: 0;
+}
+
+#trackedReg {
+    margin-bottom: 16px;
+}
+
+#trackedImg {
+    border-radius: 8px;
+    max-width: 100%;
+    border: 2px solid rgb(195, 245, 25);
+    margin-bottom: 16px;
+    max-height: 150px;
+}
+
+#icaoDest {
+    width: 100px;
+    border: none;
+    border-radius: 8px;
+    height: 24px;
+    outline: none;
+    text-align: center;
+}
+
+.etaBtn {
+    height: 26px;
+    width: 100px;
+    border: none;
+    outline: none;
+    background-color: rgb(195, 245, 25);
+    color: rgb(10, 60, 135);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.etaBtn:hover {
+    background-color: rgb(10, 60, 135);
+    color: rgb(195, 245, 25);
+    border: 2px solid rgb(195, 245, 25);
+}

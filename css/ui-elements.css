@@ -1,0 +1,206 @@
+/* Card and UI Buttons */
+.buttonWithLoader {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-evenly;
+    margin-top: 32px;
+}
+
+.aerodromeCardButton {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: rgb(195, 245, 25);
+    border: none;
+    width: 200px;
+    height: 60px;
+    color: rgb(15, 90, 210);
+    font-size: 1.5em;
+    cursor: pointer;
+    border-radius: 16px;
+}
+
+.aerodromeCardButton:hover {
+    background-color: rgb(15, 90, 210);
+    border: 2px solid rgb(195, 245, 25);
+    color: rgb(195, 245, 25);
+}
+
+.aerodromeCardButton:disabled {
+    background-color: rgb(180, 180, 180);
+    color: rgb(100, 100, 100);
+    cursor: not-allowed;
+    border: none;
+    opacity: 0.6;
+}
+
+.detailButtonsGroup {
+    position: absolute;
+    position: absolute;
+    left: 102%;
+    top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border-radius: 100%;
+    border: none;
+    height: 48px;
+    width: 48px;
+    cursor: pointer;
+    color: white;
+    font-size: 2em;
+    background-color: transparent;
+}
+
+.closeButton:hover {
+    color: rgb(195, 245, 25);
+}
+
+.rotateButton {
+    border: none;
+    height: 48px;
+    width: 48px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: white;
+    font-size: 2em;
+    background-color: rgb(40, 40, 126);
+}
+
+.rotateButton:hover {
+    background-color: white;
+    color: rgb(40, 40, 126)
+}
+
+.switchButton {
+    position: absolute;
+    top: 50%;
+    border: none;
+    height: 48px;
+    width: 48px;
+    background-color: rgb(238 238 238);
+    color: black;
+    cursor: pointer;
+    border-radius: 16px;
+    font-size: 2em;
+    z-index: 5;
+}
+
+.switchButton:hover {
+    background-color: rgb(195, 245, 25);
+    color: rgb(6, 44, 100)
+}
+
+.pdfButtons {
+    position: absolute;
+    z-index: 5;
+}
+
+.right-32 {
+    right: 32px;
+}
+
+.left-32 {
+    left: 32px;
+}
+
+#pageIndicator {
+    position: absolute;
+    bottom: 16px;
+    right: 32px;
+    color: rgb(195, 245, 25);
+    z-index: 5;
+    background-color: rgb(15, 90, 210);
+    border-radius: 16px;
+    padding: 8px;
+}
+
+/* Image and Cards */
+.bigImg {
+    height: 100vh;
+}
+
+.cardWrapper {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: grab;
+    display: flex;
+    justify-content: center;
+}
+
+.image-container img {
+    transform-origin: center center;
+    transition: transform 0.2s ease-out;
+}
+
+/* Overlay and Errors */
+.overlay {
+    height: 100vh;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.error {
+    position: absolute;
+    height: 50px;
+    width: 400px;
+    background-color: rgb(235, 25, 20);
+    border-radius: 16px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.errorCloseBtn {
+    border: none;
+    background-color: transparent;
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    right: 16px;
+}
+
+
+/* Loading Animation */
+.loader {
+    display: inline-block;
+    margin-left: 10px;
+    width: 18px;
+    height: 18px;
+    border: 4px solid rgb(40, 40, 126);
+    border-top: 4px solid rgb(195, 245, 25);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

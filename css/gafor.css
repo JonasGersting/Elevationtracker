@@ -1,0 +1,70 @@
+
+/* GAFOR */
+.gaforArea {
+    background-color: transparent;
+    color: rgb(40, 40, 126);
+    font-weight: bold;
+    border: none;
+    box-shadow: none;
+}
+
+#calcGaforRadius {
+    position: absolute;
+    z-index: 1000;
+    bottom: 100px;
+    border-radius: 8px;
+    background-color: rgb(10, 60, 135);
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    left: 32px;
+    padding: 16px;
+    display: none;
+    justify-content: center;
+    gap: 16px;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+#gaforNumbers {
+    border: none;
+    text-align: center;
+    height: 24px;
+    border-radius: 6px;
+    outline: none;
+}
+
+.gaforBtn {
+    background-color: rgb(195, 245, 25);
+    border: none;
+    border-radius: 6px;
+    color: rgb(10, 60, 135);
+    cursor: pointer;
+    border: 1px solid rgb(195, 245, 25);
+}
+
+.gaforBtn:hover {
+    background-color: rgb(10, 60, 135);
+    color: rgb(195, 245, 25);
+}
+
+.gaforInput {
+    display: flex;
+    gap: 16px;
+}
+
+/* Position Controls */
+#showActualPos {
+    position: absolute;
+    z-index: 1000;
+    bottom: 32px;
+    width: 200px;
+    border-radius: 8px;
+    background-color: rgb(10, 60, 135);
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    left: 32px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

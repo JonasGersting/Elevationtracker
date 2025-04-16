@@ -234,10 +234,6 @@ class Aerodrome extends AirspacePolygon {
                     <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155" frameborder="0"></iframe>
 
             `
-
-            // this.loadPdf('https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=21599');
-          
-            // pageIndicator.innerHTML = `${this.currentImgIndex + 1} / ${this.aipImgs.images.length}`;
         }
     }
 

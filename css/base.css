@@ -1,0 +1,32 @@
+/* Basic Page Setup */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+h3 {
+    margin: 0;
+}
+
+.shadow {
+    box-shadow: rgba(0, 0, 0, 0.4) 1.95px 3px 2.6px;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.marginTop16 {
+    margin-top: 16px;
+}
+
+.margin-top16 {
+    margin-top: 16px;
+}
+
+.z-index1100 {
+    z-index: 1100;
+}
