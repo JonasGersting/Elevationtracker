@@ -174,30 +174,21 @@ class Aerodrome extends AirspacePolygon {
     setaipInfo(icaoCode) {        
         aipInfo.forEach(item => {
             if (item.Flugplatz === icaoCode) {
-                // Initialisiere this.aipIds mit den ersten beiden Werten
                 this.aipIds = [
-                    item.Adinfo, // adInfoId
-                    item.AD      // adChartId
+                    item.Adinfo, 
+                    item.AD      
                 ];
-                console.log(item.VFRchart);
-                // Prüfe, ob VFRchart ein Array ist, und füge Elemente einzeln hinzu
                 if (Array.isArray(item.VFRchart)) {
-                    
-                    
                     item.VFRchart.forEach(item => {
-                        this.aipIds.push(item); // Füge alle Elemente des Arrays einzeln hinzu
+                        this.aipIds.push(item); 
                     });
                 } else if (item.VFRchart) {
-                    this.aipIds.push(item.VFRchart); // Füge den einzelnen Wert hinzu
+                    this.aipIds.push(item.VFRchart); 
                 }
             }
         });
-        console.log(this.aipIds);
     }
     
-    
-    
-
     async fetchWeatherData(geometry) {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${geometry.coordinates[1]}&longitude=${geometry.coordinates[0]}&current=temperature_2m,showers,snowfall,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
         try {
@@ -226,20 +217,17 @@ class Aerodrome extends AirspacePolygon {
             aerodromeCard.style.borderBottomRightRadius = '0px';
             aipImgContainer.style.width = '900px';
             aipImgContainer.innerHTML +=
-
                 `
                        <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
                     <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
                     <span id="pageIndicator">${this.currentPage + 1} / ${this.aipIds.length}</span>
                     <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155" frameborder="0"></iframe>
-
             `
         }
     }
 
     changeAipImg(direction) {
         let aipIframe = document.getElementById('pdfIframe');
-        
         if (direction == 'right') {
             if (this.currentPage != this.aipIds.length - 1) {
                 this.currentPage++
@@ -261,7 +249,6 @@ class Aerodrome extends AirspacePolygon {
         pageIndicator.innerHTML = `${this.currentPage + 1} / ${this.aipIds.length}`;
     }
 
-
     closeDetailInfo() {
         let detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '0px';
@@ -269,17 +256,4 @@ class Aerodrome extends AirspacePolygon {
             detailDiv.innerHTML = '';
         }, 1000);
     }
-
-    
-
-
-
-
-
-
-
-
-
-    
-
 }

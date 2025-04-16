@@ -4,11 +4,9 @@ class Aircraft {
         this.aircraftLayer = aircraftLayer;
         this.marker = null;
         this.trackLine = null;
-
         // Aircraft properties
         const { lat, lon, t, alt_baro, ias, true_heading,
             track, r, flight, hex, gs, seen_pos } = aircraftData;
-
         this.position = [lat, lon];
         this.type = t;
         this.altitude = alt_baro;
@@ -21,10 +19,7 @@ class Aircraft {
         this.groundSpeed = gs;
         this.isTracked = false;
         this.lastPos = seen_pos
-
-
         this.createMarker();
-
     }
 
     createMarker() {
@@ -32,7 +27,6 @@ class Aircraft {
         const acftImgColor = this.isTracked ?
             'rgb(181 117 33)' :
             this.getAltitudeColor();
-
         const planeIcon = L.divIcon({
             html: this.getSvgForType(rotation, acftImgColor),
             className: 'planeIcon',
@@ -40,7 +34,6 @@ class Aircraft {
             iconAnchor: [15, 15],
             popupAnchor: [0, -15]
         });
-
         const tooltipContent = `
             <div>
                 <strong>registration:</strong> ${this.registration || 'Unknown'}<br>
@@ -48,25 +41,21 @@ class Aircraft {
                 <strong>Altitude:</strong> ${this.altitude || 'N/A'} ft<br>
             </div>
         `;
-
         this.marker = L.marker(this.position, { icon: planeIcon });
         this.marker.bindTooltip(tooltipContent, {
             direction: 'top',
             offset: [0, -15]
         });
-
         this.marker.on('click', () => this.handleClick());
-
         this.aircraftLayer.addLayer(this.marker);
     }
 
     async handleClick() {
-        // Cleanup vorheriges trackedAcft
         if (trackedAcft && trackedAcft !== this) {
-            trackedAcft.isTracked = false;  // Status zurücksetzen
-            trackedAcft.updateMarkerStyle(); // Marker-Style aktualisieren
+            trackedAcft.isTracked = false;  
+            trackedAcft.updateMarkerStyle(); 
             if (currentTrackLine) {
-                this.map.removeLayer(currentTrackLine); // Track-Linie entfernen
+                this.map.removeLayer(currentTrackLine);
                 currentTrackLine = null;
             }
             if (flightDistLine) {
@@ -80,7 +69,6 @@ class Aircraft {
                 trackedEta = '';
             }
         }
-
         trackedAcft = this;
         this.isTracked = true;
         this.updateMarkerStyle();
@@ -103,7 +91,6 @@ class Aircraft {
     async showDetails() {
         const trackedAcftDiv = document.getElementById('trackedAcft');
         trackedAcftDiv.classList.remove('hiddenTrackedAcft');
-
         document.getElementById('trackedCallsign').innerHTML = this.callsign;
         document.getElementById('trackedReg').innerHTML = this.registration;
         document.getElementById('trackedImg').src = await this.getImage();
@@ -115,11 +102,9 @@ class Aircraft {
         document.getElementById('trackedHeading').innerHTML = `${this.heading}°`;
         document.getElementById('trackedTrack').innerHTML = `${this.track}°`;
         this.checkLastPos();
-
     }
 
     checkLastPos() {
-        // Überprüfe den lastPos-Wert und setze die Farbe entsprechend
         const lastPosElement = document.getElementById('lastPos');
         if (this.lastPos > 10) {
             lastPosElement.style.color = 'rgb(181, 117, 33)';
@@ -129,9 +114,7 @@ class Aircraft {
             lastPosElement.style.fontWeight = 'normal';
         }
         lastPosElement.innerHTML = `${this.lastPos.toFixed(2)}s`;
-
         document.getElementById('ETA').innerHTML = `${trackedEta}min`;
-
     }
 
     async getImage() {
@@ -164,7 +147,6 @@ class Aircraft {
         if (currentTrackLine) {
             this.map.removeLayer(currentTrackLine);
         }
-
         const coordinates = trackData.map(item => [item[1], item[2]]);
         currentTrackLine = L.polyline(coordinates, {
             color: 'green',
@@ -188,7 +170,6 @@ class Aircraft {
     }
 
     async updateData() {
-        // If this is the tracked aircraft, update details
         if (this.isTracked) {
             this.showDetails();
             await this.fetchAndDrawTrack();
@@ -199,7 +180,6 @@ class Aircraft {
         }
     }
 
-    // Hilfsmethoden aus der original Datei
     getAltitudeColor() {
         if (this.altitude === 'ground') return '#454545';
         if (this.altitude <= 10000) return '#75930F';

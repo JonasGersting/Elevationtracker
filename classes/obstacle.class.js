@@ -11,30 +11,23 @@ class Obstacle extends AirspacePolygon {
         this.elev = elev;
         this.height = height;
         this.map = map;
-
-        // Marker wird hier vorbereitet, aber nicht hinzugefügt
-        const iconUrl = this.getCorrectImg(this.lighted, this.type); // Platzhalter für die URL des Bildes
+        const iconUrl = this.getCorrectImg(this.lighted, this.type);
         const iconSize = [120, 120];
         const customIcon = L.icon({
             iconUrl: iconUrl,
             iconSize: iconSize
         });
-
-        // Marker wird erstellt
         this.marker = L.marker([this.lat, this.long], { icon: customIcon });
-
-        // Popup wird an den Marker gebunden
         this.marker.bindPopup(
             `ENR-Nummer: ${this.location}<br>Name: ${this.name}<br>Type: ${this.type}<br>ELEV: ${this.elev}FT<br>Height: ${this.height}FT`
         );
     }
 
-    // Methode zum Hinzufügen des Markers zur Karte
     addToMap() {
         this.marker.addTo(this.map);
     }
 
-    // Methode zum Hinzufügen des Markers zu einem Cluster-Layer
+    
     addToCluster(clusterGroup) {
         clusterGroup.addLayer(this.marker);
     }
@@ -67,7 +60,5 @@ class Obstacle extends AirspacePolygon {
         }else {
             return 'img/windmillLighted.svg';
         }
-
-       
     }
 }

@@ -3,8 +3,6 @@ class EddAirspace extends AirspacePolygon {
         super(geometry, name, ident, map, polygonLayers);
     }
 
-    
-    
     addToMap() {
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
@@ -15,24 +13,20 @@ class EddAirspace extends AirspacePolygon {
                     offset: L.point(20, 0),
                     className: 'polygon-label',
                 }).setContent(this.name);
-
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
                     if (!polygonIsBroughtUpToFront) {
                         this.handlePolygonOverlap(this.geometry);
                     }
-                      // Prüfen auf Überlappung
                     layer.bindTooltip(tooltip).openTooltip();
                     layer.setStyle({fillColor: 'white', fillOpacity: 0.8});
                 });
-
                 layer.on('mouseout', () => {
-                    isCursorOverPolygon = false;  // Setze den globalen Zustand zurück
+                    isCursorOverPolygon = false;  
                     layer.closeTooltip();
-                    layer.unbindTooltip(); // Verbindung lösen
+                    layer.unbindTooltip(); 
                     layer.setStyle({fillColor: 'orange', fillOpacity: 0.2});
                 });
-
                 layer.on('click', async () => {
                     currentAirspace = this;
                     const id = await this.setAipInfoAirspace(this.name);
@@ -48,11 +42,10 @@ class EddAirspace extends AirspacePolygon {
 
     getStyle() {
         return {
-            color: 'orange',  // Farbe des Polygons
-            weight: 2,     // Randdicke
-            opacity: 0.6,  // Randtransparenz
-            fillOpacity: 0.2 // Fülltransparenz
+            color: 'orange',  
+            weight: 2,     
+            opacity: 0.6,  
+            fillOpacity: 0.2 
         };
     }
-
 }

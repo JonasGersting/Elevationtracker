@@ -1,7 +1,7 @@
 class FirAirspace extends AirspacePolygon {
     constructor(geometry, name, ident, map, polygonLayers) {
         super(geometry, name, ident, map, polygonLayers);
-        this.labelMarker = null; // Neue Eigenschaft für das Label
+        this.labelMarker = null; 
     }
     
     addToMap() {
@@ -9,14 +9,11 @@ class FirAirspace extends AirspacePolygon {
             style: this.getStyle(),
             onEachFeature: (feature, layer) => {
                 const center = layer.getBounds().getCenter();
-                
                 const label = L.divIcon({
                     className: 'fir-label',
                     html: `<div>${this.name}</div>`,
                     iconSize: null
                 });
-                
-                // Speichere die Referenz zum Label-Marker
                 this.labelMarker = L.marker(center, {
                     icon: label,
                     interactive: false
@@ -25,7 +22,6 @@ class FirAirspace extends AirspacePolygon {
         }).addTo(this.map);
     }
 
-    // Überschreibe die removeFromMap Methode
     removeFromMap() {
         if (this.layer) {
             this.layer.remove();
@@ -37,14 +33,12 @@ class FirAirspace extends AirspacePolygon {
         }
     }
 
-
     getStyle() {
         return {
-            color: 'gray',  // Farbe des Polygons
-            weight: 2,     // Randdicke
-            opacity: 0.6,  // Randtransparenz
-            fillOpacity: 0.2, // Fülltransparenz
+            color: 'gray',  
+            weight: 2,     
+            opacity: 0.6,  
+            fillOpacity: 0.2, 
             className: 'fir-polygon'        };
     }
-
 }

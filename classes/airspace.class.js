@@ -1,4 +1,3 @@
-// Basisklasse für Airspace-Polygone
 class AirspacePolygon {
     aipInfoAirspace;
     constructor(geometry, name, ident, map, polygonLayers) {
@@ -6,10 +5,8 @@ class AirspacePolygon {
         this.name = name;
         this.ident = ident;
         this.map = map;
-        this.layer = null; // Platzhalter für den Polygon-Layer
-        this.polygonLayers = polygonLayers; // Referenz auf das spezifische polygonLayers-Array
-
-        //pdf viewer properties
+        this.layer = null; 
+        this.polygonLayers = polygonLayers; 
         this.pdfDoc = null;
         this.pageNum = 1;
         this.scale = 1;
@@ -17,12 +14,11 @@ class AirspacePolygon {
     }
 
     handlePolygonOverlap(layerGeometry) {
-        // Überprüfe andere Instanzen der EdrAirspace-Klasse
         this.polygonLayers.forEach((otherLayer) => {
             if (otherLayer instanceof EdrAirspace && otherLayer.name !== this.name) {
                 if (this.isPolygonOverlapping(layerGeometry, otherLayer.geometry.coordinates)) {
                     polygonIsBroughtUpToFront = true;
-                    otherLayer.layer.bringToFront(); // Überlappende Polygone nach vorne bringen
+                    otherLayer.layer.bringToFront(); 
                 }
             }
         });
@@ -34,7 +30,6 @@ class AirspacePolygon {
             geometry: currentPolygon,
             properties: {}
         };
-
         const otherFeature = {
             type: "Feature",
             geometry: {
@@ -43,15 +38,10 @@ class AirspacePolygon {
             },
             properties: {}
         };
-
-        // Prüfen auf Überschneidung oder Umschließung
         const isEnclosed = turf.booleanContains(currentFeature, otherFeature);
-        // const hasIntersection = turf.intersect(currentFeature, otherFeature);
-
-        return isEnclosed; // True, wenn Umschlossen oder Überschneidung
+        return isEnclosed;
     }
 
-    // Methode zum Entfernen des Polygons von der Karte
     removeFromMap() {
         if (this.layer) {
             this.layer.remove();
@@ -60,11 +50,8 @@ class AirspacePolygon {
     }
 
     showInfoPdf(pdfId) {
-        console.log('PDF ID:', pdfId);
         let detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '100vh';
-
-        // Create container for PDF
         detailDiv.innerHTML = `
             <div class="overlay"></div>
             <div class="cardWrapper">
@@ -84,7 +71,6 @@ class AirspacePolygon {
     setAipInfoAirspace(name) {
         return new Promise((resolve) => {
             let id = null;
-
             if (this instanceof RmzAirspace) {
                 rmzInfo.forEach(rmz => {
                     const lowerCaseRmzArray = rmz.RMZ.map(item => item.toLowerCase());
@@ -122,7 +108,6 @@ class AirspacePolygon {
                 resolve(id);
             } else if (this instanceof EdrAirspace) {
                 const cleanName = name.replace(/ED-R(\S+).*/, '$1').trim();
-                console.log('Cleaned EDR name:', cleanName);
                 edrInfo.forEach(edr => {
                     const lowerCaseEdrArray = edr["ED-R"].map(item => item.toLowerCase());
                     console.log(lowerCaseEdrArray, 'array EDR');
@@ -134,7 +119,6 @@ class AirspacePolygon {
                 resolve(id);
             } else if (this instanceof EddAirspace) {
                 const cleanName = name.replace(/ED-D(\S+).*/, '$1').trim();
-                console.log('Cleaned EDR name:', cleanName);
                 eddInfo.forEach(edd => {
                     const lowerCaseEdrArray = edd["ED-D"].map(item => item.toLowerCase());
                     console.log(lowerCaseEdrArray, 'array EDD');
@@ -159,9 +143,8 @@ class AirspacePolygon {
         }, 1000);
     }
 
-    // Überschreiben in spezifischen Klassen
     getStyle() {
-        return {}; // Standardstil
+        return {}; 
     }
 
 

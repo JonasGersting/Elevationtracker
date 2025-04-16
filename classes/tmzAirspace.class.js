@@ -8,25 +8,22 @@ class TmzAirspace extends AirspacePolygon {
             style: this.getStyle(),
             onEachFeature: (feature, layer) => {
                 const tooltip = L.tooltip({
-                    permanent: false,       // Tooltip erscheint nur bei Hover
-                    direction: 'right',     // Richtung des Tooltips
-                    offset: L.point(20, 0), // Offset für bessere Platzierung
+                    permanent: false,       
+                    direction: 'right',    
+                    offset: L.point(20, 0), 
                     className: 'polygon-label',
                 }).setContent(this.name);
-
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
-                    layer.bindTooltip(tooltip).openTooltip(); // Tooltip beim Hover öffnen
-                    layer.setStyle({ color: 'white', dashArray: '4 4', fillOpacity: 0.6, fillColor: 'darkblue' }); // Hervorhebung beim Hover
+                    layer.bindTooltip(tooltip).openTooltip();
+                    layer.setStyle({ color: 'white', dashArray: '4 4', fillOpacity: 0.6, fillColor: 'darkblue' });
                 });
-
                 layer.on('mouseout', () => {
-                    isCursorOverPolygon = false;  // Setze den globalen Zustand zurück
-                    layer.closeTooltip();        // Tooltip schließen
-                    layer.unbindTooltip();       // Tooltip-Verbindung lösen
-                    layer.setStyle(this.getStyle()); // Ursprünglicher Stil
+                    isCursorOverPolygon = false;  
+                    layer.closeTooltip();        
+                    layer.unbindTooltip();       
+                    layer.setStyle(this.getStyle());
                 });
-
                 layer.on('click', async () => {
                     currentAirspace = this;
                     const id = await this.setAipInfoAirspace(this.name);
@@ -42,11 +39,11 @@ class TmzAirspace extends AirspacePolygon {
 
     getStyle() {
         return {
-            color: 'darkblue',   // Dunkelblaue Farbe für den Rand
-            weight: 2,           // Dicke des Randes
-            opacity: 1,          // Transparenz des Randes
-            dashArray: '4 4',    // Gestricheltes Muster
-            fillOpacity: 0       // Innenbereich vollständig transparent
+            color: 'darkblue',   
+            weight: 2,           
+            opacity: 1,          
+            dashArray: '4 4',    
+            fillOpacity: 0      
         };
     }
 }

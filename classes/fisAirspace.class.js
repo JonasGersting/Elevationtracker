@@ -4,7 +4,6 @@ class FisAirspace extends AirspacePolygon {
         super(geometry, name, map, polygonLayers);
     }
 
-     // Methode zum Hinzufügen des Polygons zur Karte
      addToMap() {
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
@@ -18,13 +17,12 @@ class FisAirspace extends AirspacePolygon {
         }).addTo(this.map);
     }
 
-
     getStyle() {
         return {
-            color: 'blue', // Farbe des Polygons
-            weight: 2,     // Randdicke
-            opacity: 0.6,  // Randtransparenz
-            fillOpacity: 0.2 // Fülltransparenz
+            color: 'blue', 
+            weight: 2,   
+            opacity: 0.6,  
+            fillOpacity: 0.2 
         };
     }
 }
