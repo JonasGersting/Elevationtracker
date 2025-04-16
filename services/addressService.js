@@ -1,7 +1,7 @@
 let currentAdressGeoJSONLayer = null;
 let currentAddresses = [];
 let searchCat = 'Standort';
-// Adress API
+
 async function searchAdress() {
     currentAddresses = [];
     const searchQuery = document.getElementById('searchInput').value;
@@ -12,15 +12,14 @@ async function searchAdress() {
     }
     const data = await response.json();
     currentAddresses = data;
-    displayAddressList(); // Ergebnisse anzeigen
-
+    displayAddressList(); 
 }
 
-// Liste der Adressen unter dem Inputfeld anzeigen
+
 function displayAddressList() {
     const addressList = document.getElementById('addressList');
-    addressList.innerHTML = ''; // Vorherige Ergebnisse löschen
-    addressList.style.display = 'flex'; // Liste sichtbar machen
+    addressList.innerHTML = ''; 
+    addressList.style.display = 'flex'; 
     if (currentAddresses.length > 0) {
         currentAddresses.forEach((addressObj, index) => {
             addressList.innerHTML += `
@@ -37,55 +36,34 @@ function displayAddressList() {
             addressList.style.display = 'none';
         }, 1000);
     }
-
-
 }
 
-// Wenn auf eine Adresse geklickt wird
 async function handleAddressClick(index) {
     let searchInput = document.getElementById('searchInput');
     searchInput.value = '';
     const addressList = document.getElementById('addressList');
     addressList.style.display = 'none';
-    // Wenn es einen aktuellen GeoJSON-Layer oder Marker gibt, diesen entfernen
     if (currentAdressGeoJSONLayer) {
         map.removeLayer(currentAdressGeoJSONLayer);
     }
     let address = currentAddresses[index];
-    // Geodaten aus der Antwort
     const geojson = address.geojson;
-    const lat = parseFloat(address.lat); // Sicherstellen, dass es als Zahl behandelt wird
-    const lon = parseFloat(address.lon); // Sicherstellen, dass es als Zahl behandelt wird
-
-    // Popup-Inhalt
+    const lat = parseFloat(address.lat); 
+    const lon = parseFloat(address.lon);
     const popupContent = `<strong>Adresse:</strong> ${address.display_name}`;
-
-    // Funktion, um Popups an GeoJSON-Features zu binden
     function onEachFeature(feature, layer) {
-        layer.bindPopup(popupContent); // Popup direkt an das GeoJSON-Feature binden
+        layer.bindPopup(popupContent); 
     }
-
-    // Neuen GeoJSON-Layer zur Karte hinzufügen
     currentAdressGeoJSONLayer = L.geoJSON(geojson, {
         onEachFeature: onEachFeature
     }).addTo(map);
-
-    // Zoom-Level je nach GeoJSON-Typ anpassen
-    let zoomLevel = 12; // Standard Zoom-Level
+    let zoomLevel = 12; 
     if (geojson.type !== 'Polygon' && geojson.type !== 'MultiPolygon') {
-        zoomLevel = 18; // Wenn es kein Polygon ist, Zoom-Level auf 15 setzen
-
-        // Popup nach dem Hinzufügen des GeoJSON-Layers öffnen
+        zoomLevel = 18; 
         currentAdressGeoJSONLayer.getLayers()[0].openPopup();
     }
-    map.setView([lat, lon], zoomLevel); // Karte zentrieren und Zoom-Level setzen
+    map.setView([lat, lon], zoomLevel);
 }
-
-
-
-
-
-
 
 function setSearchCat(cat) {
     let searchInput = document.getElementById('searchInput');
@@ -96,7 +74,6 @@ function setSearchCat(cat) {
     searchCat = cat;
 }
 
-
 function returnSearchPlaceholder(cat) {
     if (cat === 'Standort') {
         return `Suche nach Adresse oder Koordinate`;
@@ -106,9 +83,7 @@ function returnSearchPlaceholder(cat) {
     }
 }
 
-
 function validateCoordinates(northPart, eastPart) {
-    // Prüfen und korrigieren von Minuten und Sekunden für den nördlichen Teil
     if (northPart.length >= 4) {
         const minutes = parseInt(northPart.substr(-4, 2));
         if (minutes >= 60) {
@@ -123,8 +98,6 @@ function validateCoordinates(northPart, eastPart) {
             return false;
         }
     }
-
-    // Prüfen und korrigieren von Minuten und Sekunden für den östlichen Teil
     if (eastPart.length >= 5) {
         const minutes = parseInt(eastPart.substr(-4, 2));
         if (minutes >= 60) {
@@ -139,11 +112,9 @@ function validateCoordinates(northPart, eastPart) {
             return false;
         }
     }
-
     return true;
 }
 
-// Konfigurationsobjekt für die verschiedenen Suchtypen hinzufügen
 const searchConfig = {
     'Flugplatz': {
         dataGetter: async () => (!aerodromes || aerodromes.length === 0) ? await getData('aerodromes') : null,
@@ -260,37 +231,30 @@ const searchConfig = {
     }
 };
 
-// Modifizierte search Funktion
 async function search() {
     const input = document.getElementById('searchInput').value.toUpperCase();
     const dmsPattern = /^(\d{4,6})[NSns](\d{5,7})[EWew]$/;
-
     if (dmsPattern.test(input.replace(/\s/g, ''))) {
         let cleanInput = input.replace(/\s/g, '');
         let northPart = cleanInput.match(/(\d{4,6})[NSns]/)[1];
         let eastPart = cleanInput.match(/(\d{5,7})[EWew]/)[1];
-
         if (!validateCoordinates(northPart, eastPart)) {
             return;
         }
-
         while (northPart.length < 6) {
             northPart += '0';
         }
         while (eastPart.length < 7) {
             eastPart += '0';
         }
-        
         const formattedInput = `${northPart}${cleanInput.match(/[NSns]/)[0].toUpperCase()}${eastPart}${cleanInput.match(/[EWew]/)[0].toUpperCase()}`;
         document.getElementById('searchInput').value = formattedInput;
-        
         searchCoordinate();
     } else if (searchCat === 'Callsign') {
         searchAcft();
     } else if (searchConfig[searchCat]) {
         const config = searchConfig[searchCat];
         await config.dataGetter();
-
         let sourceData;
         switch (searchCat) {
             case 'Flugplatz': sourceData = aerodromes; break;
@@ -304,26 +268,21 @@ async function search() {
             case 'NAV-Aid': sourceData = navAids; break;
             default: sourceData = [];
         }
-
         const matchingItems = sourceData.filter(item => config.filter(item, input));
         config.display(matchingItems);
     } else {
         searchAdress();
     }
 }
-// Generische Display-Funktion für alle Arten von Suchergebnissen
+
 function displaySearchResults(items, type) {
     const addressList = document.getElementById('addressList');
     addressList.innerHTML = '';
     addressList.style.display = 'flex';
-
     if (items.length > 0) {
         const limitedResults = items.slice(0, 10);
-        
         limitedResults.forEach((item) => {
-            // Bestimme die Anzeigeparameter basierend auf dem Typ
             const displayParams = getDisplayParams(item, type);
-            
             if (displayParams.shouldDisplay) {
                 addressList.innerHTML += `
                 <button class="searchButton" onclick="goToLocation('${type}', ${displayParams.lat}, ${displayParams.lon}, '${displayParams.name}')">
@@ -337,7 +296,6 @@ function displaySearchResults(items, type) {
     }
 }
 
-// Hilfsfunktion zum Ermitteln der Anzeigeparameter
 function getDisplayParams(item, type) {
     switch(type) {
         case 'Flugplatz':
@@ -364,7 +322,7 @@ function getDisplayParams(item, type) {
                 name: item['Parent Designator'],
                 buttonText: item['Parent Designator']
             };
-        default: // Für ED-R, ED-D, RMZ, CTR, TMZ, PJE
+        default: 
             return {
                 shouldDisplay: true,
                 lat: item.geometry.coordinates[0][0][1],
@@ -375,12 +333,9 @@ function getDisplayParams(item, type) {
     }
 }
 
-// Generische GoTo-Funktion für alle Typen
 function goToLocation(type, lat, lon, name) {
     const addressList = document.getElementById('addressList');
     addressList.style.display = 'none';
-
-    // Konfigurationsobjekt für verschiedene Typen
     const typeConfig = {
         'Flugplatz': { markerKey: 'aerodrome', zoom: 13, isMarker: true },
         'NAV-Aid': { markerKey: 'navaid', zoom: 13, isMarker: true },
@@ -392,10 +347,7 @@ function goToLocation(type, lat, lon, name) {
         'TMZ': { polygonKey: 'tmz', zoom: 11, isMarker: false },
         'PJE': { polygonKey: 'pje', zoom: 11, isMarker: false }
     };
-
     const config = typeConfig[type];
-
-    // Aktiviere den entsprechenden Layer falls nötig
     if (config.isMarker) {
         if (!markerData[config.markerKey].added) {
             toggleMarkers(config.markerKey);
@@ -405,12 +357,9 @@ function goToLocation(type, lat, lon, name) {
             togglePolygons(config.polygonKey);
         }
     }
-
-    // Setze die Kartenansicht
     map.setView([lat, lon], config.zoom);
 }
 
-// Hilfsfunktion für "Keine Ergebnisse" Meldung
 function showNoResults(type) {
     const addressList = document.getElementById('addressList');
     addressList.innerHTML = `
