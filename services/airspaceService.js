@@ -38,7 +38,7 @@ document.addEventListener('mousemove', () => {
 });
 
 const customIcon = L.icon({
-    iconUrl: 'img/mapPin.png',
+    iconUrl: './img/mapPin.png',
     iconSize: [48, 48],     
     iconAnchor: [24, 48],   
     popupAnchor: [0, -48]  
