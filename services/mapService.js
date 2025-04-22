@@ -16,6 +16,7 @@ var map = L.map('map', {
     zoomControl: false
 }).setView([50.505, 12], 9);
 
+
 var worldPolygon = L.polygon([
     [-90, -180],
     [-90, 180],

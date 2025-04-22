@@ -114,9 +114,9 @@ function handleMouseMove(e) {
     }
 }
 
-function calculateDistance(point1, point2) {
+function calculateDistanceMeasuring(point_1, point_2) {
     // Berechne die Distanz in Metern
-    const distanceMeters = point1.distanceTo(point2);
+    const distanceMeters = point_1.distanceTo(point_2);
     
     // Konvertiere zu Nautischen Meilen (1 NM = 1852 Meter)
     const distanceNM = distanceMeters / 1852;
@@ -136,7 +136,7 @@ function updateDistanceLabel() {
         }
     }
     
-    const distanceNM = calculateDistance(linePoints[0], linePoints[1]);
+    const distanceNM = calculateDistanceMeasuring(linePoints[0], linePoints[1]);
     
     // Finde den Mittelpunkt der Linie für die Platzierung des Labels
     const midPoint = L.latLng(

@@ -131,16 +131,18 @@ class Aircraft {
     }
 
     async fetchAndDrawTrack() {
-        try {
-            const response = await fetch(
-                `https://opensky-network.org/api/tracks/?icao24=${this.hex}`
-            );
-            if (!response.ok) throw new Error('no tracks found');
-            const data = await response.json();
-            this.drawTrack(data.path || []);
-        } catch (error) {
-            console.error("Track fetch error:", error);
-        }
+        console.log('track would be drawn here');
+        
+        // try {
+        //     const response = await fetch(
+        //         `https://opensky-network.org/api/tracks/?icao24=${this.hex}`
+        //     );
+        //     if (!response.ok) throw new Error('no tracks found');
+        //     const data = await response.json();
+        //     this.drawTrack(data.path || []);
+        // } catch (error) {
+        //     console.error("Track fetch error:", error);
+        // }
     }
 
     drawTrack(trackData) {
