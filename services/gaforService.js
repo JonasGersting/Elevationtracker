@@ -152,3 +152,11 @@ function drawCircle(center, radius) {
     gaforCircle.addToMap();
 }
 
+
+// Validiert die Eingabe für GAFOR-Nummern
+function validateInput(input) {
+    input.value = input.value
+        .replace(/[^0-9\s]/g, '')    // Entfernt nicht-zulässige Zeichen
+        .replace(/\s+/g, ' ')        // Reduziert auf einzelne Leerzeichen
+        .trim();                     // Entfernt führende und abschließende Leerzeichen
+}

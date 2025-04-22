@@ -195,6 +195,22 @@
     animation: spin 1s linear infinite;
 }
 
+.delete-measurement-btn{
+    background-color: rgb(40, 40, 126);
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 6px;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.delete-measurement-btn:hover{
+    background-color: rgb(195, 245, 25);
+    color: rgb(40, 40, 126);
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);

@@ -24,9 +24,7 @@ class Aircraft {
 
     createMarker() {
         const rotation = this.heading || this.track;
-        const acftImgColor = this.isTracked ?
-            'rgb(181 117 33)' :
-            this.getAltitudeColor();
+        const acftImgColor = this.isTracked ? 'rgb(181 117 33)' : this.getAltitudeColor();
         const planeIcon = L.divIcon({
             html: this.getSvgForType(rotation, acftImgColor),
             className: 'planeIcon',
@@ -51,41 +49,92 @@ class Aircraft {
     }
 
     async handleClick() {
-        if (trackedAcft && trackedAcft !== this) {
-            trackedAcft.isTracked = false;  
-            trackedAcft.updateMarkerStyle(); 
-            if (currentTrackLine) {
-                this.map.removeLayer(currentTrackLine);
-                currentTrackLine = null;
-            }
-            if (flightDistLine) {
-                this.map.removeLayer(flightDistLine);
-                flightDistLine = null;
-            }
-            let icaoDestInput = document.getElementById('icaoDest');
-            icaoDestInput.value = '';
-            if (trackedIcaoDest) {
-                trackedIcaoDest = null;
-                trackedEta = '';
-            }
+        // --- NEU: Check if clicking the already tracked aircraft ---
+        if (trackedAcft && trackedAcft === this) {
+            this.untrackAircraft(); // Call the new untrack method
+            return; // Exit early, no need to re-track
         }
+        // --- Ende NEU ---
+
+        // Untrack previous aircraft if exists
+        if (trackedAcft && trackedAcft !== this) {
+            trackedAcft.untrackAircraft(); // Use the new method to clean up previous
+        }
+
+        // Track this aircraft
         trackedAcft = this;
         this.isTracked = true;
-        this.updateMarkerStyle();
+        this.updateMarkerStyle(); // Update style to tracked color
         await this.showDetails();
         await this.fetchAndDrawTrack();
     }
 
+
+    // --- NEUE METHODE: untrackAircraft ---
+    untrackAircraft() {
+        if (trackedAcft && trackedAcft === this) {
+            console.log(`Untracking ${this.callsign || this.hex}`);
+            this.isTracked = false;
+            this.updateMarkerStyle(); // Reset marker to default color
+
+            // Hide details view
+            const trackedAcftDiv = document.getElementById('trackedAcft');
+            if (trackedAcftDiv) {
+                trackedAcftDiv.classList.add('hiddenTrackedAcft');
+                // Optional: Clear the content of the details view
+                document.getElementById('trackedCallsign').innerHTML = '';
+                document.getElementById('trackedReg').innerHTML = '';
+                document.getElementById('trackedImg').src = 'img/acftWhite.png'; // Reset image
+                document.getElementById('trackedAltitude').innerHTML = '';
+                document.getElementById('trackedPos').innerHTML = '';
+                document.getElementById('trackedType').innerHTML = '';
+                document.getElementById('trackedIas').innerHTML = '';
+                document.getElementById('trackedHeading').innerHTML = '';
+                document.getElementById('trackedTrack').innerHTML = '';
+                document.getElementById('lastPos').innerHTML = '';
+                document.getElementById('ETA').innerHTML = '';
+            }
+
+            // Remove track line
+            if (currentTrackLine) {
+                this.map.removeLayer(currentTrackLine);
+                currentTrackLine = null;
+            }
+
+            // Remove destination line
+            if (flightDistLine) {
+                this.map.removeLayer(flightDistLine);
+                flightDistLine = null;
+            }
+
+            // Clear destination input and related variables
+            let icaoDestInput = document.getElementById('icaoDest');
+            if (icaoDestInput) {
+                icaoDestInput.value = '';
+            }
+            if (trackedIcaoDest) {
+                trackedIcaoDest = null;
+                trackedEta = ''; // Reset ETA
+            }
+
+            // Reset the global tracked aircraft variable
+            trackedAcft = null;
+        }
+    }
+    // --- Ende NEUE METHODE ---
+
     updateMarkerStyle() {
         const rotation = this.heading || this.track;
+        const acftImgColor = this.isTracked ? 'rgb(181 117 33)' : this.getAltitudeColor();
         const icon = L.divIcon({
-            html: this.getSvgForType(rotation, 'rgb(181 117 33)'),
+            html: this.getSvgForType(rotation, acftImgColor), // Use the determined color
             className: 'planeIcon',
             iconSize: [30, 30],
             iconAnchor: [15, 15],
             popupAnchor: [0, -15]
         });
         this.marker.setIcon(icon);
+
     }
 
     async showDetails() {
@@ -132,7 +181,7 @@ class Aircraft {
 
     async fetchAndDrawTrack() {
         console.log('track would be drawn here');
-        
+
         // try {
         //     const response = await fetch(
         //         `https://opensky-network.org/api/tracks/?icao24=${this.hex}`

@@ -83,15 +83,6 @@ async function togglePolygons(airspaceKey) {
     }
 }
 
-// function toggleActBtn(id) {
-//     let button = document.getElementById(id);
-//     button.classList.toggle('bgMapButtonActive');
-// }
-
-// function toggleActBtnRadar() {
-//     let button = document.getElementById('radar');
-//     button.classList.toggle('radarBtnActive');
-// }
 
 const DB_NAME = 'cacheDatabase';
 const STORE_NAME = 'cacheStore';

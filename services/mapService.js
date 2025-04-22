@@ -14,8 +14,7 @@ slider.addEventListener('input', setOpacity);
 
 var map = L.map('map', {
     zoomControl: false
-}).setView([50.505, 12], 9);
-
+}).setView([50.8, 10], 7);
 
 var worldPolygon = L.polygon([
     [-90, -180],

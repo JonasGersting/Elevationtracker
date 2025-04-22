@@ -1,0 +1,58 @@
+<!-- filepath: d:\Jonas\Projekte\Elevationtracker\login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        #errorMessage { color: red; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <!-- Use a form element for better structure, but prevent default submission -->
+    <form id="loginForm">
+        <h2>Login</h2>
+        <!-- Use type="email" for email input -->
+        <input type="email" id="emailInput" placeholder="E-Mail" required><br><br>
+        <!-- Use type="password" for password input -->
+        <input type="password" id="passwordInput" placeholder="Passwort" required><br><br>
+        <!-- Change button type to "submit" to trigger form submission event -->
+        <button type="submit">Login</button>
+    </form>
+    <div id="errorMessage"></div>
+
+    <!-- Import the authentication service as a module -->
+    <script type="module">
+        import { loginUser } from './services/authenticationService.js'; // Adjust path if needed
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const errorMessageDiv = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default form submission which reloads the page
+            errorMessageDiv.textContent = ''; // Clear previous errors
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            loginUser(email, password)
+                .then((userCredential) => {
+                    // Signed in successfully
+                    console.log("Login erfolgreich:", userCredential.user);
+                    // Redirect to index.html
+                    window.location.href = 'index.html'; // Navigate to the main app page
+                })
+                .catch((error) => {
+                    // Handle Errors here.
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error("Login Fehler:", errorCode, errorMessage);
+                    errorMessageDiv.textContent = 'Login nicht erfolgreich. Bitte überprüfen Sie Ihre Eingaben.';
+                });
+        });
+    </script>
+</body>
+</html>
