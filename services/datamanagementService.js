@@ -9,6 +9,7 @@ let gaforAirspace = [];
 let pjeAirspace = [];
 let tmzAirspace = [];
 let atzAirspace = [];
+let trackCoordinates = []; // Neu: Array zum Speichern der Track-Koordinaten
 
 const airspaceStates = {
     fis: { name: 'fisAirspace', airspace: fisAirspace, info: 'null' },
