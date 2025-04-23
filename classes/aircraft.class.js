@@ -4,7 +4,6 @@ class Aircraft {
         this.aircraftLayer = aircraftLayer;
         this.marker = null;
         this.trackLine = null;
-        // Aircraft properties
         const { lat, lon, t, alt_baro, ias, true_heading,
             track, r, flight, hex, gs, seen_pos } = aircraftData;
         this.position = [lat, lon];
@@ -19,7 +18,6 @@ class Aircraft {
         this.groundSpeed = gs;
         this.isTracked = false;
         this.lastPos = seen_pos
-        
         this.createMarker();
     }
 
@@ -50,43 +48,32 @@ class Aircraft {
     }
 
     async handleClick() {
-        // --- NEU: Check if clicking the already tracked aircraft ---
         if (trackedAcft && trackedAcft === this) {
-            this.untrackAircraft(); // Call the new untrack method
-            return; // Exit early, no need to re-track
+            this.untrackAircraft(); 
+            return; 
         }
-        // --- Ende NEU ---
-
-        // Untrack previous aircraft if exists
         if (trackedAcft && trackedAcft !== this) {
-            trackedAcft.untrackAircraft(); // Use the new method to clean up previous
+            trackedAcft.untrackAircraft();
         }
-
-        // Track this aircraft
         trackedAcft = this;
         this.isTracked = true;
-        this.updateMarkerStyle(); // Update style to tracked color
+        this.updateMarkerStyle(); 
+        trackedAcftImg = await this.getImage();
         await this.showDetails();
         await this.fetchInitialTrack();
     }
 
-
-    // --- NEUE METHODE: untrackAircraft ---
     untrackAircraft() {
         if (trackedAcft && trackedAcft === this) {
-            console.log(`Untracking ${this.callsign || this.hex}`);
             this.isTracked = false;
-            this.updateMarkerStyle(); // Reset marker to default color
-            trackCoordinates = []; // Neu: Track-Koordinaten leeren
-
-            // Hide details view
+            this.updateMarkerStyle();
+            trackCoordinates = []; 
             const trackedAcftDiv = document.getElementById('trackedAcft');
             if (trackedAcftDiv) {
                 trackedAcftDiv.classList.add('hiddenTrackedAcft');
-                // Optional: Clear the content of the details view
                 document.getElementById('trackedCallsign').innerHTML = '';
                 document.getElementById('trackedReg').innerHTML = '';
-                document.getElementById('trackedImg').src = 'img/acftWhite.png'; // Reset image
+                document.getElementById('trackedImg').src = 'img/acftWhite.png';
                 document.getElementById('trackedAltitude').innerHTML = '';
                 document.getElementById('trackedPos').innerHTML = '';
                 document.getElementById('trackedType').innerHTML = '';
@@ -96,47 +83,38 @@ class Aircraft {
                 document.getElementById('lastPos').innerHTML = '';
                 document.getElementById('ETA').innerHTML = '';
             }
-
-            // Remove track line
             if (currentTrackLine) {
                 this.map.removeLayer(currentTrackLine);
                 currentTrackLine = null;
             }
-
-            // Remove destination line
             if (flightDistLine) {
                 this.map.removeLayer(flightDistLine);
                 flightDistLine = null;
             }
-
-            // Clear destination input and related variables
             let icaoDestInput = document.getElementById('icaoDest');
             if (icaoDestInput) {
                 icaoDestInput.value = '';
             }
             if (trackedIcaoDest) {
                 trackedIcaoDest = null;
-                trackedEta = ''; // Reset ETA
+                trackedEta = '';
             }
-
-            // Reset the global tracked aircraft variable
             trackedAcft = null;
+            trackedAcftImg = '';
         }
     }
-    // --- Ende NEUE METHODE ---
 
     updateMarkerStyle() {
         const rotation = this.heading || this.track;
         const acftImgColor = this.isTracked ? 'rgb(181 117 33)' : this.getAltitudeColor();
         const icon = L.divIcon({
-            html: this.getSvgForType(rotation, acftImgColor), // Use the determined color
+            html: this.getSvgForType(rotation, acftImgColor), 
             className: 'planeIcon',
             iconSize: [30, 30],
             iconAnchor: [15, 15],
             popupAnchor: [0, -15]
         });
         this.marker.setIcon(icon);
-
     }
 
     async showDetails() {
@@ -144,7 +122,7 @@ class Aircraft {
         trackedAcftDiv.classList.remove('hiddenTrackedAcft');
         document.getElementById('trackedCallsign').innerHTML = this.callsign;
         document.getElementById('trackedReg').innerHTML = this.registration;
-        document.getElementById('trackedImg').src = await this.getImage();
+        document.getElementById('trackedImg').src = trackedAcftImg;
         document.getElementById('trackedAltitude').innerHTML = `${this.altitude}FT`;
         document.getElementById('trackedPos').innerHTML =
             `${this.position[0].toFixed(2)}N, ${this.position[1].toFixed(2)}E`;
@@ -184,56 +162,44 @@ class Aircraft {
     async fetchInitialTrack() {
         const corsProxy = 'https://api.allorigins.win/raw?url=';
         const hexSuffix = this.hex.slice(-2);
-        const url = `https://globe.airplanes.live/data/traces/${hexSuffix}/trace_recent_${this.hex}.json`;
+        const url = `https://opensky-network.org/api/tracks/all?icao24=${this.hex}&time=0`;
 
         try {
             const response = await fetch(corsProxy + `${encodeURIComponent(url)}`);
             if (!response.ok) throw new Error('no tracks found');
             const data = await response.json();
-            console.log('Initial track fetched', data, this.hex);
-
             const fetchedTrackData = data.trace || data.path || [];
-            // Nimm nur die letzten 100 Punkte und speichere sie als Koordinatenpaare
-            trackCoordinates = fetchedTrackData.slice(-100).map(item => [item[1], item[2]]);
-
-            // Füge die aktuelle Position hinzu und zeichne den Track zum ersten Mal
+            trackCoordinates = fetchedTrackData.map(item => [item[1], item[2]]);
             this.updateAndDrawTrack();
-
         } catch (error) {
             console.error("Initial track fetch error:", error);
-            trackCoordinates = []; // Setze auf leer im Fehlerfall
-            this.updateAndDrawTrack(); // Zeichne zumindest die aktuelle Position
+            trackCoordinates = []; 
+            this.updateAndDrawTrack(); 
         }
     }
 
-     // Neu: Methode zum Aktualisieren und Zeichnen des Tracks
-     updateAndDrawTrack() {
-        // Füge die aktuelle Position am Anfang des Arrays hinzu
+
+    updateAndDrawTrack() {
         const currentPosCoords = [this.position[0], this.position[1]];
         trackCoordinates.push(currentPosCoords);
-        this.drawTrack(); // Rufe die Zeichenmethode auf
+        this.drawTrack(); 
     }
 
-    // Geändert: Zeichnet den Track basierend auf den gespeicherten Koordinaten
+
     drawTrack() {
         if (currentTrackLine) {
-            // console.log('removing current track line'); // Optional: Kann bleiben oder entfernt werden
             this.map.removeLayer(currentTrackLine);
         }
-
-        // Stelle sicher, dass mindestens ein Punkt vorhanden ist (die aktuelle Position)
         if (trackCoordinates.length === 0) {
-             // Füge die aktuelle Position hinzu, falls das Array leer ist
-             trackCoordinates.push([this.position[0], this.position[1]]);
+            trackCoordinates.push([this.position[0], this.position[1]]);
         }
-
-        currentTrackLine = L.polyline(trackCoordinates, { // Verwende die gespeicherten Koordinaten
+        currentTrackLine = L.polyline(trackCoordinates, {
             color: 'green',
             weight: 3,
             opacity: 1
         }).addTo(this.map);
     }
-    
+
 
     calcEta(destination) {
         trackedIcaoDest = destination;
@@ -250,22 +216,19 @@ class Aircraft {
     }
 
     async updateData() {
-        // Update marker position (angenommen, this.position wird extern aktualisiert)
         if (this.marker) {
-             this.marker.setLatLng(this.position);
+            this.marker.setLatLng(this.position);
         }
-
         if (this.isTracked) {
-            this.showDetails(); // Aktualisiere die Detailansicht
-            this.updateAndDrawTrack(); // Geändert: Aktualisiere und zeichne den Track ohne neuen Fetch
+            this.showDetails(); 
+            this.updateAndDrawTrack();
         }
         if (trackedIcaoDest) {
             this.calcEta(trackedIcaoDest);
             document.getElementById('ETA').innerHTML = `${trackedEta}min`;
         }
-        // Aktualisiere den Marker-Stil (z.B. Farbe basierend auf Höhe, falls nicht getrackt)
         if (!this.isTracked) {
-             this.updateMarkerStyle();
+            this.updateMarkerStyle();
         }
     }
 

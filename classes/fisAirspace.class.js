@@ -1,4 +1,3 @@
-// Klasse für FIS Airspace
 class FisAirspace extends AirspacePolygon {
     constructor(geometry, name, map, polygonLayers) {
         super(geometry, name, map, polygonLayers);

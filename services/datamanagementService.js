@@ -9,8 +9,8 @@ let gaforAirspace = [];
 let pjeAirspace = [];
 let tmzAirspace = [];
 let atzAirspace = [];
-let trackCoordinates = []; // Neu: Array zum Speichern der Track-Koordinaten
-
+let trackCoordinates = [];
+let trackedAcftImg = '';
 const airspaceStates = {
     fis: { name: 'fisAirspace', airspace: fisAirspace, info: 'null' },
     edr: { name: 'edrAirspace', airspace: edrAirspace, info: 'edrInfo' },
@@ -23,17 +23,12 @@ const airspaceStates = {
     tmz: { name: 'tmzAirspace', airspace: tmzAirspace, info: 'tmzInfo' },
     atz: { name: 'atzAirspace', airspace: atzAirspace, info: 'null' },
 };
-
-// Objekt zum Speichern der Polygone nach AirspaceKey
 let polygonLayers = {};
 
-// Toggle-Funktion zum Hinzufügen und Entfernen von Polygonen
 async function togglePolygons(airspaceKey) {
     let gaforCalc = document.getElementById('calcGaforRadius');
     toggleActBtn(airspaceKey);
-    // Prüfen, ob es Polygone für den aktuellen Key gibt
     if (polygonLayers[airspaceKey] && polygonLayers[airspaceKey].length > 0) {
-        // Entferne bestehende Polygone für diesen Key
         polygonLayers[airspaceKey].forEach(polygon => polygon.removeFromMap());
         polygonLayers[airspaceKey] = [];
         if (airspaceKey === 'gafor') {
@@ -44,8 +39,6 @@ async function togglePolygons(airspaceKey) {
         }
         return;
     }
-
-
     if (airspaceKey === 'gafor') {
         let gaforInput = document.getElementById('gaforNumbers');
         gaforInput.value = '';
@@ -55,28 +48,18 @@ async function togglePolygons(airspaceKey) {
         gaforCenter.innerHTML = `<span id="gaforCenter">Center:</span>`;
         gaforCalc.style.display = 'flex';
     }
-
     let airspaceArray = airspaceStates[airspaceKey].airspace;
     let data = await getData(airspaceStates[airspaceKey].name);
-
-
     airspaceStates[airspaceKey].airspace = data;
     airspaceArray = data;
-
     if (airspaceStates[airspaceKey].info !== 'null') {
         let info = airspaceStates[airspaceKey].info;
         await getData(info);
     }
-
-
-
-
-    // Initialisiere, falls noch nicht vorhanden
     if (!polygonLayers[airspaceKey]) {
 
         polygonLayers[airspaceKey] = [];
     }
-
     if (airspaceArray === ctrAirspace) {
         processItems(airspaceArray, airspaceKey, map, polygonLayers[airspaceKey]);
     } else {
@@ -84,11 +67,9 @@ async function togglePolygons(airspaceKey) {
     }
 }
 
-
 const DB_NAME = 'cacheDatabase';
 const STORE_NAME = 'cacheStore';
 
-// IndexedDB initialisieren
 async function getDB() {
     return idb.openDB(DB_NAME, 1, {
         upgrade(db) {
@@ -99,26 +80,19 @@ async function getDB() {
     });
 }
 
-// Daten aus IndexedDB abrufen
 async function getFromIndexedDB(key, maxAge = 2 * 60 * 60 * 1000) {
     const db = await getDB();
     const cachedItem = await db.get(STORE_NAME, key);
-
     if (!cachedItem) return null;
-
     const { data, timestamp } = cachedItem;
     const age = Date.now() - timestamp;
-
     if (age < maxAge) {
         return data;
     }
-
-    // Cache ist abgelaufen
     await db.delete(STORE_NAME, key);
     return null;
 }
 
-// Daten in IndexedDB speichern
 async function saveToIndexedDB(key, data) {
     const db = await getDB();
     const payload = {
@@ -133,8 +107,6 @@ async function getData(key) {
     const cachedData = await getFromIndexedDB(key);
     if (cachedData) {
         console.log(`Daten für ${key} aus dem Cache geladen.`);
-
-        // Verarbeite die gecachten Daten, um die Variablen entsprechend zu setzen
         processDataByKey(key, cachedData);
         return cachedData;
     }
@@ -156,12 +128,9 @@ async function getData(key) {
             } else {
                 await saveToIndexedDB(key, data);
             }
-
-            // Verarbeite die Daten entsprechend dem Key
             processDataByKey(key, data);
             return data;
         }
-
         throw `Keine Daten für Key: ${key} gefunden.`;
     } catch (error) {
         console.error('Fehler beim Abrufen der Daten:', error);
@@ -203,40 +172,24 @@ function processDataByKey(key, data) {
         atzAirspace = data[0]?.features;
     } else if (key === 'ctrInfo') {
         ctrInfo = data;
-        console.log(data);
-
     } else if (key === 'eddInfo') {
         eddInfo = data;
-        console.log(data);
-
     } else if (key === 'edrInfo') {
         edrInfo = data;
-        console.log(data);
-
     } else if (key === 'rmzInfo') {
         rmzInfo = data;
-        console.log(data);
-
     } else if (key === 'tmzInfo') {
         tmzInfo = data;
-        console.log(data);
-
     } else if (key === 'pjeInfo') {
         pjeInfo = data;
-        console.log(data);
-
     }
 }
 
 
-
-
 function processItems(items, airspaceKey, map, layerArray) {
     if (airspaceKey === 'edr' || airspaceKey === 'edd' || airspaceKey === 'ctr') {
-        // Normales Durchiterieren von vorne
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-
             if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
                 let polygon;
                 if (airspaceKey === 'edr') {
@@ -251,10 +204,8 @@ function processItems(items, airspaceKey, map, layerArray) {
             }
         }
     } else {
-        // Rückwärts Durchiterieren
         for (let i = items.length - 1; i >= 0; i--) {
             const item = items[i];
-
             if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
                 let polygon;
                 switch (airspaceKey) {
@@ -290,19 +241,11 @@ function processItems(items, airspaceKey, map, layerArray) {
     }
 }
 
-
-
-
-
-
-
-// Arrays und Statusvariablen für Marker
 const markerData = {
     navaid: { markers: [], added: false, source: navAids },
     aerodrome: { markers: [], added: false, source: aerodromes },
     obstacle: { markers: [], added: false, source: obstacles }
 };
-
 
 function toggleMarkers(key) {
     toggleActBtn(key);
@@ -310,29 +253,21 @@ function toggleMarkers(key) {
         console.warn(`Unbekannter Schlüssel: ${key}`);
         return;
     }
-
     const { markers, added, source } = markerData[key];
-
     if (!added) {
         if (key === "obstacle") {
-            // Cluster-Layer nur für Obstacle erstellen
             const markerClusterGroup = L.markerClusterGroup();
-
-            // Events für Tooltips hinzufügen
             markerClusterGroup.on('clustermouseover', function (e) {
-                const cluster = e.layer; // Aktueller Cluster
-                const markers = cluster.getAllChildMarkers(); // Alle Marker im Cluster
-                const parentDesignators = [...new Set(markers.map(marker => marker.options.parentDesignator))]; // Einzigartige Parent Designators
-
-                // Tooltip mit Parent Designators
+                const cluster = e.layer; 
+                const markers = cluster.getAllChildMarkers();
+                const parentDesignators = [...new Set(markers.map(marker => marker.options.parentDesignator))];
                 const tooltipContent = parentDesignators.join('<br>');
                 cluster.bindTooltip(tooltipContent).openTooltip();
             });
 
             markerData[key].markers = source
-                .filter(data => data.geoLat && data.geoLong) // Sicherstellen, dass Koordinaten vorhanden sind
+                .filter(data => data.geoLat && data.geoLong)
                 .map(data => {
-                    // Obstacle-Objekt erstellen
                     const obstacle = new Obstacle(
                         data.geoLat,
                         data.geoLong,
@@ -345,24 +280,15 @@ function toggleMarkers(key) {
                         data['valHgt (ft)'],
                         map
                     );
-
-                    // Marker-Eigenschaften erweitern (für Tooltip)
                     obstacle.marker.options.parentDesignator = data['Parent Designator'];
-
-                    // Marker zum Cluster-Layer hinzufügen
                     obstacle.addToCluster(markerClusterGroup);
-
                     return obstacle;
                 });
-
-            map.addLayer(markerClusterGroup); // Cluster-Layer zur Karte hinzufügen
-            markerData[key].clusterLayer = markerClusterGroup; // Cluster-Layer speichern
+            map.addLayer(markerClusterGroup); 
+            markerData[key].clusterLayer = markerClusterGroup; 
         } else {
-
-
-            // Standard-Logik für Navaid und Aerodrome
             markerData[key].markers = source
-                .filter(data => key !== "aerodrome" || data.icaoCode) // Filter für Aerodromes mit icaoCode
+                .filter(data => key !== "aerodrome" || data.icaoCode) 
                 .map(data => {
                     let item;
                     if (key === "aerodrome") {
@@ -370,33 +296,26 @@ function toggleMarkers(key) {
                     } else if (key === "navaid") {
                         item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted, data.properties.icaocode);
                     }
-                    item.addToMap(); // Marker wird direkt zur Karte hinzugefügt
-
+                    item.addToMap(); 
                     return item;
                 });
         }
     } else {
         if (key === "obstacle") {
-            // Cluster-Layer entfernen
             map.removeLayer(markerData[key].clusterLayer);
             markerData[key].markers = [];
         } else {
-            // Marker für Navaid und Aerodrome entfernen
             markers.forEach(item => item.marker && map.removeLayer(item.marker));
             markerData[key].markers = [];
         }
     }
-
     markerData[key].added = !added;
 }
 
 
-
-// Funktion zum Reset der Karte
 function resetMap() {
     let trackedAcftDiv = document.getElementById('trackedAcft');
     trackedAcftDiv.classList.add('hiddenTrackedAcft');
-
     currentAddresses = [];
     if (trackedAcft) {
         if (currentTrackLine) {
@@ -407,8 +326,6 @@ function resetMap() {
         trackedAcft.updateMarkerStyle();
         trackedAcft = null;
     }
-
-    // Reset destination and flight line
     if (flightDistLine) {
         map.removeLayer(flightDistLine);
         flightDistLine = null;
@@ -423,23 +340,15 @@ function resetMap() {
         map.removeLayer(currentAdressGeoJSONLayer);
     }
     currentAdressGeoJSONLayer = null;
-
     trackedAcftReg = 'nothing';
     if (markerData.navaid.added) {
         toggleMarkers('navaid');
     }
-    
-    // Entferne alle Marker
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
-
-    // Entferne alle Polylines
     polylines.forEach(line => map.removeLayer(line));
     polylines = [];
-    
-    // Lösche Distanzmessungen aus airspaceService.js
     clearAllDistanceMeasurements();
-    
     if (flightDistLine) {
         flightDistLine.remove();
     }
@@ -451,6 +360,6 @@ function resetMap() {
     initialMarkerLat = null;
     initialMarkerLon = null;
     closestNavAid = null;
-    foundNavAids = []; // Array zum Speichern bereits gefundener Navaids
+    foundNavAids = []; 
     foundNavaidId = 0;
 }

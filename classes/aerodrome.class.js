@@ -8,8 +8,8 @@ class Aerodrome extends AirspacePolygon {
         this.map = map;
         this.icaoCode = icaoCode;
         this.rwys = rwys;
-        this.icon = this.createCustomIcon(); // Das Icon wird sofort beim Erstellen gesetzt
-        this.marker = null; // initialisieren, aber noch nicht gesetzt
+        this.icon = this.createCustomIcon(); 
+        this.marker = null;
         this.aipImgs = [];
         this.currentImgIndex;
         this.rotationAngle = 0;
@@ -17,9 +17,7 @@ class Aerodrome extends AirspacePolygon {
     }
 
     createCustomIcon() {
-        // Überprüfen, ob `this.rwys` und `trueHeading` verfügbar sind
         const trueHeading = this.rwys && this.rwys[0] ? this.rwys[0].trueHeading : 0;
-
         const iconHtml = `
             <div class="marker-icon" style="position: relative; width: 16px; height: 16px;">
                 <img src="img/airport.png" alt="Aerodrome Icon" style="width: 16px; height: 16px;">
@@ -44,36 +42,21 @@ class Aerodrome extends AirspacePolygon {
         return L.divIcon({
             className: 'custom-icon',
             html: iconHtml,
-            iconSize: [16, 16], // Größe des Icons
+            iconSize: [16, 16],
         });
     }
 
-
-
-    // Methode zum Hinzufügen des Markers zur Karte
     addToMap() {
-        // Marker wird hier hinzugefügt, wenn das Icon erstellt wird
         this.marker = L.marker([this.geometry.coordinates[1], this.geometry.coordinates[0]], { icon: this.icon }).addTo(this.map);
-
-        // Binde ein Popup an den Marker
         this.marker.bindPopup(`Name: ${this.name}<br>ICAO: ${this.icaoCode}`);
-
-        // Setze einen Event-Listener für Zoom-Änderungen, wenn der Marker auf der Karte ist
         this.map.on('zoomend', () => this.toggleAdditionalInfo());
-
-        // Initialisiere die Zusatzinformationen beim Erstellen des Markers
         this.toggleAdditionalInfo();
-
-        // Event-Listener für Hover
         this.marker.on('mouseover', () => {
-            this.marker.openPopup(); // Popup öffnen
+            this.marker.openPopup();
         });
-
         this.marker.on('mouseout', () => {
-            this.marker.closePopup(); // Popup schließen
+            this.marker.closePopup();
         });
-
-        // Event-Listener für Klick auf den Marker
         this.marker.on('click', () => this.onClick());
     }
 
@@ -129,7 +112,6 @@ class Aerodrome extends AirspacePolygon {
                 <ul>${weatherData.current.wind_direction_10m}°</ul> 
                 <ul>${weatherData.current.wind_gusts_10m}km/h</ul> 
                 <ul>${weatherData.current.wind_speed_10m}km/h</ul> 
-
                 </div>   
                 </div>
                 <div class="buttonWithLoader">
@@ -145,9 +127,7 @@ class Aerodrome extends AirspacePolygon {
                 <div id="aipInfo">                    
                     </div>
                 </div>
-            </div>
-          
-            `;
+            </div>`;
         try {
             let loader = document.getElementById('loaderAipImg');
             loader.style.display = 'inline-block';

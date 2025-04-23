@@ -28,16 +28,12 @@ var worldPolygon = L.polygon([
     fillOpacity: 0
 }).addTo(map).bringToBack();
 
-// Angepasster OSM Buildings Funktionsblock
 const buildingsCheckbox = document.getElementById('buildings-checkbox');
 buildingsCheckbox.addEventListener('change', toggleBuildings);
 
 function toggleBuildings() {
     if (buildingsCheckbox.checked) {
-        // Aktiviere 3D-Gebäude
-        console.log("Aktiviere OSM Buildings");
         try {
-            // Immer ein neues OSMBuildings-Objekt erstellen
             osmb = new OSMBuildings(map);
             osmb.load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
             console.log("OSM Buildings aktiviert");
@@ -52,8 +48,6 @@ function toggleBuildings() {
         }
     }
 }
-
-
 
 function setOpacity() {
     var opacityValue = slider.value / 100;
@@ -168,7 +162,7 @@ const mapStates = {
     }
 };
 
-toggleMap('topPlusOpen', 'backgroundMaps'); // Standardkarte setzen
+toggleMap('topPlusOpen', 'backgroundMaps');
 
 function toggleMap(mapKey, category) {
     const categoryStates = mapStates[category];
@@ -281,7 +275,6 @@ function updateAdditionalLayerOrder() {
     });
 }
 
-
 async function getWeather(weatherType) {
     try {
         const data = await fetchWeatherData();
@@ -355,7 +348,6 @@ function toggleWeatherMap(weatherType) {
     const layerKey = weatherType === 'weather' ? 'rainviewerWeather' : 'rainviewerClouds';
     toggleMap(layerKey, 'weatherLayers');
 }
-
 
 function toggleActBtn(id) {
     let button = document.getElementById(id);

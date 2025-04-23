@@ -275,20 +275,15 @@ async function search() {
     }
 }
 
-// Suche nach einem speziellen ACFT
 function searchAcft() {
     let input = document.getElementById('searchInput').value;
     const loader = document.getElementById('loader');
-    // Zeige den Loader an
     loader.style.display = 'inline-block';
     stopRadarInterval();
-    // Timeout für die Suche
     setTimeout(() => {
         fetchAircraftDataCallsign(input);
-        // Verstecke den Loader, wenn die Anfrage abgeschlossen ist
         loader.style.display = 'none';
     }, 1000);
-
 }
 
 function displaySearchResults(items, type) {

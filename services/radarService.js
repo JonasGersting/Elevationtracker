@@ -182,31 +182,22 @@ async function fetchAircraftData(centerLat, centerLon, radius) {
         if (!response.ok) throw new Error(`API error: ${response.statusText}`);
         const data = await response.json();
         console.log(data);
-        
-        // Lösche alle alten Aircraft von der Karte
         aircraftLayer.clearLayers();
         aircraftInstances = [];
-
-        // Erstelle neue Aircraft Instanzen
         data.ac.forEach(acftData => {
             const aircraft = new Aircraft(acftData, map, aircraftLayer);
-            
-            // Wenn dies das vorher getrackte Flugzeug war, stelle Tracking wieder her
             if (trackedAcft && aircraft.hex === trackedAcft.hex) {
                 aircraft.isTracked = true;
                 aircraft.updateMarkerStyle();
                 trackedAcft = aircraft;
                 trackedAcft.updateData();
             }
-            
             aircraftInstances.push(aircraft);
         });
-
     } catch (error) {
         console.error("API fetch error:", error);
     }
 }
-
 
 async function fetchAircraftDataCallsign(callsign) {
     const apiUrl = `https://api.adsb.one/v2/callsign/${callsign}`;
@@ -216,28 +207,18 @@ async function fetchAircraftDataCallsign(callsign) {
             throw new Error(`API-Fehler: ${response.statusText}`);
         }
         const data = await response.json();
-        
-        // Clear old aircraft
         aircraftLayer.clearLayers();
         aircraftInstances = [];
-
         const acft = data.ac[0];
         if (acft) {
-            // Create new Aircraft instance
             const aircraft = new Aircraft(acft, map, aircraftLayer);
             aircraftInstances.push(aircraft);
-            
-            // Set as tracked aircraft
             trackedAcft = aircraft;
             aircraft.isTracked = true;
             aircraft.updateMarkerStyle();
             await aircraft.showDetails();
             await aircraft.fetchAndDrawTrack();
-
-            // Center map on aircraft
             map.setView([acft.lat, acft.lon], 10);
-            
-            // Enable radar
             radarActive = true;
             toggleActBtnRadar();
             setTimeout(() => startRadarInterval(), 1000);
@@ -250,55 +231,43 @@ async function fetchAircraftDataCallsign(callsign) {
     }
 }
 
-// Aktualisiere die API-Anfrage
 function updateAPIRequest() {
-    const bounds = map.getBounds(); // Grenzen der aktuellen Ansicht abrufen
-    const { lat: lat1, lng: lon1 } = bounds.getSouthWest(); // Südwest-Ecke
-    const { lat: lat2, lng: lon2 } = bounds.getNorthEast(); // Nordost-Ecke
+    const bounds = map.getBounds(); 
+    const { lat: lat1, lng: lon1 } = bounds.getSouthWest(); 
+    const { lat: lat2, lng: lon2 } = bounds.getNorthEast(); 
     const { centerLat, centerLon, radius } = calculateCircle(lat1, lon1, lat2, lon2);
-    // Führe die API-Anfrage aus
     fetchAircraftData(centerLat, centerLon, radius);
 }
-// Event: Karte wird verschoben
 map.on('move', () => {
-    stopRadarInterval(); // Radar-Intervall stoppen
-
+    stopRadarInterval(); 
     if (startTime === null) {
-        startTime = Date.now(); // Startzeit setzen, wenn die Bewegung beginnt
+        startTime = Date.now(); 
     }
-
     if (radarTimer) {
-        clearTimeout(radarTimer); // Timer zurücksetzen, wenn die Karte verschoben wird
+        clearTimeout(radarTimer); 
     }
 });
-// Event: Verschieben der Karte beendet
 map.on('moveend', () => {
-    const elapsedTime = Date.now() - startTime; // Berechne die vergangene Zeit
-    startTime = null; // Reset der Startzeit, damit sie für zukünftige Bewegungen bereit ist
-
-    const adjustedTimeout = Math.max(0, 1000 - elapsedTime); // Timeout anpassen (maximale Wartezeit: 1 Sekunde)
-
-    // Timer starten, der das Radar-Intervall nach der berechneten Zeit neu startet
+    const elapsedTime = Date.now() - startTime; 
+    startTime = null; 
+    const adjustedTimeout = Math.max(0, 1000 - elapsedTime); 
     radarTimer = setTimeout(() => {
         startRadarInterval();
     }, adjustedTimeout);
 });
-// Event: Zoom wird verändert
 map.on('zoom', () => {
-    stopRadarInterval(); // Radar-Intervall stoppen
+    stopRadarInterval(); 
     if (startTime === null) {
-        startTime = Date.now(); // Startzeit setzen, wenn der Zoom beginnt
+        startTime = Date.now(); 
     }
     if (radarTimer) {
-        clearTimeout(radarTimer); // Timer zurücksetzen, wenn der Zoom verändert wird
+        clearTimeout(radarTimer); 
     }
 });
-// Event: Zoom beendet
 map.on('zoomend', () => {
-    const elapsedTime = Date.now() - startTime; // Berechne die vergangene Zeit
-    startTime = null; // Reset der Startzeit, damit sie für zukünftige Zooms bereit ist
-    const adjustedTimeout = Math.max(0, 1000 - elapsedTime); // Timeout anpassen (maximale Wartezeit: 1 Sekunde)
-    // Timer starten, der das Radar-Intervall nach der berechneten Zeit neu startet
+    const elapsedTime = Date.now() - startTime; 
+    startTime = null; 
+    const adjustedTimeout = Math.max(0, 1000 - elapsedTime); 
     radarTimer = setTimeout(() => {
         startRadarInterval();
     }, adjustedTimeout);
