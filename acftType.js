@@ -5,7 +5,7 @@ let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22',
     'RALL', 'PA44', 'C206', 'PNR2', 'C10T', 'EVSS', 'FDCT', 'STRE', 'SLG2', 'TAMP', 'SLG2', 'DG40', 'AS02', 'C82T', 'C177', 'C210', 'OSCR', 'RV12', 'P46T', 'TEX2', 'M7', 'C72R', 'BT36', 'T206', 'CH2T', 'AA5',
     'GC1', 'C82S', 'C77R', 'BL8', 'C180', 'COL4', 'COL3', 'T210', 'GLST', 'PIAT', 'RV7', 'K100', 'IR23', 'D253', 'MCR1', 'ECHO', 'HUSK', 'S12S', 'LGND', 'IMPU', 'FAET', 'PULS', 'AS25', 'A32E', 'VNTR', 'P28B',
     'AAT3', 'TB21', 'LNCE', 'DG50', 'DISC', 'BE18', 'DUOD', 'AP22', 'S05R', 'PA38', 'CH75', 'P28U', 'WAIX', 'SV4', 'CRES', 'C170', 'TBM7', 'MOR2', 'TBM7', 'FBA2', 'BOLT', 'SAVG', 'RISN', 'R90R', 'ALSL', 'R200',  
-    'P149', 'AVID', 'UF13', 'AS29', 'VENT', 'PA30', 'C337', 'TBM8', 'CH7A', 'DAL4', 'R300', 'JUNR', 'C175'                
+    'P149', 'AVID', 'UF13', 'AS29', 'VENT', 'PA30', 'C337', 'TBM8', 'CH7A', 'DAL4', 'R300', 'JUNR', 'C175', 'C140'                
 
 ];
 let turboAcft = ['B350', 'L2T', 'F406', 'SF34', 'V22', 'BE30', 'C414', 'DA62', 'AT76', 'SW4', 'DA42', 'SC7', 'PA34', 'DA42', 'P68', 'BE9L', 'DHC6', 'AT75', 'AN30', 'C212', 'D228', 'C310', 'AT45',

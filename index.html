@@ -5,16 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>elevationFinder</title>
-     <!-- Lokale CSS-Dateien aus node_modules -->
      <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
      <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" />
      <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" />
-    <!-- Eigene CSS-Dateien -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="fonts/fonts.css">
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
 </head>
-
 <body onload="init()" >
     <div class="topSearchBar">
         <div class="standardInput">
@@ -40,7 +37,7 @@
             </div>
             <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse oder Koordinate">
             <div class="address-list shadow" id="addressList" style="display: none;"></div>
-            <div class="searchBtnWithLoader">
+            <div id="searchBtnWithLoader" class="searchBtnWithLoader">
                 <button class="shadow z-index1100" id="searchBtn" onclick="search()">Suche</button><span
                     class="loader z-index1100" id="loader" style="display: none;"></span>
             </div>
@@ -190,6 +187,9 @@
     </div>
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
+    </div>
+    <div id="monitorToSmall" class="d-none" >
+        <span class="toSmallSpan">Öffnen Sie die App auf einem größeren Monitor!</span>
     </div>
     <div id="map"></div>
     <div class="hiddenTrackedAcft" id="trackedAcft">

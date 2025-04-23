@@ -162,8 +162,9 @@ class Aircraft {
     async fetchInitialTrack() {
         const corsProxy = 'https://api.allorigins.win/raw?url=';
         const hexSuffix = this.hex.slice(-2);
-        const url = `https://opensky-network.org/api/tracks/all?icao24=${this.hex}&time=0`;
-
+        const url = `https://globe.airplanes.live/data/traces/${hexSuffix}/trace_recent_${this.hex}.json`;
+        // `https://opensky-network.org/api/tracks/all?icao24=${this.hex}&time=0`; // Alte URL
+        // `https://globe.airplanes.live/data/traces/${this.hex.slice(-2)}/trace_recent_${this.hex}.json`; // Neue, oft zuverlässigere URL
         try {
             const response = await fetch(corsProxy + `${encodeURIComponent(url)}`);
             if (!response.ok) throw new Error('no tracks found');
