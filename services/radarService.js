@@ -216,8 +216,9 @@ async function fetchAircraftDataCallsign(callsign) {
             trackedAcft = aircraft;
             aircraft.isTracked = true;
             aircraft.updateMarkerStyle();
+            trackedAcftImg = await aircraft.getImage();
             await aircraft.showDetails();
-            await aircraft.fetchAndDrawTrack();
+            await aircraft.fetchInitialTrack();
             map.setView([acft.lat, acft.lon], 10);
             radarActive = true;
             toggleActBtnRadar();

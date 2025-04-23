@@ -73,14 +73,14 @@ function startDistanceMeasurement(lat, lng) {
             weight: 2,
             dashArray: '5, 10'
         }).addTo(map),
-        label: createDistanceLabel()
-    };
+        label: createDistanceLabelNavAid()
+    };   
     map.on('mousemove', updateActiveDistanceLine);
     map.once('click', finishDistanceMeasurement);
     modifyNavaidMarkers(true);
 }
 
-function createDistanceLabel() {
+function createDistanceLabelNavAid() {
     const label = L.DomUtil.create('div', 'distance-label');
     document.getElementById('map').appendChild(label);
     return label;
@@ -111,6 +111,10 @@ function calculateDistanceNavAid(lat1, lon1, lat2, lon2) {
 }
 
 function updateDistanceLabel(measurement, distance, endPoint) {
+    if (!measurement || !measurement.label) {
+        console.error("Fehler: updateDistanceLabel wurde ohne gültiges Label aufgerufen.", measurement);
+        return; // Funktion sicher beenden
+    }
     const midPoint = [
         (measurement.startPoint[0] + endPoint[0]) / 2,
         (measurement.startPoint[1] + endPoint[1]) / 2
