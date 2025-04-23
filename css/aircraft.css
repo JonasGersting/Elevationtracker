@@ -1,7 +1,7 @@
 /* Aircraft Tracking */
 .planeIcon {
     width: 30px;
-    height: 30px; 
+    height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -15,7 +15,7 @@
     font-family: 'Roboto', sans-serif;
     z-index: 1000;
     position: absolute;
-    height: 650px;
+    height: 680px;
     width: 300px;
     overflow: hidden;
     right: 0;
@@ -41,9 +41,38 @@
     width: 100%;
 }
 
+.trackedAcftLoader {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin-top: 12px;
+    gap: 12px;
+    align-items: center;
+}
+
+.imgLinkWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+
+#photoLink {
+    color: white;
+    margin-top: 6px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    text-decoration: none;
+}
+
+#photoLink:hover {
+    color: rgb(195, 245, 25);
+}
+
 #trackedCallsign {
     margin-top: 0;
 }
+
 
 #trackedReg {
     margin-bottom: 16px;
@@ -53,7 +82,6 @@
     border-radius: 8px;
     max-width: 100%;
     border: 2px solid rgb(195, 245, 25);
-    margin-bottom: 16px;
     max-height: 150px;
 }
 
@@ -81,4 +109,31 @@
     background-color: rgb(10, 60, 135);
     color: rgb(195, 245, 25);
     border: 2px solid rgb(195, 245, 25);
+}
+
+#adsb-one-attribution{
+    border-bottom-left-radius: 8px;
+    border-top-left-radius: 8px;
+    z-index: 1000;
+    position: absolute;
+    bottom: 24px;
+    right: 0;
+    width: 110px;
+    height: 30px;
+    background-color: rgb(10, 60, 135);
+    color: white;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.adsbOneLink{
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.adsbOneLink:hover{
+    color: rgb(195, 245, 25);
 }

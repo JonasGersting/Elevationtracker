@@ -49,16 +49,19 @@ class Aircraft {
 
     async handleClick() {
         if (trackedAcft && trackedAcft === this) {
-            this.untrackAircraft(); 
-            return; 
+            this.untrackAircraft();
+            return;
         }
         if (trackedAcft && trackedAcft !== this) {
             trackedAcft.untrackAircraft();
         }
         trackedAcft = this;
         this.isTracked = true;
-        this.updateMarkerStyle(); 
-        trackedAcftImg = await this.getImage();
+        this.updateMarkerStyle();
+        trackedAcftImgJSON = await this.getImage();
+        trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
+        trackedAcftImgLink = trackedAcftImgJSON.link;
+        trackedAcftImgPhotographer = trackedAcftImgJSON.photographer;
         await this.showDetails();
         await this.fetchInitialTrack();
     }
@@ -67,7 +70,7 @@ class Aircraft {
         if (trackedAcft && trackedAcft === this) {
             this.isTracked = false;
             this.updateMarkerStyle();
-            trackCoordinates = []; 
+            trackCoordinates = [];
             const trackedAcftDiv = document.getElementById('trackedAcft');
             if (trackedAcftDiv) {
                 trackedAcftDiv.classList.add('hiddenTrackedAcft');
@@ -100,7 +103,7 @@ class Aircraft {
                 trackedEta = '';
             }
             trackedAcft = null;
-            trackedAcftImg = '';
+            trackedAcftImgJSON = null;
         }
     }
 
@@ -108,7 +111,7 @@ class Aircraft {
         const rotation = this.heading || this.track;
         const acftImgColor = this.isTracked ? 'rgb(181 117 33)' : this.getAltitudeColor();
         const icon = L.divIcon({
-            html: this.getSvgForType(rotation, acftImgColor), 
+            html: this.getSvgForType(rotation, acftImgColor),
             className: 'planeIcon',
             iconSize: [30, 30],
             iconAnchor: [15, 15],
@@ -122,7 +125,9 @@ class Aircraft {
         trackedAcftDiv.classList.remove('hiddenTrackedAcft');
         document.getElementById('trackedCallsign').innerHTML = this.callsign;
         document.getElementById('trackedReg').innerHTML = this.registration;
-        document.getElementById('trackedImg').src = trackedAcftImg;
+        document.getElementById('trackedImg').src = trackedAcftImgJSON.thumbnail.src;
+        document.getElementById('photoLink').href = trackedAcftImgJSON.link;
+        document.getElementById('photoLink').innerHTML = `Photo © ${trackedAcftImgJSON.photographer}`;
         document.getElementById('trackedAltitude').innerHTML = `${this.altitude}FT`;
         document.getElementById('trackedPos').innerHTML =
             `${this.position[0].toFixed(2)}N, ${this.position[1].toFixed(2)}E`;
@@ -153,45 +158,47 @@ class Aircraft {
             );
             if (!response.ok) return 'img/acftWhite.png';
             const data = await response.json();
-            return data.photos[0].thumbnail.src;
+            return data.photos[0];
         } catch (error) {
             return 'img/acftWhite.png';
         }
     }
 
     async fetchInitialTrack() {
+        let trackedLoader = document.getElementById('trackedAcftLoader');
+        trackedLoader.classList.remove('d-none');
         const corsProxy = 'https://proxy.corsfix.com/?';
         const hexSuffix = this.hex.slice(-2);
         const url = `https://globe.airplanes.live/data/traces/${hexSuffix}/trace_full_${this.hex}.json`;
-        // `https://opensky-network.org/api/tracks/all?icao24=${this.hex}&time=0`; // Alte URL
-        // `https://globe.airplanes.live/data/traces/${this.hex.slice(-2)}/trace_recent_${this.hex}.json`; // Alternative URL
-
         try {
             const response = await fetch(corsProxy + url);
             if (!response.ok) throw new Error(`no tracks found (Status: ${response.status})`);
             const data = await response.json();
             let fetchedTrackData = data.trace || data.path || [];
+            console.log(data, 'fetchedTrackData');
+            
             let lastGroundIndex = -1;
             for (let i = fetchedTrackData.length - 1; i >= 0; i--) {
                 if (fetchedTrackData[i] && fetchedTrackData[i].length > 4 && fetchedTrackData[i][3] === "ground") {
                     lastGroundIndex = i;
-                    break; 
+                    break;
                 }
             }
             let lastLegData = [];
             if (lastGroundIndex !== -1 && lastGroundIndex < fetchedTrackData.length - 1) {
                 lastLegData = fetchedTrackData.slice(lastGroundIndex + 1);
             } else if (fetchedTrackData.length > 0) {
-                 if (fetchedTrackData[0] && fetchedTrackData[0].length > 4 && fetchedTrackData[0][4] !== "ground") {
+                if (fetchedTrackData[0] && fetchedTrackData[0].length > 4 && fetchedTrackData[0][4] !== "ground") {
                     lastLegData = fetchedTrackData;
-                 } else {
-                    lastLegData = []; 
-                 }
+                } else {
+                    lastLegData = [];
+                }
             } else {
                 lastLegData = [];
             }
             trackCoordinates = lastLegData.map(item => [item[1], item[2]]);
             this.updateAndDrawTrack();
+            trackedLoader.classList.add('d-none');
         } catch (error) {
             console.error("Initial track fetch error:", error);
             trackCoordinates = [];
@@ -203,7 +210,7 @@ class Aircraft {
     updateAndDrawTrack() {
         const currentPosCoords = [this.position[0], this.position[1]];
         trackCoordinates.push(currentPosCoords);
-        this.drawTrack(); 
+        this.drawTrack();
     }
 
 
@@ -241,7 +248,7 @@ class Aircraft {
             this.marker.setLatLng(this.position);
         }
         if (this.isTracked) {
-            this.showDetails(); 
+            this.showDetails();
             this.updateAndDrawTrack();
         }
         if (trackedIcaoDest) {

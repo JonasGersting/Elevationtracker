@@ -38,8 +38,8 @@
             <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse oder Koordinate">
             <div class="address-list shadow" id="addressList" style="display: none;"></div>
             <div id="searchBtnWithLoader" class="searchBtnWithLoader">
-                <button class="shadow z-index1100" id="searchBtn" onclick="search()">Suche</button><span
-                    class="loader z-index1100" id="loader" style="display: none;"></span>
+                <button class="shadow z-index1100" id="searchBtn" onclick="search()">Suche</button>
+                <span class="loader z-index1100" id="loader" style="display: none;"></span>
             </div>
 
         </div>
@@ -191,11 +191,17 @@
     <div id="monitorToSmall" class="d-none" >
         <span class="toSmallSpan">Öffnen Sie die App auf einem größeren Monitor!</span>
     </div>
+    <div id="adsb-one-attribution" class="d-none">
+        <span>Data by</span><a class="adsbOneLink" href="https://adsb.one/" target="_blank" rel="noopener noreferrer">ADS-B One</a>
+    </div>
     <div id="map"></div>
     <div class="hiddenTrackedAcft" id="trackedAcft">
         <h2 id="trackedCallsign">BPO345</h2>
         <h3 id="trackedReg">D-HVGM</h3>
-        <img id="trackedImg" src="https://t.plnspttrs.net/04648/1543914_9e6709f74a_t.jpg" alt="no img found">
+        <div class="imgLinkWrapper">
+            <img id="trackedImg" src="https://t.plnspttrs.net/04648/1543914_9e6709f74a_t.jpg" alt="no img found">
+            <a target="_blank" id="photoLink" href="www.google.de">hallo</a>
+        </div>
         <div class="trackedAcftRow">
             <span>Höhe:</span>
             <span id="trackedAltitude">1000FT</span>
@@ -232,6 +238,11 @@
             <span>ETA:</span>
             <span id="ETA">25 min</span>
         </div>
+        <div class="trackedAcftLoader d-none" id="trackedAcftLoader">
+            <span>loading trace</span>
+            <span class="loader z-index1100"></span>
+        </div>
+        
     </div>
 </body>
 <script src="node_modules/idb/build/umd.js"></script>

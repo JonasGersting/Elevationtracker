@@ -10,7 +10,10 @@ let pjeAirspace = [];
 let tmzAirspace = [];
 let atzAirspace = [];
 let trackCoordinates = [];
-let trackedAcftImg = '';
+let trackedAcftImgJSON;
+let trackedAcftImg = null;
+let trackedAcftImgLink = null;
+let trackedAcftImgPhotographer = null;
 const airspaceStates = {
     fis: { name: 'fisAirspace', airspace: fisAirspace, info: 'null' },
     edr: { name: 'edrAirspace', airspace: edrAirspace, info: 'edrInfo' },

@@ -216,7 +216,7 @@ async function fetchAircraftDataCallsign(callsign) {
             trackedAcft = aircraft;
             aircraft.isTracked = true;
             aircraft.updateMarkerStyle();
-            trackedAcftImg = await aircraft.getImage();
+            trackedAcftImgJSON = await aircraft.getImage();
             await aircraft.showDetails();
             await aircraft.fetchInitialTrack();
             map.setView([acft.lat, acft.lon], 10);

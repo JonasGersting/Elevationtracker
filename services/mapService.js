@@ -378,6 +378,8 @@ function toggleActBtn(id) {
 function toggleActBtnRadar() {
     let button = document.getElementById('radar');
     button.classList.toggle('radarBtnActive');
+    let radarAttribution = document.getElementById('adsb-one-attribution');
+    radarAttribution.classList.toggle('d-none');
 }
 
 
