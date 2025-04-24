@@ -217,6 +217,15 @@ async function fetchAircraftDataCallsign(callsign) {
             aircraft.isTracked = true;
             aircraft.updateMarkerStyle();
             trackedAcftImgJSON = await aircraft.getImage();
+            if (trackedAcftImgJSON != undefined) {
+                trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
+                trackedAcftImgLink = trackedAcftImgJSON.link;
+                trackedAcftImgPhotographer =`Photo © ${trackedAcftImgJSON.photographer}`;
+            } else {
+                trackedAcftImg = 'img/acftWhite.png';
+                trackedAcftImgLink = '';
+                trackedAcftImgPhotographer = '';
+            }
             await aircraft.showDetails();
             await aircraft.fetchInitialTrack();
             map.setView([acft.lat, acft.lon], 10);

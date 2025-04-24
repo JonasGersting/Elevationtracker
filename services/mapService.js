@@ -9,6 +9,14 @@ let currentTileLayer;
 let osmb;
 const monitorWarningDiv = document.getElementById('monitorToSmall');
 
+async function init() {
+    getData('navAids');
+    getData('aerodromes');
+    getData('obstacles');
+    getData('aipInfo');
+    showCursorCoordinates(map);
+}
+
 function checkScreenSize() {
     if (!monitorWarningDiv) {
         console.error("Element mit ID 'monitorToSmall' nicht gefunden.");

@@ -17,13 +17,7 @@ let initialMarkerLon = null;
 let distanceMeasurements = [];
 let activeMeasurement = null;
 
-async function init() {
-    getData('navAids');
-    getData('aerodromes');
-    getData('obstacles');
-    getData('aipInfo');
-    showCursorCoordinates(map);
-}
+
 
 function checkCursorOverPolygon() {
     if (!isCursorOverPolygon) {

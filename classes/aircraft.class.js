@@ -59,9 +59,16 @@ class Aircraft {
         this.isTracked = true;
         this.updateMarkerStyle();
         trackedAcftImgJSON = await this.getImage();
-        trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
-        trackedAcftImgLink = trackedAcftImgJSON.link;
-        trackedAcftImgPhotographer = trackedAcftImgJSON.photographer;
+        if (trackedAcftImgJSON != undefined) {
+            trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
+            trackedAcftImgLink = trackedAcftImgJSON.link;
+            trackedAcftImgPhotographer =`Photo © ${trackedAcftImgJSON.photographer}`;
+        } else {
+            trackedAcftImg = 'img/acftWhite.png';
+            trackedAcftImgLink = '';
+            trackedAcftImgPhotographer = '';
+        }
+        
         await this.showDetails();
         await this.fetchInitialTrack();
     }
@@ -125,9 +132,9 @@ class Aircraft {
         trackedAcftDiv.classList.remove('hiddenTrackedAcft');
         document.getElementById('trackedCallsign').innerHTML = this.callsign;
         document.getElementById('trackedReg').innerHTML = this.registration;
-        document.getElementById('trackedImg').src = trackedAcftImgJSON.thumbnail.src;
-        document.getElementById('photoLink').href = trackedAcftImgJSON.link;
-        document.getElementById('photoLink').innerHTML = `Photo © ${trackedAcftImgJSON.photographer}`;
+        document.getElementById('trackedImg').src = trackedAcftImg;
+        document.getElementById('photoLink').href = trackedAcftImgLink;
+        document.getElementById('photoLink').innerHTML = trackedAcftImgPhotographer;
         document.getElementById('trackedAltitude').innerHTML = `${this.altitude}FT`;
         document.getElementById('trackedPos').innerHTML =
             `${this.position[0].toFixed(2)}N, ${this.position[1].toFixed(2)}E`;
