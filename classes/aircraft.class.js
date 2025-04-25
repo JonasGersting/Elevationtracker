@@ -181,19 +181,17 @@ class Aircraft {
             const response = await fetch(corsProxy + url);
             if (!response.ok) throw new Error(`no tracks found (Status: ${response.status})`);
             const data = await response.json();
-            let fetchedTrackData = data.trace || data.path || [];
-            console.log(data, 'fetchedTrackData');
-            
+            let fetchedTrackData = data.trace || data.path || [];            
             let lastGroundIndex = -1;
             for (let i = fetchedTrackData.length - 1; i >= 0; i--) {
-                if (fetchedTrackData[i] && fetchedTrackData[i].length > 4 && fetchedTrackData[i][3] === "ground") {
-                    lastGroundIndex = i;
+                if (fetchedTrackData[i] && fetchedTrackData[i].length > 4 && fetchedTrackData[i][3] === "ground" || fetchedTrackData[i][3] <= 0) {
+                    lastGroundIndex = i;                  
                     break;
                 }
             }
             let lastLegData = [];
             if (lastGroundIndex !== -1 && lastGroundIndex < fetchedTrackData.length - 1) {
-                lastLegData = fetchedTrackData.slice(lastGroundIndex + 1);
+                lastLegData = fetchedTrackData.slice(lastGroundIndex + 1);                
             } else if (fetchedTrackData.length > 0) {
                 if (fetchedTrackData[0] && fetchedTrackData[0].length > 4 && fetchedTrackData[0][4] !== "ground") {
                     lastLegData = fetchedTrackData;
