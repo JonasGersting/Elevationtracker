@@ -205,3 +205,32 @@
 .buildings-toggle label:hover {
     color: rgb(195, 245, 25);
 }
+
+@media only screen and (max-width: 1400px) {
+    .allBackgroundMaps {
+        width: 500px !important;
+    }
+
+    #slider-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+}
+
+
+@media only screen and (max-width: 966px) {
+    #opacity-slider {
+        width: 200px;
+    }
+
+}
+
+@media screen and (max-width: 880px) {
+    .giveMenuPsnAbsolute {
+        top: 140px;
+    }
+
+
+
+}

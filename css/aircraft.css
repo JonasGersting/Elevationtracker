@@ -137,3 +137,19 @@
 .adsbOneLink:hover{
     color: rgb(195, 245, 25);
 }
+
+@media screen and (max-width: 1000px) {
+    #trackedReg {
+        display: none;
+    }
+
+    .imgLinkWrapper {
+        display: none;
+    }
+
+    #trackedAcft {
+        top: 400px;
+        height: 460px;
+    }
+
+}

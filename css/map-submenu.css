@@ -1,6 +1,6 @@
 /* Background Maps Menu */
 .allBackgroundMaps {
-    width: 900px !important;
+    width: 900px;
     padding-left: 24px;
 }
 
@@ -10,7 +10,7 @@
     display: flex;
     justify-content: start;
     align-items: start;
-    width: 900px !important;
+    width: 900px;
     overflow: auto;
     box-sizing: border-box;
 }
@@ -36,8 +36,6 @@
     flex-direction: row !important;
     padding-bottom: 4px;
     padding-left: 24px;
-    overflow: unset;
-    width: unset;
 }
 
 .allDetailMaps::-webkit-scrollbar {
@@ -175,4 +173,32 @@
     white-space: nowrap;
     border: 1px solid rgb(40, 40, 126);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@media only screen and (max-width: 1400px) {
+    .bgMapsMenu{
+        width: 500px !important;
+    }
+
+}
+
+@media only screen and (max-width: 966px) {
+    .allBackgroundMaps{
+        width: 210px !important;
+        padding: 0;
+    }
+    .bgMapsMenu{
+        width: 210px !important;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .bgMapButton{
+        margin: 0;
+    }
+    .allDetailMaps{
+        flex-direction: column !important;
+        padding: 12px 0 12px 0;
+        gap: 16px;
+    }
+
 }

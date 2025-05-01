@@ -15,27 +15,28 @@
 
 <body>
     <div class="topSearchBar">
-        <div class="standardInput">
-            <div class="searchDropDown">
-                <div class="relativeDiv shadow">
-                    <span id="searchCategoryHeadline">Standort</span><img class="arrowImg" src="img/arrowLeft.png"
-                        alt="">
-                    <div class="shadow" id="dropDownCategory">
-                        <button class="searchButton" onclick="setSearchCat('Standort')">Standort</button>
-                        <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
-                        <button class="searchButton" onclick="setSearchCat('Callsign')">Callsign</button>
-                        <button class="searchButton" onclick="setSearchCat('ED-R')">ED-R</button>
-                        <button class="searchButton" onclick="setSearchCat('ED-D')">ED-D</button>
-                        <button class="searchButton" onclick="setSearchCat('RMZ')">RMZ</button>
-                        <button class="searchButton" onclick="setSearchCat('TMZ')">TMZ</button>
-                        <button class="searchButton" onclick="setSearchCat('PJE')">PJE</button>
-                        <button class="searchButton" onclick="setSearchCat('CTR')">CTR</button>
-                        <button class="searchButton" onclick="setSearchCat('Hinderniss')">Hinderniss</button>
-                        <button class="searchButton" onclick="setSearchCat('NAV-Aid')">NAV-Aid</button>
+        <div class="searchDropDown">
+            <div class="relativeDiv shadow">
+                <span id="searchCategoryHeadline">Standort</span><img class="arrowImg" src="img/arrowLeft.png"
+                    alt="">
+                <div class="shadow" id="dropDownCategory">
+                    <button class="searchButton" onclick="setSearchCat('Standort')">Standort</button>
+                    <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
+                    <button class="searchButton" onclick="setSearchCat('Callsign')">Callsign</button>
+                    <button class="searchButton" onclick="setSearchCat('ED-R')">ED-R</button>
+                    <button class="searchButton" onclick="setSearchCat('ED-D')">ED-D</button>
+                    <button class="searchButton" onclick="setSearchCat('RMZ')">RMZ</button>
+                    <button class="searchButton" onclick="setSearchCat('TMZ')">TMZ</button>
+                    <button class="searchButton" onclick="setSearchCat('PJE')">PJE</button>
+                    <button class="searchButton" onclick="setSearchCat('CTR')">CTR</button>
+                    <button class="searchButton" onclick="setSearchCat('Hinderniss')">Hinderniss</button>
+                    <button class="searchButton" onclick="setSearchCat('NAV-Aid')">NAV-Aid</button>
 
-                    </div>
                 </div>
             </div>
+        </div>
+        <div class="standardInput">
+           
             <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse oder Koordinate">
             <div class="address-list shadow" id="addressList" style="display: none;"></div>
             <div id="searchBtnWithLoader" class="searchBtnWithLoader">
@@ -189,7 +190,7 @@
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
     </div>
-    <div id="monitorToSmall" class="d-none">
+    <div id="monitorToSmall">
         <span class="toSmallSpan">Öffnen Sie die App auf einem größeren Monitor!</span>
     </div>
     <div id="login">
