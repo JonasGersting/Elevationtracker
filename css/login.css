@@ -1,0 +1,78 @@
+#login {
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(45deg, rgb(10, 60, 135), rgb(15, 90, 210));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    position: absolute;
+    gap: 16px;
+}
+
+#loginInput {
+    width: 400px;
+    height: 48px;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    font-size: 24px;
+    text-align: center;
+    color: rgb(10, 60, 135);
+
+}
+
+#loginBtn {
+    width: 200px;
+    height: 50px;
+    border-radius: 4px;
+    border: none;
+    background-color: rgb(195, 245, 25);
+    font-size: 24px;
+    cursor:pointer
+}
+
+#loginBtn:hover {
+    background-color: rgb(10, 60, 135);
+    color: rgb(195, 245, 25);
+}
+
+/* Animation für das Verschwinden des Login-Overlays */
+@keyframes slideOutDown {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+#login.hidden {
+    animation: slideOutDown 0.5s forwards; /* Animation mit 0.5 Sekunden Dauer */
+}
+
+/* Fehler-Banner */
+#errorBanner {
+    position: fixed;
+    bottom: -50px; /* Startposition außerhalb des sichtbaren Bereichs */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: all 0.5s ease-in-out;
+    z-index: 3000;
+}
+
+/* Banner sichtbar machen */
+#errorBanner.show {
+    bottom: 20px; /* Zielposition */
+    opacity: 1;
+}

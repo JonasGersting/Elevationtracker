@@ -107,6 +107,7 @@ async function saveToIndexedDB(key, data) {
 }
 
 async function getData(key) {
+    // Überprüfe den Cache
     const cachedData = await getFromIndexedDB(key);
     if (cachedData) {
         console.log(`Daten für ${key} aus dem Cache geladen.`);
@@ -114,29 +115,50 @@ async function getData(key) {
         return cachedData;
     }
 
-    const firebaseURL = 'https://aromaps-3b242-default-rtdb.europe-west1.firebasedatabase.app/';
-    const url = `${firebaseURL}/${key}.json`;
+    // Prüfe, ob der Nutzer eingeloggt ist
+    const auth = firebase.auth(); // Zugriff auf das globale Firebase-Auth-Objekt
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("Benutzer ist nicht eingeloggt. Zugriff verweigert.");
+    }
+
+    // Prüfe den Session-Token
+    const storedToken = sessionStorage.getItem("accessToken");
+    if (!storedToken) {
+        throw new Error("Kein Token im SessionStorage gefunden. Zugriff verweigert.");
+    }
+
+    const currentToken = await user.getIdToken();
+    if (storedToken !== currentToken) {
+        throw new Error("Ungültiger Token. Zugriff verweigert.");
+    }
+
+    // Daten direkt über Firebase abrufen
+    const database = firebase.database(); // Zugriff auf das globale Firebase-Database-Objekt
+    const dataRef = database.ref(key);
 
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`API-Anfrage fehlgeschlagen: ${response.statusText}`);
-        }
-        let data = await response.json();
+        const snapshot = await dataRef.once("value"); // Daten aus Firebase abrufen
+        if (snapshot.exists()) {
+            let data = snapshot.val();
 
-        if (data !== null) {
-            if (data[0]?.features) {
-                await saveToIndexedDB(key, data[0].features);
-                data = data[0].features;
-            } else {
-                await saveToIndexedDB(key, data);
+            if (data !== null) {
+                // Daten in den Cache speichern
+                if (data[0]?.features) {
+                    await saveToIndexedDB(key, data[0].features);
+                    data = data[0].features;
+                } else {
+                    await saveToIndexedDB(key, data);
+                }
+
+                console.log(`Daten für ${key} erfolgreich aus Firebase geladen.`);
+                processDataByKey(key, data); // Daten verarbeiten
+                return data;
             }
-            processDataByKey(key, data);
-            return data;
         }
-        throw `Keine Daten für Key: ${key} gefunden.`;
+        throw new Error(`Keine Daten für Key: ${key} gefunden.`);
     } catch (error) {
-        console.error('Fehler beim Abrufen der Daten:', error);
+        console.error(`Fehler beim Abrufen der Daten für ${key}:`, error);
         throw error;
     }
 }

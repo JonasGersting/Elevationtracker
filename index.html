@@ -5,14 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>elevationFinder</title>
-     <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
-     <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" />
-     <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="fonts/fonts.css">
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
 </head>
-<body onload="init()" >
+
+<body >
     <div class="topSearchBar">
         <div class="standardInput">
             <div class="searchDropDown">
@@ -188,11 +189,19 @@
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
     </div>
-    <div id="monitorToSmall" class="d-none" >
+    <div id="monitorToSmall" class="d-none">
         <span class="toSmallSpan">Öffnen Sie die App auf einem größeren Monitor!</span>
     </div>
+    <div id="login">
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <input type="password" id="loginInput" placeholder="Password" required>
+            <button id="loginBtn" type="submit">Login</button>
+        </form>
+    </div>
+    <div id="errorBanner">Das Passwort war nicht korrekt</div>
     <div id="adsb-one-attribution" class="d-none">
-        <span>Data by</span><a class="adsbOneLink" href="https://adsb.one/" target="_blank" rel="noopener noreferrer">ADS-B One</a>
+        <span>Data by</span><a class="adsbOneLink" href="https://adsb.one/" target="_blank"
+            rel="noopener noreferrer">ADS-B One</a>
     </div>
     <div id="map"></div>
     <div class="hiddenTrackedAcft" id="trackedAcft">
@@ -242,9 +251,14 @@
             <span>loading trace</span>
             <span class="loader z-index1100"></span>
         </div>
-        
+
     </div>
 </body>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="firebase.js" type="module"></script>
+<script src="login.js" ></script>
 <script src="node_modules/idb/build/umd.js"></script>
 <script src="node_modules/leaflet/dist/leaflet.js"></script>
 <script src="node_modules/osmbuildings/dist/OSMBuildings-Leaflet.js"></script>
@@ -258,7 +272,7 @@
 <script src="services/addressService.js"></script>
 <script src="services/showPositionService.js"></script>
 <script src="services/gaforService.js"></script>
-<script src="services/measuringService.js" ></script>
+<script src="services/measuringService.js"></script>
 <script src="classes/airspace.class.js"></script>
 <script src="classes/edrAirspace.class.js"></script>
 <script src="classes/fisAirspace.class.js"></script>

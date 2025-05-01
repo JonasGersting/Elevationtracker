@@ -9,6 +9,10 @@ let currentTileLayer;
 let osmb;
 const monitorWarningDiv = document.getElementById('monitorToSmall');
 
+
+
+
+
 async function init() {
     getData('navAids');
     getData('aerodromes');
