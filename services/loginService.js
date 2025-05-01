@@ -6,9 +6,7 @@ async function login(password) {
         sessionStorage.setItem("accessToken", token); // Speichere das Token in sessionStorage
         console.log("Login erfolgreich, Token gespeichert.");
 
-        // Login-Overlay ausblenden
-        const loginOverlay = document.getElementById("login");
-        loginOverlay.classList.add("hidden"); // Füge die Klasse für die Animation hinzu
+    
 
         // Initialisiere die Anwendung
         init();
@@ -33,6 +31,30 @@ function showErrorBanner(message) {
     setTimeout(() => {
         errorBanner.classList.remove("show");
     }, 3000);
+}
+
+
+async function init() {
+    showLogInSuccess();
+    await Promise.all([
+        getData('navAids'),
+        getData('aerodromes'),
+        getData('obstacles'),
+        getData('aipInfo')
+    ]);
+    showCursorCoordinates(map);
+    removeOverlay();
+}
+
+function removeOverlay() {
+      // Login-Overlay ausblenden
+      const loginOverlay = document.getElementById("login");
+      loginOverlay.classList.add("hidden"); // Füge die Klasse für die Animation hinzu
+}
+
+function showLogInSuccess() {
+    const loginSuccess = document.getElementById("loginSuccess");
+    loginSuccess.classList.remove("d-none");
 }
 
 document.addEventListener("DOMContentLoaded", () => {

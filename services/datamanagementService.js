@@ -129,6 +129,7 @@ async function getData(key) {
     }
 
     const currentToken = await user.getIdToken();
+    
     if (storedToken !== currentToken) {
         throw new Error("Ungültiger Token. Zugriff verweigert.");
     }

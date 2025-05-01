@@ -13,7 +13,7 @@
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
 </head>
 
-<body >
+<body>
     <div class="topSearchBar">
         <div class="standardInput">
             <div class="searchDropDown">
@@ -193,10 +193,15 @@
         <span class="toSmallSpan">Öffnen Sie die App auf einem größeren Monitor!</span>
     </div>
     <div id="login">
+        <h1>ARO-Maps</h1>
         <form id="loginForm" onsubmit="handleLogin(event)">
             <input type="password" id="loginInput" placeholder="Password" required>
             <button id="loginBtn" type="submit">Login</button>
         </form>
+        <div id="loginSuccess" class="d-none">
+            <span>Sie werden eingeloggt...</span>
+            <span class="loader z-index1100"></span>
+        </div>
     </div>
     <div id="errorBanner">Das Passwort war nicht korrekt</div>
     <div id="adsb-one-attribution" class="d-none">
@@ -257,13 +262,13 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script src="firebase.js" type="module"></script>
-<script src="login.js" ></script>
+<script src="services/firebaseService.js" type="module"></script>
 <script src="node_modules/idb/build/umd.js"></script>
 <script src="node_modules/leaflet/dist/leaflet.js"></script>
 <script src="node_modules/osmbuildings/dist/OSMBuildings-Leaflet.js"></script>
 <script src="node_modules/@turf/turf/turf.min.js"></script>
 <script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+<script src="services/loginService.js"></script>
 <script src="acftType.js"></script>
 <script src="services/mapService.js"></script>
 <script src="services/airspaceService.js"></script>

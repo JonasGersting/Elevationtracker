@@ -8,6 +8,14 @@
     z-index: 2000;
     position: absolute;
     gap: 16px;
+    flex-direction: column;
+}
+
+h1 {
+    color: white;
+    font-size: 60px;
+    text-align: center;
+    font-weight: bold;
 }
 
 #loginInput {
@@ -28,6 +36,7 @@
     border-radius: 4px;
     border: none;
     background-color: rgb(195, 245, 25);
+    color: rgb(10, 60, 135);
     font-size: 24px;
     cursor:pointer
 }
@@ -75,4 +84,12 @@
 #errorBanner.show {
     bottom: 20px; /* Zielposition */
     opacity: 1;
+}
+
+#loginSuccess{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+
 }
