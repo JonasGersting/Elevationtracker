@@ -62,13 +62,13 @@ class Aircraft {
         if (trackedAcftImgJSON != undefined) {
             trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
             trackedAcftImgLink = trackedAcftImgJSON.link;
-            trackedAcftImgPhotographer =`Photo © ${trackedAcftImgJSON.photographer}`;
+            trackedAcftImgPhotographer = `Photo © ${trackedAcftImgJSON.photographer}`;
         } else {
             trackedAcftImg = 'img/acftWhite.png';
             trackedAcftImgLink = '';
             trackedAcftImgPhotographer = '';
         }
-        
+
         await this.showDetails();
         await this.fetchInitialTrack();
     }
@@ -181,17 +181,17 @@ class Aircraft {
             const response = await fetch(corsProxy + url);
             if (!response.ok) throw new Error(`no tracks found (Status: ${response.status})`);
             const data = await response.json();
-            let fetchedTrackData = data.trace || data.path || [];            
+            let fetchedTrackData = data.trace || data.path || [];
             let lastGroundIndex = -1;
             for (let i = fetchedTrackData.length - 1; i >= 0; i--) {
                 if (fetchedTrackData[i] && fetchedTrackData[i].length > 4 && fetchedTrackData[i][3] === "ground" || fetchedTrackData[i][3] <= 0) {
-                    lastGroundIndex = i;                  
+                    lastGroundIndex = i;
                     break;
                 }
             }
             let lastLegData = [];
             if (lastGroundIndex !== -1 && lastGroundIndex < fetchedTrackData.length - 1) {
-                lastLegData = fetchedTrackData.slice(lastGroundIndex + 1);                
+                lastLegData = fetchedTrackData.slice(lastGroundIndex + 1);
             } else if (fetchedTrackData.length > 0) {
                 if (fetchedTrackData[0] && fetchedTrackData[0].length > 4 && fetchedTrackData[0][4] !== "ground") {
                     lastLegData = fetchedTrackData;
@@ -308,13 +308,27 @@ class Aircraft {
             </svg>
             </div>
             `
-        }  else if (this.type == 'GLID') {
+        } else if (this.type == 'GLID') {
             return `
              <div style="transform: rotate(${rotation - 180}deg);">
                       <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="36pt" height="36pt" viewBox="0 0 418 418" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M200.127,251.163c-37.011,-0.018 -189.276,-4.03 -194.597,-6.686c-1.528,-0.763 -0.744,-12.164 -0.744,-12.164c64.114,-6.037 129.804,-7.871 196.058,-8.202c0.943,-26.525 2.726,-69.856 4.793,-95.774c-7.588,-0.894 -26.208,-3.231 -30.692,-5.125c-1.348,-0.569 -0.714,-8.808 -0.714,-8.808l33.137,-2.611c0.498,-3.193 1.004,-4.994 1.509,-4.994c0.508,0 0.989,1.782 1.451,4.994l33.144,2.611c0,-0 0.634,8.239 -0.714,8.808c-4.523,1.911 -23.433,4.272 -30.89,5.149c1.765,25.918 3.044,69.226 3.692,95.744c66.712,0.312 132.859,2.13 197.409,8.208c-0,0 0.784,11.401 -0.744,12.164c-5.401,2.696 -162.195,6.789 -196.186,6.684l-0,24.824c-0,4.391 -2.771,34.971 -7.162,34.971c-4.39,-0 -8.75,-30.58 -8.75,-34.971l0,-24.822Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="0" width="417.755" height="417.755" style="fill:none;"/></svg>
             </div>
             `
+        } else if (this.type == 'BALL') {
+            return `
+            <div>
+            <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="100%" height="100%" viewBox="0 0 174 174" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><rect x="0" y="0" width="173.267" height="173.267" style="fill:none;"/><g><g><path d="M86.829,3.091c0,-0 -13.208,21.263 -13.766,45.836c-0.559,24.573 11.051,81.41 11.051,81.41" style="fill:none;stroke:#000;stroke-width:1px;"/><path d="M86.633,3.08c0,-0 13.209,21.263 13.767,45.836c0.559,24.573 -11.051,81.41 -11.051,81.41" style="fill:none;stroke:#000;stroke-width:1px;"/><path id="_--xml-version--1.0--encoding--UTF-8--standalone--no---" serif:id="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;" d="M86.829,3.091c0,-0 -27.41,3.403 -39.765,27.25c-8.196,15.821 -0.292,34.674 2.479,41.508c2.859,7.053 28.106,58.488 28.106,58.488" style="fill:${color};stroke:#000;stroke-width:1px;"/><path id="_--xml-version--1.0--encoding--UTF-8--standalone--no---1" serif:id="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;" d="M86.829,3.08c0,-0 27.411,3.403 39.765,27.25c8.197,15.821 0.293,34.674 -2.478,41.508c-2.859,7.053 -28.106,58.488 -28.106,58.488" style="fill:none;stroke:#000;stroke-width:1px;"/></g><path d="M101.2,130.499l-3.126,10.142l-20.435,-0l-3.812,-9.837l27.373,-0.305Z" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M84.525,140.641l0.537,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M91.162,140.641l-0.537,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M77.639,140.641l1.909,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M98.074,140.641l-1.909,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M48.466,99.811c-11.003,-14.496 -18.046,-32.985 -19.168,-46.719c-2.208,-27.049 21.128,-49.403 57.531,-50.001c35.546,-0.584 58.784,22.113 57.208,50.001c-0.777,13.753 -7.742,32.232 -18.747,46.719c-0.119,0.157 -0.239,0.313 -0.359,0.469l-23.731,30.219l-27.373,0.305l-25.468,-30.993l0.107,0Z" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M77.639,154.632l20.435,0l-0,3.508l-0.953,-0l-0,12.047l-18.529,0l0,-12.047l-0.953,-0l0,-3.508Z" style="fill:none;stroke:#000;stroke-width:1.7px;"/></g></svg>
+            </div>
+            `
         }
+
+
+
+
+
+
+
+
         else {
             return `
                         <div style="transform: rotate(${rotation - 90}deg);">
