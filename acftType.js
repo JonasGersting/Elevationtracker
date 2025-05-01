@@ -1,6 +1,6 @@
 let pistonAcft = ['C172', 'C182', 'C152', 'P28A', 'SR20', 'H47', 'C150', 'PA22', 'C82R', 'AP32', 'C208', 'LA4', 'AA5', 'DV20', 'P28S', 'SR22', 'M20T', 'C42', 'TB20', 'VL3', 'ULAC', 'B36T', 'P32R', 'DIMO', 'PC12',
     'M20P', 'EFOX', 'PNR3', 'RV9', 'PIVI', 'NG5', 'SIRA', 'SHRK', 'RV14', 'S22T', 'SF25', 'DA40', 'A210', 'DR40', 'DIAMO02', 'AC11', 'B209', 'WT9', 'BW6T', 'DG80', 'BR23', 'PC9', 'TL30',
-    'P208', 'P28T', 'PC21', 'TL20', 'BU31', 'GLID', 'F260', 'PRIM', 'PC7', 'Z42', 'DA50', 'TOBA', 'HR20', 'BREZ', 'TBM9', 'PA32', 'G115', 'BDOG', 'JAB4', 'SKRA', 'RV10', 'PA24', 'CRUZ', 'RV8', 'BE36', 'PA11',
+    'P208', 'P28T', 'PC21', 'TL20', 'BU31', 'F260', 'PRIM', 'PC7', 'Z42', 'DA50', 'TOBA', 'HR20', 'BREZ', 'TBM9', 'PA32', 'G115', 'BDOG', 'JAB4', 'SKRA', 'RV10', 'PA24', 'CRUZ', 'RV8', 'BE36', 'PA11',
     'AUJ2', 'G109', 'PA46', 'BE33', 'RV4', 'DR10', 'P28R', 'SUBA', 'P210', 'TWEN', 'YK52', 'RF6', 'G3', 'AS31', 'BE35', 'ALTO', 'EV97', 'FK9', 'NIMB', 'EB29', 'ARCP', 'CH60', 'GX', 'E500', 'PA18', 'S10S',
     'RALL', 'PA44', 'C206', 'PNR2', 'C10T', 'EVSS', 'FDCT', 'STRE', 'SLG2', 'TAMP', 'SLG2', 'DG40', 'AS02', 'C82T', 'C177', 'C210', 'OSCR', 'RV12', 'P46T', 'TEX2', 'M7', 'C72R', 'BT36', 'T206', 'CH2T', 'AA5',
     'GC1', 'C82S', 'C77R', 'BL8', 'C180', 'COL4', 'COL3', 'T210', 'GLST', 'PIAT', 'RV7', 'K100', 'IR23', 'D253', 'MCR1', 'ECHO', 'HUSK', 'S12S', 'LGND', 'IMPU', 'FAET', 'PULS', 'AS25', 'A32E', 'VNTR', 'P28B',

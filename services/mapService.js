@@ -10,29 +10,6 @@ let osmb;
 const monitorWarningDiv = document.getElementById('monitorToSmall');
 
 
-
-
-
-
-// function checkScreenSize() {
-//     if (!monitorWarningDiv) {
-//         console.error("Element mit ID 'monitorToSmall' nicht gefunden.");
-//         return;
-//     }
-//     const minWidth = 450;
-//     if (window.innerWidth < minWidth) {
-//         monitorWarningDiv.classList.remove('d-none');
-//         document.getElementById('searchBtnWithLoader').classList.add('d-none');
-
-//     } else {
-//         monitorWarningDiv.classList.add('d-none');
-//         document.getElementById('searchBtnWithLoader').classList.remove('d-none');
-//     }
-// }
-
-// document.addEventListener('DOMContentLoaded', checkScreenSize);
-// window.addEventListener('resize', checkScreenSize);
-
 var slider = document.getElementById('opacity-slider');
 var sliderValue = document.getElementById('slider-value');
 slider.addEventListener('input', setOpacity);
