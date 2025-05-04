@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>elevationFinder</title>
-    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="libs/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="libs/leaflet/MarkerCluster.css" />
+    <link rel="stylesheet" href="libs/leaflet/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="fonts/fonts.css">
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
@@ -17,8 +17,7 @@
     <div class="topSearchBar">
         <div class="searchDropDown">
             <div class="relativeDiv shadow">
-                <span id="searchCategoryHeadline">Standort</span><img class="arrowImg" src="img/arrowLeft.png"
-                    alt="">
+                <span id="searchCategoryHeadline">Standort</span><img class="arrowImg" src="img/arrowLeft.png" alt="">
                 <div class="shadow" id="dropDownCategory">
                     <button class="searchButton" onclick="setSearchCat('Standort')">Standort</button>
                     <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
@@ -36,7 +35,7 @@
             </div>
         </div>
         <div class="standardInput">
-           
+
             <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse oder Koordinate">
             <div class="address-list shadow" id="addressList" style="display: none;"></div>
             <div id="searchBtnWithLoader" class="searchBtnWithLoader">
@@ -172,8 +171,6 @@
                         <button class="mapBtn" id="obstacle" onclick="toggleMarkers('obstacle')">Hindernisse</button>
                     </div>
                 </div>
-
-
             </div>
         </div>
         <button id="radar" class="radarBtn shadow" onclick="toggleRadar()"></button>
@@ -194,14 +191,16 @@
         <span class="toSmallSpan">Öffnen Sie die App auf einem größeren Monitor!</span>
     </div>
     <div id="login">
-        <h1>ARO-Maps</h1>
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <input type="password" id="loginInput" placeholder="Password" required>
-            <button id="loginBtn" type="submit">Login</button>
-        </form>
-        <div id="loginSuccess" class="d-none">
-            <span>Sie werden eingeloggt...</span>
-            <span class="loader z-index1100"></span>
+        <div class="blurBackground">
+            <h1>ARO-Maps</h1>
+            <form id="loginForm"  onsubmit="handleLogin(event)">
+                <input type="password" class="shadow" id="loginInput" placeholder="Password" required>
+                <button id="loginBtn" class="shadow" type="submit">Login</button>
+            </form>
+            <div id="loginSuccess" class="d-none">
+                <span>Sie werden eingeloggt...</span>
+                <span class="loader z-index1100"></span>
+            </div>
         </div>
     </div>
     <div id="errorBanner">Das Passwort war nicht korrekt</div>
@@ -260,15 +259,15 @@
 
     </div>
 </body>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="libs/firebase/firebase-app-compat.js"></script>
+<script src="libs/firebase/firebase-auth-compat.js"></script>
+<script src="libs/firebase/firebase-database-compat.js"></script>
 <script src="services/firebaseService.js" type="module"></script>
-<script src="node_modules/idb/build/umd.js"></script>
-<script src="node_modules/leaflet/dist/leaflet.js"></script>
-<script src="node_modules/osmbuildings/dist/OSMBuildings-Leaflet.js"></script>
-<script src="node_modules/@turf/turf/turf.min.js"></script>
-<script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+<script src="libs/indexDB/umd.js"></script>
+<script src="libs/leaflet/leaflet.js"></script>
+<script src="libs/leaflet/OSMBuildings-Leaflet.js"></script>
+<script src="libs/turf/turf.min.js"></script>
+<script src="libs/leaflet/leaflet.markercluster.js"></script>
 <script src="services/loginService.js"></script>
 <script src="acftType.js"></script>
 <script src="services/mapService.js"></script>

@@ -9,6 +9,22 @@
     position: absolute;
     gap: 16px;
     flex-direction: column;
+    background-image: url('../img/AROMapsBG.PNG');
+    /* background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px); */
+}
+
+.blurBackground{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    gap: 16px;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(1.5px);
+    padding-bottom: 200px;
 }
 
 h1 {
@@ -16,6 +32,8 @@ h1 {
     font-size: 60px;
     text-align: center;
     font-weight: bold;
+    text-shadow: 2px 4px 3px rgba(0, 0, 0, 0.4);
+    ;
 }
 
 #loginInput {
@@ -82,7 +100,7 @@ h1 {
 
 /* Banner sichtbar machen */
 #errorBanner.show {
-    bottom: 20px; /* Zielposition */
+    bottom: 220px; /* Zielposition */
     opacity: 1;
 }
 
