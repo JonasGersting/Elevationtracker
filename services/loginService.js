@@ -1,4 +1,14 @@
+// Flag, um sicherzustellen, dass init() nur einmal aufgerufen wird
+let isInitialized = false;
+
+// --- Login-Funktion (bleibt wie zuvor) ---
 async function login(password) {
+    // Deaktiviere Eingabe und Button während des Logins
+    const passwordInput = document.getElementById("loginInput");
+    const loginBtn = document.getElementById("loginBtn");
+    if (passwordInput) passwordInput.disabled = true;
+    if (loginBtn) loginBtn.disabled = true;
+
     const functions = firebase.app().functions('europe-west3');
     const validateAccess = functions.httpsCallable('validateAccessAndGenerateToken');
 
@@ -7,25 +17,20 @@ async function login(password) {
         const customAuthToken = result.data.token;
 
         if (customAuthToken) {
-            // --- HIER: Persistenz festlegen ---
-            // Option A: Sitzung nur für die aktuelle Browser-Session
+            // Persistenz festlegen (z.B. SESSION)
             await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
-
-            // Option B: Sitzung nicht speichern (Ausloggen bei Neuladen)
-            // await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
-
-            // Option C: Standard (local - bleibt gespeichert) - muss nicht explizit gesetzt werden
-            // await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            // --- Ende Persistenz ---
 
             // Mit dem Custom Token bei Firebase anmelden
             await firebase.auth().signInWithCustomToken(customAuthToken);
             console.log("Erfolgreich mit Custom Token angemeldet.");
-            sessionStorage.setItem('isLoggedIn', 'true');
-            init();
+            // init() wird jetzt vom onAuthStateChanged Listener aufgerufen
+            // sessionStorage.setItem('isLoggedIn', 'true'); // Kann entfernt oder beibehalten werden
         } else {
             console.error("Login fehlgeschlagen: Kein Custom Token von der Funktion erhalten.");
             showErrorBanner("Login fehlgeschlagen: Ungültige Antwort vom Server.");
+            // Re-enable Button/Input bei Fehler, bevor init() aufgerufen wird
+            if (passwordInput) passwordInput.disabled = false;
+            if (loginBtn) loginBtn.disabled = false;
         }
 
     } catch (error) {
@@ -37,77 +42,107 @@ async function login(password) {
         } else {
             showErrorBanner("Login fehlgeschlagen: " + (error.message || "Unbekannter Fehler"));
         }
+        // Re-enable Button/Input bei Fehler
+        if (passwordInput) passwordInput.disabled = false;
+        if (loginBtn) loginBtn.disabled = false;
     }
+    // finally Block wird nicht mehr benötigt, da init() vom Listener aufgerufen wird
 }
 
+// --- handleLogin (bleibt wie zuvor) ---
 function handleLogin(event) {
     event.preventDefault();
     const passwordInput = document.getElementById("loginInput");
     const password = passwordInput.value;
-    const loginBtn = document.getElementById("loginBtn");
-    if (loginBtn) loginBtn.disabled = true;
-
-    login(password).finally(() => {
-        passwordInput.disabled = false;
-        if (loginBtn) loginBtn.disabled = false;
-    });
+    // Button/Input Deaktivierung passiert jetzt am Anfang von login()
+    login(password); // Ruft login auf, aber init() wird vom Listener gesteuert
 }
 
-
+// --- showErrorBanner (bleibt wie zuvor) ---
 function showErrorBanner(message) {
     const errorBanner = document.getElementById("errorBanner");
-    errorBanner.textContent = message; // Setze die Fehlermeldung
-    errorBanner.classList.add("show"); // Zeige das Banner an
-
-    // Verstecke das Banner nach 3 Sekunden
+    if (!errorBanner) return; // Sicherstellen, dass das Element existiert
+    errorBanner.textContent = message;
+    errorBanner.classList.add("show");
     setTimeout(() => {
         errorBanner.classList.remove("show");
     }, 3000);
 }
 
-
+// --- init (bleibt wie zuvor, wird aber vom Listener aufgerufen) ---
 async function init() {
-    showLogInSuccess();
-    // Stelle sicher, dass getData und andere Funktionen verfügbar sind
-    // und dass der Token ggf. für API-Aufrufe genutzt wird, falls erforderlich.
-    await Promise.all([
-        getData('navAids'),
-        getData('aerodromes'),
-        getData('obstacles'),
-        getData('aipInfo')
-    ]);
-    // Stelle sicher, dass 'map' initialisiert ist, bevor es verwendet wird.
-    if (typeof map !== 'undefined') {
-        showCursorCoordinates(map);
-    } else {
-        console.warn("Karte (map) ist noch nicht initialisiert in init().");
+    if (isInitialized) return; // Verhindert mehrfachen Aufruf
+    isInitialized = true;
+    console.log("Initialisiere Anwendung...");
+
+    showLogInSuccess(); // Zeigt Erfolgsmeldung an
+    removeOverlay(); // Entfernt Login-Overlay
+
+    try {
+        // Lade notwendige Daten
+        await Promise.all([
+            getData('navAids'),
+            getData('aerodromes'),
+            getData('obstacles'),
+            getData('aipInfo')
+            // Füge hier weitere initiale getData-Aufrufe hinzu, falls nötig
+        ]);
+
+        // Karteninitialisierung, falls map verfügbar ist
+        if (typeof map !== 'undefined' && map) {
+            showCursorCoordinates(map);
+        } else {
+            console.warn("Karte (map) ist noch nicht initialisiert in init().");
+            // Ggf. warten oder später initialisieren
+        }
+        console.log("Anwendung initialisiert.");
+
+    } catch (error) {
+        console.error("Fehler während der Initialisierung:", error);
+        showErrorBanner("Fehler beim Laden der Anwendungsdaten.");
+        isInitialized = false; 
     }
-    removeOverlay();
 }
 
 function removeOverlay() {
-    // Login-Overlay ausblenden
     const loginOverlay = document.getElementById("login");
-    loginOverlay.classList.add("hidden"); // Füge die Klasse für die Animation hinzu
+    if (loginOverlay) {
+        loginOverlay.classList.add("hidden");
+    }
 }
 
 function showLogInSuccess() {
     const loginSuccess = document.getElementById("loginSuccess");
-    loginSuccess.classList.remove("d-none");
-    // Optional: Login-Formular ausblenden
+    if (loginSuccess) {
+        loginSuccess.classList.remove("d-none");
+    }
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
         loginForm.classList.add("d-none");
     }
 }
 
-// document.addEventListener("DOMContentLoaded", () => {
-//     // Event Listener für das Formular hinzufügen, falls noch nicht geschehen
-//     const loginForm = document.getElementById("loginForm");
-//     if (loginForm) {
-//         // Entferne den onsubmit-Handler aus dem HTML, wenn du diesen Listener verwendest
-//         // loginForm.addEventListener('submit', handleLogin);
-//     }
-//     // Kein automatischer Login mehr hier
-//     // login("testpassword"); // Beispielaufruf entfernt
-// });
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                console.log("Benutzer ist angemeldet:", user.uid);
+                init();
+            } else {
+                console.log("Benutzer ist nicht angemeldet.");
+                const loginOverlay = document.getElementById("login");
+                if (loginOverlay) {
+                    loginOverlay.classList.remove("hidden");
+                }
+                const loginForm = document.getElementById("loginForm");
+                if (loginForm) {
+                    loginForm.classList.remove("d-none");
+                }
+                isInitialized = false;
+            }
+        });
+    } else {
+        console.error("Firebase Auth konnte nicht initialisiert werden. Listener nicht angehängt.");
+        showErrorBanner("Fehler bei der Initialisierung. Bitte Seite neu laden.");
+    }
+});

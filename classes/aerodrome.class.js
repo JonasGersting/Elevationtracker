@@ -232,8 +232,7 @@ class Aerodrome extends AirspacePolygon {
     closeDetailInfo() {
         let detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '0px';
-        setTimeout(() => {
-            detailDiv.innerHTML = '';
-        }, 1000);
+        
+
     }
 }
