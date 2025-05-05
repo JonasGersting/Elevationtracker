@@ -115,99 +115,97 @@ async function getData(key) {
         return cachedData;
     }
 
-    // Prüfe, ob der Nutzer eingeloggt ist
-    const auth = firebase.auth(); // Zugriff auf das globale Firebase-Auth-Objekt
-    const user = auth.currentUser;
-    if (!user) {
-        throw new Error("Benutzer ist nicht eingeloggt. Zugriff verweigert.");
-    }
+    // KEIN manueller Token-Check mehr nötig.
+    // Das Firebase SDK sendet Anfragen automatisch als angemeldeter Benutzer (oder nicht).
+    // Die Datenbankregeln (auth != null) kümmern sich um die Berechtigung.
 
-    // Prüfe den Session-Token
-    const storedToken = sessionStorage.getItem("accessToken");
-    if (!storedToken) {
-        throw new Error("Kein Token im SessionStorage gefunden. Zugriff verweigert.");
-    }
-
-    const currentToken = await user.getIdToken();
-    
-    if (storedToken !== currentToken) {
-        throw new Error("Ungültiger Token. Zugriff verweigert.");
-    }
-
-    // Daten direkt über Firebase abrufen
-    const database = firebase.database(); // Zugriff auf das globale Firebase-Database-Objekt
+    const database = firebase.database();
     const dataRef = database.ref(key);
 
     try {
-        const snapshot = await dataRef.once("value"); // Daten aus Firebase abrufen
+        const snapshot = await dataRef.once("value");
         if (snapshot.exists()) {
             let data = snapshot.val();
-
             if (data !== null) {
-                // Daten in den Cache speichern
-                if (data[0]?.features) {
-                    await saveToIndexedDB(key, data[0].features);
-                    data = data[0].features;
+                // Daten in den Cache speichern (Logik wie zuvor)
+                if (key === 'firAirspace' || key === 'gaforAirspace' || key === 'atzAirspace') {
+                    const features = Array.isArray(data) && data.length > 0 && data[0].features ? data[0].features : data;
+                    await saveToIndexedDB(key, features);
+                    data = features;
+                } else if (Array.isArray(data) && data.length > 0 && data[0]?.features) {
+                     await saveToIndexedDB(key, data[0].features);
+                     data = data[0].features;
                 } else {
                     await saveToIndexedDB(key, data);
                 }
 
                 console.log(`Daten für ${key} erfolgreich aus Firebase geladen.`);
-                processDataByKey(key, data); // Daten verarbeiten
+                processDataByKey(key, data);
                 return data;
             }
         }
-        throw new Error(`Keine Daten für Key: ${key} gefunden.`);
+        console.warn(`Keine Daten für Key: ${key} in Firebase gefunden.`);
+        processDataByKey(key, null);
+        return null;
     } catch (error) {
         console.error(`Fehler beim Abrufen der Daten für ${key}:`, error);
+        // Der Fehler 'PERMISSION_DENIED' sollte jetzt nur auftreten, wenn der Benutzer
+        // nicht erfolgreich mit signInWithCustomToken angemeldet wurde.
+        if (error.code === 'PERMISSION_DENIED') {
+             showErrorBanner("Zugriff auf Datenbank verweigert. Bitte neu anmelden.");
+        } else {
+             showErrorBanner(`Fehler beim Laden von ${key}.`);
+        }
         throw error;
     }
 }
-
 function processDataByKey(key, data) {
+    // Stelle sicher, dass data nicht null ist, bevor darauf zugegriffen wird
+    const safeData = data || ( (key === 'firAirspace' || key === 'gaforAirspace' || key === 'atzAirspace') ? [] : null); // Passe Standardwert an
+
     if (key === 'aerodromes') {
-        aerodromes = data;
-        markerData.aerodrome.source = data;
+        aerodromes = safeData;
+        markerData.aerodrome.source = safeData || [];
     } else if (key === 'navAids') {
-        navAids = data;
-        markerData.navaid.source = data;
+        navAids = safeData;
+        markerData.navaid.source = safeData || [];
     } else if (key === 'obstacles') {
-        obstacles = data;
-        markerData.obstacle.source = data;
+        obstacles = safeData;
+        markerData.obstacle.source = safeData || [];
     } else if (key === 'fisAirspace') {
-        fisAirspace = data;
+        fisAirspace = safeData || [];
     } else if (key === 'edrAirspace') {
-        edrAirspace = data;
+        edrAirspace = safeData || [];
     } else if (key === 'eddAirspace') {
-        eddAirspace = data;
+        eddAirspace = safeData || [];
     } else if (key === 'ctrAirspace') {
-        ctrAirspace = data;
+        ctrAirspace = safeData || [];
     } else if (key === 'aipInfo') {
-        aipInfo = data;
+        aipInfo = safeData || {};
     } else if (key === 'rmzAirspace') {
-        rmzAirspace = data;
+        rmzAirspace = safeData || [];
     } else if (key === 'firAirspace') {
-        firAirspace = data[0]?.features;
+        firAirspace = safeData || []; // Bereits als Array erwartet
     } else if (key === 'gaforAirspace') {
-        gaforAirspace = data[0]?.features;
+        gaforAirspace = safeData || []; // Bereits als Array erwartet
     } else if (key === 'pjeAirspace') {
-        pjeAirspace = data;
+        pjeAirspace = safeData || [];
     } else if (key === 'tmzAirspace') {
-        tmzAirspace = data;
+        tmzAirspace = safeData || [];
     } else if (key === 'atzAirspace') {
-        atzAirspace = data[0]?.features;
+        atzAirspace = safeData || []; // Bereits als Array erwartet
     } else if (key === 'ctrInfo') {
-        ctrInfo = data;
+        ctrInfo = safeData || {};
     } else if (key === 'eddInfo') {
-        eddInfo = data;
+        eddInfo = safeData || {};
     } else if (key === 'edrInfo') {
-        edrInfo = data;
+        edrInfo = safeData || {};
     } else if (key === 'rmzInfo') {
-        rmzInfo = data;
+        rmzInfo = safeData || {};
     } else if (key === 'tmzInfo') {
-        tmzInfo = data;
+        tmzInfo = safeData || {};
     } else if (key === 'pjeInfo') {
-        pjeInfo = data;
+        pjeInfo = safeData || {};
     }
 }
 

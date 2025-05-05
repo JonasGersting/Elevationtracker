@@ -11,6 +11,9 @@ dist/
 build/
 out/
 
+# Functions directory
+functions/
+
 # Development environment
 .env
 .env.local

@@ -9,9 +9,10 @@
     position: absolute;
     gap: 16px;
     flex-direction: column;
-    background-image: url('../img/AROMapsBG.PNG');
-    /* background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px); */
+    background-image: url('../img/AROMapsBG5.PNG');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .blurBackground{
@@ -23,7 +24,7 @@
     gap: 16px;
     flex-direction: column;
     background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(1.5px);
+    backdrop-filter: blur(3px);
     padding-bottom: 200px;
 }
 
