@@ -3,12 +3,7 @@ let isInitialized = false;
 
 // --- Login-Funktion (bleibt wie zuvor) ---
 async function login(password) {
-    // Deaktiviere Eingabe und Button während des Logins
-    const passwordInput = document.getElementById("loginInput");
-    const loginBtn = document.getElementById("loginBtn");
-    if (passwordInput) passwordInput.disabled = true;
-    if (loginBtn) loginBtn.disabled = true;
-
+    showLogInSuccess(); 
     const functions = firebase.app().functions('europe-west3');
     const validateAccess = functions.httpsCallable('validateAccessAndGenerateToken');
 
@@ -17,20 +12,12 @@ async function login(password) {
         const customAuthToken = result.data.token;
 
         if (customAuthToken) {
-            // Persistenz festlegen (z.B. SESSION)
             await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
-
-            // Mit dem Custom Token bei Firebase anmelden
             await firebase.auth().signInWithCustomToken(customAuthToken);
             console.log("Erfolgreich mit Custom Token angemeldet.");
-            // init() wird jetzt vom onAuthStateChanged Listener aufgerufen
-            // sessionStorage.setItem('isLoggedIn', 'true'); // Kann entfernt oder beibehalten werden
         } else {
             console.error("Login fehlgeschlagen: Kein Custom Token von der Funktion erhalten.");
             showErrorBanner("Login fehlgeschlagen: Ungültige Antwort vom Server.");
-            // Re-enable Button/Input bei Fehler, bevor init() aufgerufen wird
-            if (passwordInput) passwordInput.disabled = false;
-            if (loginBtn) loginBtn.disabled = false;
         }
 
     } catch (error) {
@@ -42,9 +29,6 @@ async function login(password) {
         } else {
             showErrorBanner("Login fehlgeschlagen: " + (error.message || "Unbekannter Fehler"));
         }
-        // Re-enable Button/Input bei Fehler
-        if (passwordInput) passwordInput.disabled = false;
-        if (loginBtn) loginBtn.disabled = false;
     }
     // finally Block wird nicht mehr benötigt, da init() vom Listener aufgerufen wird
 }
@@ -60,6 +44,7 @@ function handleLogin(event) {
 
 // --- showErrorBanner (bleibt wie zuvor) ---
 function showErrorBanner(message) {
+    hideLogInSuccess(); // Versteckt Erfolgsmeldung bei Fehler
     const errorBanner = document.getElementById("errorBanner");
     if (!errorBanner) return; // Sicherstellen, dass das Element existiert
     errorBanner.textContent = message;
@@ -75,7 +60,7 @@ async function init() {
     isInitialized = true;
     console.log("Initialisiere Anwendung...");
 
-    showLogInSuccess(); // Zeigt Erfolgsmeldung an
+
     removeOverlay(); // Entfernt Login-Overlay
 
     try {
@@ -100,7 +85,8 @@ async function init() {
     } catch (error) {
         console.error("Fehler während der Initialisierung:", error);
         showErrorBanner("Fehler beim Laden der Anwendungsdaten.");
-        isInitialized = false; 
+        isInitialized = false;
+        hideLogInSuccess(); // Versteckt Erfolgsmeldung bei Fehler
     }
 }
 
@@ -116,10 +102,14 @@ function showLogInSuccess() {
     if (loginSuccess) {
         loginSuccess.classList.remove("d-none");
     }
-    const loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-        loginForm.classList.add("d-none");
-    }
+}
+
+function hideLogInSuccess() {
+    console.log('');
+    
+    const loginSuccess = document.getElementById("loginSuccess");
+    loginSuccess.classList.add("d-none");
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {

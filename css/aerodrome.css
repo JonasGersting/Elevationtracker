@@ -53,6 +53,20 @@
     background: linear-gradient(45deg, rgb(10, 60, 135), rgb(15, 90, 210));
 }
 
+.metar{
+    font-size: 18px;
+    font-weight: 500;
+    color: #000;
+    width: 330px;
+    height: 450px;
+    display: block;
+    background-color: white;
+    padding: 12px;
+    color: blue;
+    border-radius: 12px;
+    margin-top: 32px;
+}
+
 .orderWeatherData {
     width: 100%;
     margin-top: 32px;

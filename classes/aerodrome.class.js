@@ -8,7 +8,7 @@ class Aerodrome extends AirspacePolygon {
         this.map = map;
         this.icaoCode = icaoCode;
         this.rwys = rwys;
-        this.icon = this.createCustomIcon(); 
+        this.icon = this.createCustomIcon();
         this.marker = null;
         this.aipImgs = [];
         this.currentImgIndex;
@@ -18,31 +18,52 @@ class Aerodrome extends AirspacePolygon {
 
     createCustomIcon() {
         const trueHeading = this.rwys && this.rwys[0] ? this.rwys[0].trueHeading : 0;
-        const iconHtml = `
-            <div class="marker-icon" style="position: relative; width: 16px; height: 16px;">
-                <img src="img/airport.png" alt="Aerodrome Icon" style="width: 16px; height: 16px;">
-                <div class="rotation-bar" 
+        const circleSize = 18; // px
+        const borderWidth = 3; // px
+        const borderColor = 'black';
+        const backgroundColor = 'transparent';
+
+        let rotationBarHtml = '';
+        if (this.rwys !== undefined) {
+            rotationBarHtml = `
+                <div class="rotation-bar"
                     style="
                         position: absolute;
                         top: 50%;
                         left: 50%;
-                        width: 25px;
-                        height: 3px;
+                        width: 25px; /* Breite des Runway-Indikators */
+                        height: 3px; /* Dicke des Runway-Indikators */
                         background-color: black;
                         transform: translate(-50%, -50%) rotate(${trueHeading - 90}deg);
                         transform-origin: center;
                     ">
+                </div>`;
+        }
+
+        const iconHtml = `
+            <div class="marker-icon" style="position: relative; width: ${circleSize}px; height: ${circleSize}px; display: flex; align-items: center; justify-content: center;">
+                <div class="circle-marker"
+                    style="
+                        width: ${circleSize}px;
+                        height: ${circleSize}px;
+                        background-color: ${backgroundColor};
+                        border: ${borderWidth}px solid ${borderColor};
+                        border-radius: 50%;
+                        box-sizing: border-box;
+                    ">
                 </div>
-                <div class="additional-info" style="display: none; font-size: 12px; width: 35px; padding: 5px;">
+                ${rotationBarHtml}
+                <div class="additional-info" style="display: none; font-size: 12px; width: 35px; position: absolute; right: -32px; bottom: -18px;">
                     ${this.icaoCode}
                 </div>
             </div>
         `;
 
         return L.divIcon({
-            className: 'custom-icon',
+            className: 'custom-div-icon',
             html: iconHtml,
-            iconSize: [16, 16],
+            iconSize: [circleSize, circleSize],
+            iconAnchor: [circleSize / 2, circleSize / 2]
         });
     }
 
@@ -78,69 +99,90 @@ class Aerodrome extends AirspacePolygon {
     async onClick() {
         this.setaipInfo(this.icaoCode);
         currentAerodrome = this;
-        let weatherData = await this.fetchWeatherData(this.geometry);
         const detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '100vh';
-        detailDiv.innerHTML = '';
-        detailDiv.innerHTML +=
-            `
+        detailDiv.innerHTML = ''; // Wichtig: Zuerst leeren
+        const metarTargetId = `${this.icaoCode}`; 
+        const cardHTML = `
             <div class="overlay"></div>
             <div class="cardWrapper">
-            <div class="aerodromeCard" id="aerodromeCard">
-                <button onclick="currentAerodrome.closeDetailInfo()" class="closeButton">X</button>
-                <h2>${this.name}</h2>
-                <h3>${this.icaoCode}</h3>
-                <div class="orderWeatherData">
-                <div>
-                    <ul>Temperatur:</ul>
-                    <ul>Wolkendecke:</ul>
-                    <ul>Druck auf Meereshöhe:</ul>
-                    <ul>Druck am Boden:</ul>
-                    <ul>Regen:</ul>
-                    <ul>Schnee:</ul>
-                    <ul>Windrichtung:</ul>
-                    <ul>Windböhen:</ul>
-                    <ul>Windgeschwindigkeit:</ul>
-                </div>
-                <div>
-                <ul>${weatherData.current.temperature_2m}°C</ul> 
-                <ul>${weatherData.current.cloud_cover}%</ul> 
-                <ul>${weatherData.current.pressure_msl}hPa</ul> 
-                <ul>${weatherData.current.surface_pressure}hPa</ul> 
-                <ul>${weatherData.current.showers}mm</ul> 
-                <ul>${weatherData.current.snowfall}cm</ul> 
-                <ul>${weatherData.current.wind_direction_10m}°</ul> 
-                <ul>${weatherData.current.wind_gusts_10m}km/h</ul> 
-                <ul>${weatherData.current.wind_speed_10m}km/h</ul> 
-                </div>   
-                </div>
-                <div class="buttonWithLoader">
-                    <button class="aerodromeCardButton" id="showAipImgsBtn" disabled onclick="currentAerodrome.toggleAIPImgs()">
-                    <span class="loader z-index1100" id="loaderAipImg" style="display: none;"></span>
-                    AIP-Info</button>
-                    <button class="aerodromeCardButton" id="showNotam" disabled onclick="currentAerodrome.toggleNotam()">
-                    <span class="loader z-index1100" id="loaderNotam" style="display: none;"></span>
-                    NOTAM</button>                    
-                </div>
-
-            </div>
-                <div id="aipInfo">                    
+                <div class="aerodromeCard" id="aerodromeCard">
+                    <button onclick="currentAerodrome.closeDetailInfo()" class="closeButton">X</button>
+                    <h2>${this.name}</h2>
+                    <h3>${this.icaoCode}</h3>
+                    <a href="https://metar-taf.com/de/${this.icaoCode}" target="_blank" id="metartaf-${metarTargetId}" class="metar">METAR &quot;${this.name}&quot; Airfield</a>
+                    <div class="buttonWithLoader">
+                        <button class="aerodromeCardButton" id="showAipImgsBtn" onclick="currentAerodrome.toggleAIPImgs()">
+                        <span class="loader z-index1100" id="loaderAipImg" style="display: none;"></span>
+                        AIP-Info</button>
+                        <button class="aerodromeCardButton" id="showNotam" disabled onclick="currentAerodrome.toggleNotam()">
+                        <span class="loader z-index1100" id="loaderNotam" style="display: none;"></span>
+                        NOTAM</button>
                     </div>
                 </div>
+                <div id="aipInfo">
+                </div>
             </div>`;
+        detailDiv.innerHTML = cardHTML; // Füge das Basis-HTML ein
+
+        // Stelle sicher, dass das DOM eine Chance hat, sich nach innerHTML zu aktualisieren,
+        // bevor das Skript angehängt wird.
+        
+            // Überprüfe, ob das Zielelement jetzt im DOM ist
+            if (!document.getElementById(`metartaf-${metarTargetId}`)) {
+                console.error(`METAR Target Element ${metarTargetId} NICHT im DOM gefunden, bevor das Skript angehängt wurde!`);
+                // Optional: Informiere den Benutzer oder zeige eine alternative Info im Link an
+                const targetLinkFallback = document.getElementById(metarTargetId); // Versuche es trotzdem zu finden
+                if (targetLinkFallback) {
+                    targetLinkFallback.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht initialisiert werden.`;
+                }
+                return; // Hänge das Skript nicht an, wenn das Ziel fehlt.
+            }
+            // console.log(`METAR Target Element ${metarTargetId} im DOM gefunden. Hänge Skript an.`);
+
+            const metarScript = document.createElement('script');
+            metarScript.async = true;
+            metarScript.defer = true;
+            metarScript.crossOrigin = 'anonymous';
+            metarScript.src = `https://metar-taf.com/de/embed-js/${this.icaoCode}?qnh=hPa&rh=rh&target=${metarTargetId}`;
+
+            metarScript.onload = () => {
+                // console.log(`METAR Skript für ${metarTargetId} erfolgreich geladen.`);
+            };
+            metarScript.onerror = () => {
+                console.error(`Fehler beim Laden des METAR Skripts für ${metarTargetId} von ${metarScript.src}`);
+                const targetLink = document.getElementById(metarTargetId);
+                if (targetLink) {
+                    targetLink.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht geladen werden.`;
+                    // Verhindere ggf. Navigation oder ändere den Link
+                    targetLink.href = '#error-loading-metar'; 
+                }
+            };
+
+            document.body.appendChild(metarScript);
+        //  Eine Verzögerung von 0ms reicht oft aus, um die Ausführung in den nächsten Event-Tick zu verschieben.
+
         try {
             let loader = document.getElementById('loaderAipImg');
             loader.style.display = 'inline-block';
-            if (this.aipImgs) {
+            if (this.aipImgs) { 
                 this.currentImgIndex = 0;
                 let aipImgBtn = document.getElementById('showAipImgsBtn');
                 aipImgBtn.disabled = false;
                 loader.style.display = 'none';
             } else {
-                throw new Error('Keine Bilder gefunden');
+                let aipImgBtn = document.getElementById('showAipImgsBtn');
+                aipImgBtn.disabled = true;
+                loader.style.display = 'none';
+                console.warn(`Keine AIP Bilder für ${this.icaoCode} gefunden oder this.aipImgs ist leer.`);
             }
         } catch (error) {
-            console.error('Fehler beim Laden der Bilder:', error.message);
+            console.error('Fehler beim Initialisieren der AIP-Bilder Anzeige:', error.message);
+            // Die Fehlerbehandlung für Bilder sollte nicht die gesamte Karte überschreiben,
+            // es sei denn, das ist explizit gewünscht.
+            // Hier könnte man z.B. nur den AIP-Button deaktivieren oder eine kleine Meldung anzeigen.
+            // Der folgende Code überschreibt die gesamte Karte, was vielleicht nicht ideal ist.
+            /*
             detailDiv.innerHTML = `
             <div class="overlay"></div>
             <div class="error">
@@ -148,27 +190,28 @@ class Aerodrome extends AirspacePolygon {
                 <button class="errorCloseBtn" onclick="currentAerodrome.closeDetailInfo()">X</button>
             </div>
             `;
+            */
         }
     }
 
-    setaipInfo(icaoCode) {        
+    setaipInfo(icaoCode) {
         aipInfo.forEach(item => {
             if (item.Flugplatz === icaoCode) {
                 this.aipIds = [
-                    item.Adinfo, 
-                    item.AD      
+                    item.Adinfo,
+                    item.AD
                 ];
                 if (Array.isArray(item.VFRchart)) {
                     item.VFRchart.forEach(item => {
-                        this.aipIds.push(item); 
+                        this.aipIds.push(item);
                     });
                 } else if (item.VFRchart) {
-                    this.aipIds.push(item.VFRchart); 
+                    this.aipIds.push(item.VFRchart);
                 }
             }
         });
     }
-    
+
     async fetchWeatherData(geometry) {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${geometry.coordinates[1]}&longitude=${geometry.coordinates[0]}&current=temperature_2m,showers,snowfall,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
         try {
@@ -214,7 +257,7 @@ class Aerodrome extends AirspacePolygon {
             } else {
                 this.currentPage = 0;
             }
-           aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
+            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
         }
         if (direction == 'left') {
             if (this.currentPage == 0) {
@@ -232,7 +275,7 @@ class Aerodrome extends AirspacePolygon {
     closeDetailInfo() {
         let detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '0px';
-        
+
 
     }
 }
