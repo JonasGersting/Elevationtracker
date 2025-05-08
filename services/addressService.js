@@ -232,6 +232,10 @@ const searchConfig = {
 };
 
 async function search() {
+    const deleteSearchBtn = document.getElementById('deleteSearch');
+    if (deleteSearchBtn) {
+        deleteSearchBtn.disabled = false; // Delete-Button deaktivieren
+    }
     const input = document.getElementById('searchInput').value.toUpperCase();
     const dmsPattern = /^(\d{4,6})[NSns](\d{5,7})[EWew]$/;
     if (dmsPattern.test(input.replace(/\s/g, ''))) {
@@ -379,4 +383,67 @@ function showNoResults(type) {
     setTimeout(() => {
         addressList.style.display = 'none';
     }, 1000);
+}
+
+
+function resetSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const addressList = document.getElementById('addressList');
+    const deleteSearchBtn = document.getElementById('deleteSearch');
+
+    if (searchInput) {
+        searchInput.value = ''; // Suchfeld leeren
+    }
+
+    let trackedAcftDiv = document.getElementById('trackedAcft');
+    trackedAcftDiv.classList.add('hiddenTrackedAcft');
+    currentAddresses = [];
+    if (trackedAcft) {
+        if (currentTrackLine) {
+            map.removeLayer(currentTrackLine);
+            currentTrackLine = null;
+        }
+        trackedAcft.isTracked = false;
+        trackedAcft.updateMarkerStyle();
+        trackedAcft = null;
+    }
+    if (flightDistLine) {
+        map.removeLayer(flightDistLine);
+        flightDistLine = null;
+    }
+    if (trackedIcaoDest) {
+        trackedIcaoDest = null;
+        trackedEta = '';
+        let icaoDestInput = document.getElementById('icaoDest');
+        icaoDestInput.value = '';
+    }
+    if (currentAdressGeoJSONLayer) {
+        map.removeLayer(currentAdressGeoJSONLayer);
+    }
+    currentAdressGeoJSONLayer = null;
+    trackedAcftReg = 'nothing';
+    if (markerData.navaid.added) {
+        toggleMarkers('navaid');
+    }
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+    polylines.forEach(line => map.removeLayer(line));
+    polylines = [];
+    clearAllDistanceMeasurements();
+    if (flightDistLine) {
+        flightDistLine.remove();
+    }
+    if (trackedIcaoDest) {
+        trackedIcaoDest = '';
+        let icaoDestInput = document.getElementById('icaoDest');
+        icaoDestInput.value = '';
+    }
+    initialMarkerLat = null;
+    initialMarkerLon = null;
+    closestNavAid = null;
+    foundNavAids = []; 
+    foundNavaidId = 0;
+    if (deleteSearchBtn) {
+        deleteSearchBtn.disabled = true;
+    }
 }

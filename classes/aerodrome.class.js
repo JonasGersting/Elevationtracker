@@ -22,7 +22,6 @@ class Aerodrome extends AirspacePolygon {
         const borderWidth = 3; // px
         const borderColor = 'black';
         const backgroundColor = 'transparent';
-
         let rotationBarHtml = '';
         if (this.rwys !== undefined) {
             rotationBarHtml = `
@@ -101,8 +100,8 @@ class Aerodrome extends AirspacePolygon {
         currentAerodrome = this;
         const detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '100vh';
-        detailDiv.innerHTML = ''; // Wichtig: Zuerst leeren
-        const metarTargetId = `${this.icaoCode}`; 
+        detailDiv.innerHTML = '';
+        const metarTargetId = `${this.icaoCode}`;
         const cardHTML = `
             <div class="overlay"></div>
             <div class="cardWrapper">
@@ -123,49 +122,34 @@ class Aerodrome extends AirspacePolygon {
                 <div id="aipInfo">
                 </div>
             </div>`;
-        detailDiv.innerHTML = cardHTML; // Füge das Basis-HTML ein
-
-        // Stelle sicher, dass das DOM eine Chance hat, sich nach innerHTML zu aktualisieren,
-        // bevor das Skript angehängt wird.
-        
-            // Überprüfe, ob das Zielelement jetzt im DOM ist
-            if (!document.getElementById(`metartaf-${metarTargetId}`)) {
-                console.error(`METAR Target Element ${metarTargetId} NICHT im DOM gefunden, bevor das Skript angehängt wurde!`);
-                // Optional: Informiere den Benutzer oder zeige eine alternative Info im Link an
-                const targetLinkFallback = document.getElementById(metarTargetId); // Versuche es trotzdem zu finden
-                if (targetLinkFallback) {
-                    targetLinkFallback.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht initialisiert werden.`;
-                }
-                return; // Hänge das Skript nicht an, wenn das Ziel fehlt.
+        detailDiv.innerHTML = cardHTML;
+        if (!document.getElementById(`metartaf-${metarTargetId}`)) {
+            console.error(`METAR Target Element ${metarTargetId} NICHT im DOM gefunden, bevor das Skript angehängt wurde!`);
+            const targetLinkFallback = document.getElementById(metarTargetId);
+            if (targetLinkFallback) {
+                targetLinkFallback.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht initialisiert werden.`;
             }
-            // console.log(`METAR Target Element ${metarTargetId} im DOM gefunden. Hänge Skript an.`);
+            return;
+        }
+        const metarScript = document.createElement('script');
+        metarScript.async = true;
+        metarScript.defer = true;
+        metarScript.crossOrigin = 'anonymous';
+        metarScript.src = `https://metar-taf.com/de/embed-js/${this.icaoCode}?qnh=hPa&rh=rh&target=${metarTargetId}`;
 
-            const metarScript = document.createElement('script');
-            metarScript.async = true;
-            metarScript.defer = true;
-            metarScript.crossOrigin = 'anonymous';
-            metarScript.src = `https://metar-taf.com/de/embed-js/${this.icaoCode}?qnh=hPa&rh=rh&target=${metarTargetId}`;
-
-            metarScript.onload = () => {
-                // console.log(`METAR Skript für ${metarTargetId} erfolgreich geladen.`);
-            };
-            metarScript.onerror = () => {
-                console.error(`Fehler beim Laden des METAR Skripts für ${metarTargetId} von ${metarScript.src}`);
-                const targetLink = document.getElementById(metarTargetId);
-                if (targetLink) {
-                    targetLink.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht geladen werden.`;
-                    // Verhindere ggf. Navigation oder ändere den Link
-                    targetLink.href = '#error-loading-metar'; 
-                }
-            };
-
-            document.body.appendChild(metarScript);
-        //  Eine Verzögerung von 0ms reicht oft aus, um die Ausführung in den nächsten Event-Tick zu verschieben.
-
+        metarScript.onerror = () => {
+            console.error(`Fehler beim Laden des METAR Skripts für ${metarTargetId} von ${metarScript.src}`);
+            const targetLink = document.getElementById(metarTargetId);
+            if (targetLink) {
+                targetLink.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht geladen werden.`;
+                targetLink.href = '#error-loading-metar';
+            }
+        };
+        document.body.appendChild(metarScript);
         try {
             let loader = document.getElementById('loaderAipImg');
             loader.style.display = 'inline-block';
-            if (this.aipImgs) { 
+            if (this.aipImgs) {
                 this.currentImgIndex = 0;
                 let aipImgBtn = document.getElementById('showAipImgsBtn');
                 aipImgBtn.disabled = false;
@@ -178,19 +162,6 @@ class Aerodrome extends AirspacePolygon {
             }
         } catch (error) {
             console.error('Fehler beim Initialisieren der AIP-Bilder Anzeige:', error.message);
-            // Die Fehlerbehandlung für Bilder sollte nicht die gesamte Karte überschreiben,
-            // es sei denn, das ist explizit gewünscht.
-            // Hier könnte man z.B. nur den AIP-Button deaktivieren oder eine kleine Meldung anzeigen.
-            // Der folgende Code überschreibt die gesamte Karte, was vielleicht nicht ideal ist.
-            /*
-            detailDiv.innerHTML = `
-            <div class="overlay"></div>
-            <div class="error">
-                <p>Fehler beim Laden der Bilder.</p>
-                <button class="errorCloseBtn" onclick="currentAerodrome.closeDetailInfo()">X</button>
-            </div>
-            `;
-            */
         }
     }
 
@@ -275,7 +246,5 @@ class Aerodrome extends AirspacePolygon {
     closeDetailInfo() {
         let detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '0px';
-
-
     }
 }

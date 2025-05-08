@@ -91,7 +91,7 @@ function cleanupRadar() {
     // Hide aircraft details
     const trackedAcftDiv = document.getElementById('trackedAcft');
     trackedAcftDiv.classList.add('hiddenTrackedAcft');
-    
+
     // Clear tracked aircraft
     if (trackedAcft) {
         if (currentTrackLine) {
@@ -220,7 +220,7 @@ async function fetchAircraftDataCallsign(callsign) {
             if (trackedAcftImgJSON != undefined) {
                 trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
                 trackedAcftImgLink = trackedAcftImgJSON.link;
-                trackedAcftImgPhotographer =`Photo © ${trackedAcftImgJSON.photographer}`;
+                trackedAcftImgPhotographer = `Photo © ${trackedAcftImgJSON.photographer}`;
             } else {
                 trackedAcftImg = 'img/acftWhite.png';
                 trackedAcftImgLink = '';
@@ -229,8 +229,11 @@ async function fetchAircraftDataCallsign(callsign) {
             await aircraft.showDetails();
             await aircraft.fetchInitialTrack();
             map.setView([acft.lat, acft.lon], 10);
-            radarActive = true;
-            toggleActBtnRadar();
+            if (!radarActive) {
+                radarActive = true;
+                toggleActBtnRadar();
+            }
+
             setTimeout(() => startRadarInterval(), 1000);
         } else {
             alert('Es wurde kein ACFT gefunden');
@@ -242,42 +245,42 @@ async function fetchAircraftDataCallsign(callsign) {
 }
 
 function updateAPIRequest() {
-    const bounds = map.getBounds(); 
-    const { lat: lat1, lng: lon1 } = bounds.getSouthWest(); 
-    const { lat: lat2, lng: lon2 } = bounds.getNorthEast(); 
+    const bounds = map.getBounds();
+    const { lat: lat1, lng: lon1 } = bounds.getSouthWest();
+    const { lat: lat2, lng: lon2 } = bounds.getNorthEast();
     const { centerLat, centerLon, radius } = calculateCircle(lat1, lon1, lat2, lon2);
     fetchAircraftData(centerLat, centerLon, radius);
 }
 map.on('move', () => {
-    stopRadarInterval(); 
+    stopRadarInterval();
     if (startTime === null) {
-        startTime = Date.now(); 
+        startTime = Date.now();
     }
     if (radarTimer) {
-        clearTimeout(radarTimer); 
+        clearTimeout(radarTimer);
     }
 });
 map.on('moveend', () => {
-    const elapsedTime = Date.now() - startTime; 
-    startTime = null; 
-    const adjustedTimeout = Math.max(0, 1000 - elapsedTime); 
+    const elapsedTime = Date.now() - startTime;
+    startTime = null;
+    const adjustedTimeout = Math.max(0, 1000 - elapsedTime);
     radarTimer = setTimeout(() => {
         startRadarInterval();
     }, adjustedTimeout);
 });
 map.on('zoom', () => {
-    stopRadarInterval(); 
+    stopRadarInterval();
     if (startTime === null) {
-        startTime = Date.now(); 
+        startTime = Date.now();
     }
     if (radarTimer) {
-        clearTimeout(radarTimer); 
+        clearTimeout(radarTimer);
     }
 });
 map.on('zoomend', () => {
-    const elapsedTime = Date.now() - startTime; 
-    startTime = null; 
-    const adjustedTimeout = Math.max(0, 1000 - elapsedTime); 
+    const elapsedTime = Date.now() - startTime;
+    startTime = null;
+    const adjustedTimeout = Math.max(0, 1000 - elapsedTime);
     radarTimer = setTimeout(() => {
         startRadarInterval();
     }, adjustedTimeout);

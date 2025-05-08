@@ -2,8 +2,8 @@
 .buttonWithLoader {
     display: flex;
     align-items: center;
-    width: 100%;
-    justify-content: space-evenly;
+    width: 330px;
+    justify-content: space-between;
     margin-top: 32px;
 }
 
@@ -13,10 +13,10 @@
     justify-content: space-evenly;
     background-color: rgb(195, 245, 25);
     border: none;
-    width: 200px;
+    width: 130px;
     height: 60px;
     color: rgb(15, 90, 210);
-    font-size: 1.5em;
+    font-size: 1.3em;
     cursor: pointer;
     border-radius: 16px;
 }
@@ -48,7 +48,7 @@
 
 .closeButton {
     position: absolute;
-    top: 16px;
+    bottom: 16px;
     right: 16px;
     border-radius: 100%;
     border: none;
@@ -195,7 +195,18 @@
     animation: spin 1s linear infinite;
 }
 
-.delete-measurement-btn{
+.gaforLoader{
+    display: inline-block;
+    margin-left: 10px;
+    width: 12px;
+    height: 12px;
+    border: 4px solid white;
+    border-top: 4px solid rgb(40, 40, 126);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.delete-measurement-btn {
     background-color: rgb(40, 40, 126);
     border: none;
     cursor: pointer;
@@ -206,9 +217,54 @@
     margin-top: 6px;
 }
 
-.delete-measurement-btn:hover{
+.delete-measurement-btn:hover {
     background-color: rgb(195, 245, 25);
     color: rgb(40, 40, 126);
+}
+
+#deleteSearch {
+    background-image: url('../img/closeAddressBlue.png');
+    height: 28px;
+    width: 28px;
+    border: none;
+    background-size: cover;
+    background-color: white;
+    border-radius: 8px;
+    margin-left: 12px;
+    cursor: pointer;
+}
+
+#deleteSearch:not(:disabled):hover {
+    background-color: rgb(40, 40, 126);
+    background-image: url('../img/closeAddressgreen.png');
+}
+
+#deleteSearch:disabled{
+    background-color: rgb(180, 180, 180);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.resetGaforBtn{
+    background-image: url('../img/closeAddressGreen.png');
+    height: 28px;
+    width: 28px;
+    border: none;
+    background-size: cover;
+    background-color: rgb(10, 60, 135);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.resetGaforBtn:not(:disabled):hover {
+    background-color: rgb(195, 245, 25);
+    background-image: url('../img/closeAddressBlue.png');
+}
+
+.resetGaforBtn:disabled{
+    background-color: rgb(180, 180, 180);
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 @keyframes spin {

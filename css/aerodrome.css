@@ -31,7 +31,7 @@
 .aerodromeCard {
     font-size: 1.4em;
     height: 800px;
-    width: 600px;
+    width: 500px;
     color: white;
     border-radius: 16px;
     display: flex;
@@ -58,6 +58,7 @@
     font-weight: 500;
     color: #000;
     width: 330px;
+    box-sizing: border-box;
     height: 450px;
     display: block;
     background-color: white;

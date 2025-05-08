@@ -35,12 +35,13 @@
             </div>
         </div>
         <div class="standardInput">
-
             <input class="shadow" id="searchInput" type="text" placeholder="Suche nach Adresse oder Koordinate">
             <div class="address-list shadow" id="addressList" style="display: none;"></div>
             <div id="searchBtnWithLoader" class="searchBtnWithLoader">
                 <button class="shadow z-index1100" id="searchBtn" onclick="search()">Suche</button>
+                <button class="shadow z-index1100" id="deleteSearch" disabled onclick="resetSearch()"></button>
                 <span class="loader z-index1100" id="loader" style="display: none;"></span>
+
             </div>
 
         </div>
@@ -178,11 +179,20 @@
     </div>
     <div class="shadow" id="calcGaforRadius">
         <div class="gaforInput">
-            <input id="gaforNumbers" oninput="validateInput(this)" type="text" placeholder="45 34 1 4..."> <button
-                class="gaforBtn" onclick="calcGaforRadius()">Radius</button>
+            <input id="gaforNumbers" oninput="validateInput(this)" type="text" placeholder="45 34 1 4...">
+            <button class="gaforBtn" onclick="calcGaforRadius()">Radius</button>
+            <button class="resetGaforBtn" id="resetGafor" disabled onclick="resetGaforRadius()"></button>
         </div>
-        <span id="gaforRadius">Radius:</span>
-        <span id="gaforCenter">Center:</span>
+        <div class="d-flex">
+            <span id="gaforRadius">Radius:</span>             
+            <span class="gaforLoader z-index1100" id="loaderGaforRadius" style="display: none;"></span>
+        </div>
+        <div class="d-flex">
+            <span id="gaforCenter">Center:</span>
+            <span class="gaforLoader z-index1100" id="loaderGaforPos" style="display: none;"></span>
+        </div>
+        
+
     </div>
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">
@@ -193,7 +203,7 @@
     <div id="login">
         <div class="blurBackground">
             <h1>ARO-Maps</h1>
-            <form id="loginForm"  onsubmit="handleLogin(event)">
+            <form id="loginForm" onsubmit="handleLogin(event)">
                 <input type="password" class="shadow" id="loginInput" placeholder="Password" required>
                 <button id="loginBtn" class="shadow" type="submit">Login</button>
             </form>
@@ -260,7 +270,7 @@
     </div>
 </body>
 <script src="libs/firebase/firebase-app-compat.js"></script>
-<script src="libs/firebase/firebase-functions-compat.js" ></script>
+<script src="libs/firebase/firebase-functions-compat.js"></script>
 <script src="libs/firebase/firebase-auth-compat.js"></script>
 <script src="libs/firebase/firebase-database-compat.js"></script>
 <script src="services/firebaseService.js" type="module"></script>

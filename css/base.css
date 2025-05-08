@@ -31,6 +31,9 @@ h3 {
 .z-index1100 {
     z-index: 1100;
 }
+.d-flex {
+    display: flex;
+}
 
 #monitorToSmall{
     height: 100vh;

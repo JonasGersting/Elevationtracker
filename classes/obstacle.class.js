@@ -27,38 +27,68 @@ class Obstacle extends AirspacePolygon {
         this.marker.addTo(this.map);
     }
 
-    
+
     addToCluster(clusterGroup) {
         clusterGroup.addLayer(this.marker);
     }
 
-    getCorrectImg(lightStatus, type){
+    getCorrectImg(lightStatus, type) {
         if (type == 'WINDMILL') {
             if (lightStatus == 'Y') {
                 return 'img/windmillLighted.svg';
             } else {
-                return 'img/windmillLightOut.svg';
+                return 'img/windmill.svg';
             }
-        } else if (type == 'STACK') {
+        } else if (type == 'STACK' || type == 'INDUSTRIAL_SYSTEM') {
             if (lightStatus == 'Y') {
                 return 'img/stackLighted.svg';
             } else {
                 return 'img/stack.svg';
             }
-        } else if (type == 'CABLE ABOVE VALLEY BOTTOM') {
+        } else if (type == 'CABLE ABOVE VALLEY BOTTOM' || type.includes('MAST')) {
             if (lightStatus == 'Y') {
                 return 'img/electricitypoleLighted.svg';
             } else {
                 return 'img/electricitypole.svg';
             }
-        }  else if (type == 'BUILDING') {
+        } else if (type == 'BUILDING') {
             if (lightStatus == 'Y') {
-                return 'img/AKWLighted.svg';
+                return 'img/buildingLighted.svg';
             } else {
-                return 'img/AKW.svg';
+                return 'img/building.svg';
             }
-        }else {
-            return 'img/windmillLighted.svg';
+        } else if (type == 'TOWER') {
+            if (lightStatus == 'Y') {
+                return 'img/towerLighted.svg';
+            } else {
+                return 'img/tower.svg';
+            }
+        } else if (type == 'ANTENNA') {
+            if (lightStatus == 'Y') {
+                return 'img/antennaLighted.svg';
+            } else {
+                return 'img/antenna.svg';
+            }
+        } else if (type == 'SPIRE') {
+            if (lightStatus == 'Y') {
+                return 'img/spireLighted.svg';
+            } else {
+                return 'img/spire.svg';
+            }
+        } else if (type == 'NUCLEAR_REACTOR') {
+            if (lightStatus == 'Y') {
+                return 'img/nuclearReactorLighted.svg';
+            } else {
+                return 'img/nuclearReactor.svg';
+            }
+        } else if (type == 'CRANE') {
+            if (lightStatus == 'Y') {
+                return 'img/craneLighted.svg';
+            } else {
+                return 'img/crane.svg';
+            }
+        } else {
+            return 'img/pole.svg';
         }
     }
 }
