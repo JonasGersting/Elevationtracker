@@ -133,8 +133,8 @@ async function getData(key) {
                     await saveToIndexedDB(key, features);
                     data = features;
                 } else if (Array.isArray(data) && data.length > 0 && data[0]?.features) {
-                     await saveToIndexedDB(key, data[0].features);
-                     data = data[0].features;
+                    await saveToIndexedDB(key, data[0].features);
+                    data = data[0].features;
                 } else {
                     await saveToIndexedDB(key, data);
                 }
@@ -152,16 +152,16 @@ async function getData(key) {
         // Der Fehler 'PERMISSION_DENIED' sollte jetzt nur auftreten, wenn der Benutzer
         // nicht erfolgreich mit signInWithCustomToken angemeldet wurde.
         if (error.code === 'PERMISSION_DENIED') {
-             showErrorBanner("Zugriff auf Datenbank verweigert. Bitte neu anmelden.");
+            showErrorBanner("Zugriff auf Datenbank verweigert. Bitte neu anmelden.");
         } else {
-             showErrorBanner(`Fehler beim Laden von ${key}.`);
+            showErrorBanner(`Fehler beim Laden von ${key}.`);
         }
         throw error;
     }
 }
 function processDataByKey(key, data) {
     // Stelle sicher, dass data nicht null ist, bevor darauf zugegriffen wird
-    const safeData = data || ( (key === 'firAirspace' || key === 'gaforAirspace' || key === 'atzAirspace') ? [] : null); // Passe Standardwert an
+    const safeData = data || ((key === 'firAirspace' || key === 'gaforAirspace' || key === 'atzAirspace') ? [] : null); // Passe Standardwert an
 
     if (key === 'aerodromes') {
         aerodromes = safeData;
@@ -271,6 +271,18 @@ const markerData = {
     obstacle: { markers: [], added: false, source: obstacles }
 };
 
+let smallAerodromeInstances = [];
+
+function initializeSmallAerodromeEventHandler() {
+    if (map) { // Sicherstellen, dass die Karte initialisiert ist
+        map.on('zoomend', handleSmallAerodromeVisibilityBasedOnZoom);
+        // Optional: Einmaliger Aufruf nach dem Laden der Daten, um den initialen Zustand zu setzen
+        // handleSmallAerodromeVisibilityBasedOnZoom(); 
+    } else {
+        console.error("Karte nicht initialisiert, bevor initializeMapEventHandlers aufgerufen wurde.");
+    }
+}
+
 function toggleMarkers(key) {
     toggleActBtn(key);
     if (!markerData[key]) {
@@ -282,7 +294,7 @@ function toggleMarkers(key) {
         if (key === "obstacle") {
             const markerClusterGroup = L.markerClusterGroup();
             markerClusterGroup.on('clustermouseover', function (e) {
-                const cluster = e.layer; 
+                const cluster = e.layer;
                 const markers = cluster.getAllChildMarkers();
                 const parentDesignators = [...new Set(markers.map(marker => marker.options.parentDesignator))];
                 const tooltipContent = parentDesignators.join('<br>');
@@ -308,33 +320,82 @@ function toggleMarkers(key) {
                     obstacle.addToCluster(markerClusterGroup);
                     return obstacle;
                 });
-            map.addLayer(markerClusterGroup); 
-            markerData[key].clusterLayer = markerClusterGroup; 
+            map.addLayer(markerClusterGroup);
+            markerData[key].clusterLayer = markerClusterGroup;
         } else {
             markerData[key].markers = source
-                .filter(data => key !== "aerodrome" || data.icaoCode) 
                 .map(data => {
                     let item;
                     if (key === "aerodrome") {
-                        item = new Aerodrome(data.geometry, data.name, map, data.icaoCode, data.runways);
+                        initializeSmallAerodromeEventHandler(); 
+                        if (data.icaoCode) { 
+                            item = new Aerodrome(data.geometry, data.name, map, data.icaoCode, data.runways);
+                        } else { 
+                            item = new SmallAerodrome(data.geometry, data.name, map, data.runways);
+                            smallAerodromeInstances.push(item); 
+                        }
                     } else if (key === "navaid") {
                         item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted, data.properties.icaocode);
                     }
-                    item.addToMap(); 
+                    if (item && !(item instanceof SmallAerodrome)) {
+                        item.addToMap();
+                    }
                     return item;
                 });
+                if (map.getZoom() >= 9 && key === "aerodrome") {
+                    smallAerodromeInstances.forEach(saItem => {
+                        saItem.addToMap();
+                        smallAerodromesActive = true; 
+                    })  
+                }
         }
     } else {
         if (key === "obstacle") {
             map.removeLayer(markerData[key].clusterLayer);
             markerData[key].markers = [];
         } else {
+            if (key === "aerodrome") {
+                if (smallAerodromesActive) {
+                    smallAerodromeInstances.forEach(saItem => {
+                        map.removeLayer(saItem.marker);
+
+                    });
+                    smallAerodromesActive = false; // Setze den Status auf inaktiv
+                }
+                smallAerodromeInstances = []; // Leere die Instanzliste
+            }
             markers.forEach(item => item.marker && map.removeLayer(item.marker));
             markerData[key].markers = [];
         }
     }
     markerData[key].added = !added;
 }
+
+let smallAerodromesActive = false; // Variable, um den Status der kleinen Flugplätze zu verfolgen
+
+function handleSmallAerodromeVisibilityBasedOnZoom() {
+    if (!map) {
+        // console.log("handleSmallAerodromeVisibilityBasedOnZoom: Karte nicht bereit.");
+        return;
+    }
+
+    const currentZoom = map.getZoom();
+
+    if (currentZoom >= 9 && !smallAerodromesActive) {
+        smallAerodromeInstances.forEach(saItem => {
+            saItem.addToMap();
+            smallAerodromesActive = true; // Setze den Status auf aktiv
+        })
+    }
+    if (currentZoom < 9 && smallAerodromesActive) {
+        smallAerodromeInstances.forEach(saItem => {
+            map.removeLayer(saItem.marker);
+            smallAerodromesActive = false; // Setze den Status auf inaktiv
+        })
+
+    }
+}
+
 
 
 function resetMap() {
@@ -384,6 +445,6 @@ function resetMap() {
     initialMarkerLat = null;
     initialMarkerLon = null;
     closestNavAid = null;
-    foundNavAids = []; 
+    foundNavAids = [];
     foundNavaidId = 0;
 }
