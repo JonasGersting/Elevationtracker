@@ -442,6 +442,7 @@ function resetSearch() {
     initialMarkerLon = null;
     closestNavAid = null;
     foundNavAids = []; 
+    currentSequenceFoundNavAidNames = [];
     foundNavaidId = 0;
     if (deleteSearchBtn) {
         deleteSearchBtn.disabled = true;

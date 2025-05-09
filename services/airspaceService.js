@@ -194,40 +194,55 @@ let closestNavAid = null;
 let foundNavAids = []; 
 let foundNavaidId = 0;
 
-function findClosestNavAid(markerLat, markerLon, isNext = false) {
-    console.log('ich werde ausgeführt');
-    foundNavaidId++;
-    if (!initialMarkerLat || !initialMarkerLon) {
-        initialMarkerLat = markerLat;
-        initialMarkerLon = markerLon;
-    }
-    closestNavAid = null;
+
+let currentSequenceFoundNavAidNames = [];
+
+
+function findClosestNavAid(markerLat, markerLon) {
+
+    let closestNavAidData = null;
     let shortestDistance = Infinity;
     let closestNavAidLatLng = null;
+
+    if (!navAids || navAids.length === 0) {
+        console.error("NavAids-Daten sind nicht verfügbar oder leer.");
+        alert("Navigationshilfen-Daten nicht geladen.");
+        return;
+    }
+
     navAids.forEach(navaid => {
-        if (isNext && foundNavAids.includes(navaid.properties.txtname)) {
-            return; 
+        const navAidName = navaid.properties.txtname;
+
+        // Überspringe NavAids, die in dieser Sequenz bereits gefunden wurden
+        if (currentSequenceFoundNavAidNames.includes(navAidName)) {
+            return;
         }
+
+        // Anwenden der Filterkriterien
         if (((navaid.properties.charted && navaid.properties.charted.includes('ICAO500')) ||
             (navaid.properties.dme_charted && (navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted.includes('NN')))) && navaid.properties.icaocode == 'ED') {
-            const distance = haversine(
-                initialMarkerLat, initialMarkerLon,
-                navaid.geometry.coordinates[1], navaid.geometry.coordinates[0]
-            );
+
+            const navaidLat = navaid.geometry.coordinates[1];
+            const navaidLon = navaid.geometry.coordinates[0];
+            const distance = haversine(markerLat, markerLon, navaidLat, navaidLon);
+
             if (distance < shortestDistance) {
                 shortestDistance = distance;
-                closestNavAid = navaid;
-                closestNavAidLatLng = [navaid.geometry.coordinates[1], navaid.geometry.coordinates[0]];
+                closestNavAidData = navaid;
+                closestNavAidLatLng = [navaidLat, navaidLon];
             }
         }
     });
-    if (closestNavAid && closestNavAidLatLng) {
+
+    if (closestNavAidData && closestNavAidLatLng) {
+        console.log('Nächstes NavAid gefunden:', closestNavAidData.properties.txtname, 'Distanz:', shortestDistance);
+        currentSequenceFoundNavAidNames.push(closestNavAidData.properties.txtname);
         const angle = calculateAngle(
             closestNavAidLatLng[0], closestNavAidLatLng[1],
-            initialMarkerLat, initialMarkerLon 
+            markerLat, markerLon
         );
         const line = L.polyline([
-            [initialMarkerLat, initialMarkerLon], 
+            [markerLat, markerLon],
             closestNavAidLatLng
         ], {
             color: 'red',
@@ -237,17 +252,18 @@ function findClosestNavAid(markerLat, markerLon, isNext = false) {
         polylines.push(line);
         const popupContent = `
             <div>
-                <p>${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAid.properties.txtname} ${closestNavAid.properties['select-source-layer']} ${closestNavAid.properties.ident}</p>
-                <button class="navAidBtn" id="nextNavAidBtn${foundNavaidId}">Finde nächstes Navaid</button>
+                <p>${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAidData.properties.txtname} ${closestNavAidData.properties['select-source-layer']} ${closestNavAidData.properties.ident}</p>
+                <button class="navAidBtn" onclick="findClosestNavAid(${markerLat}, ${markerLon})" >Finde nächstes Navaid</button>
             </div>
         `;
         line.bindPopup(popupContent).openPopup();
-        document.getElementById(`nextNavAidBtn${foundNavaidId}`).addEventListener('click', () => {
-            foundNavAids.push(closestNavAid.properties.txtname);
-            findClosestNavAid(initialMarkerLat, initialMarkerLon, true);
-        });
     } else {
-        alert("Es wurde kein Navaid gefunden.");
+        console.log('Kein (weiteres) passendes NavAid gefunden.');
+        if (currentSequenceFoundNavAidNames.length > 0) {
+            alert("Keine weiteren passenden NavAids für diesen Punkt gefunden.");
+        } else {
+            alert("Es wurde kein passendes Navaid gefunden.");
+        }
     }
 }
 
