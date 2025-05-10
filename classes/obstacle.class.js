@@ -16,7 +16,8 @@ class Obstacle extends AirspacePolygon {
         const customIcon = L.icon({
             iconUrl: iconUrl,
             iconSize: iconSize,
-            iconAnchor: [iconSize[0] / 2, iconSize[1]]
+            iconAnchor: [iconSize[0] / 2, iconSize[1]],
+            popupAnchor: [0, -iconSize[1]]
         });
         this.marker = L.marker([this.lat, this.long], { icon: customIcon });
         this.marker.bindPopup(

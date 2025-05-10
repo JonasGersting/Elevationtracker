@@ -17,14 +17,24 @@ class Navaid extends AirspacePolygon {
         if (iconUrl == 'img/antenna.png') {
             iconSize = [8, 8];
         } else {
-            iconSize = [16, 16];
+            iconSize = [24, 24];
         }
         const customIcon = L.icon({
             iconUrl: iconUrl,
             iconSize: iconSize,
         });
         this.marker = L.marker([this.lat, this.long], { icon: customIcon }).addTo(this.map);
-        this.marker.bindPopup(`Name: ${this.name}<br>Type: ${this.type}<br>Designator: ${this.designator}<br>charted: ${this.charted}<br>ICAO: ${this.icaoCode}`);
+         // Popup-Inhalt mit dem gewünschten Stil
+        const popupContent = `
+            <div style="word-wrap: break-word;">
+                <b>Name:</b> ${this.name}<br>
+                <b>Type:</b> ${this.type}<br>
+                <b>Designator:</b> ${this.designator}<br>
+                <b>Charted:</b> ${this.charted}<br>
+                <b>ICAO:</b> ${this.icaoCode}
+            </div>
+        `;
+        this.marker.bindPopup(popupContent);
     }
 
     returnCorrectIcon(type) {
