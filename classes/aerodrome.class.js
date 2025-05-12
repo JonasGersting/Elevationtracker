@@ -18,8 +18,8 @@ class Aerodrome extends AirspacePolygon {
 
     createCustomIcon() {
         const trueHeading = this.rwys && this.rwys[0] ? this.rwys[0].trueHeading : 0;
-        const circleSize = 18; // px
-        const borderWidth = 3; // px
+        const circleSize = 18;
+        const borderWidth = 3;
         const borderColor = 'black';
         const backgroundColor = 'transparent';
         let rotationBarHtml = '';
@@ -30,8 +30,8 @@ class Aerodrome extends AirspacePolygon {
                         position: absolute;
                         top: 50%;
                         left: 50%;
-                        width: 25px; /* Breite des Runway-Indikators */
-                        height: 3px; /* Dicke des Runway-Indikators */
+                        width: 25px;
+                        height: 3px;
                         background-color: black;
                         transform: translate(-50%, -50%) rotate(${trueHeading - 90}deg);
                         transform-origin: center;
@@ -183,40 +183,39 @@ class Aerodrome extends AirspacePolygon {
         });
     }
 
-    async fetchWeatherData(geometry) {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${geometry.coordinates[1]}&longitude=${geometry.coordinates[0]}&current=temperature_2m,showers,snowfall,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP-Error: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error("Fehler beim Abrufen der Wetterdaten:", error);
-            return null;
-        }
-    }
-
     toggleAIPImgs() {
         let aipImgContainer = document.getElementById('aipInfo');
         let aerodromeCard = document.getElementById('aerodromeCard');
         if (this.aipImgsAct) {
             this.aipImgsAct = false;
             aipImgContainer.style.width = '0px';
+            // Reset innerHTML to remove buttons and iframe when closing
+            aipImgContainer.innerHTML = '';
             aerodromeCard.style.borderRadius = '16px';
         } else {
             this.aipImgsAct = true;
             aerodromeCard.style.borderTopRightRadius = '0px';
             aerodromeCard.style.borderBottomRightRadius = '0px';
-            aipImgContainer.style.width = '900px';
+
+            // Check screen width
+            if (window.innerWidth <= 1000) {
+                aipImgContainer.style.width = '500px';
+            } else if (window.innerWidth <= 1300) {
+                aipImgContainer.style.width = '600px';
+            } else {
+                aipImgContainer.style.width = '900px';
+            }
+
+            // Clear previous content before adding new
+            aipImgContainer.innerHTML = '';
+            // Add new content
             aipImgContainer.innerHTML +=
                 `
-                       <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
+                    <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
                     <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
                     <span id="pageIndicator">${this.currentPage + 1} / ${this.aipIds.length}</span>
                     <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155" frameborder="0"></iframe>
-            `
+                `;
         }
     }
 

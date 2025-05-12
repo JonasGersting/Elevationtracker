@@ -25,7 +25,7 @@ function calcGaforRadius() {
             gaforLoaderPos.style.display = "none";
             return;
         }
-        const input = inputElement.value;
+        const input = inputElement.value.trim();
         const numbers = input
             .split(/\s+/)
             .filter(Boolean)
@@ -174,8 +174,7 @@ function drawCircle(center, radius) {
 function validateInput(input) {
     input.value = input.value
         .replace(/[^0-9\s]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
+        .replace(/\s+/g, ' ');
 }
 
 function resetGaforRadius() {

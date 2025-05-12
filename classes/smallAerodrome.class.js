@@ -14,9 +14,9 @@ class SmallAerodrome extends AirspacePolygon {
 
     createCustomIcon() {
         const trueHeading = this.rwys && this.rwys[0] ? this.rwys[0].trueHeading : 0;
-        const circleSize = 18; // px
-        const borderWidth = 3; // px
-        const borderColor = 'black';
+        const circleSize = 18;
+        const borderWidth = 3; 
+        const borderColor = 'rgb(10, 60, 135)';
         const backgroundColor = 'transparent';
         let rotationBarHtml = '';
         if (this.rwys !== undefined) {
@@ -26,9 +26,9 @@ class SmallAerodrome extends AirspacePolygon {
                         position: absolute;
                         top: 50%;
                         left: 50%;
-                        width: 25px; /* Breite des Runway-Indikators */
-                        height: 3px; /* Dicke des Runway-Indikators */
-                        background-color: black;
+                        width: 25px;
+                        height: 3px;
+                        background-color: rgb(10, 60, 135);
                         transform: translate(-50%, -50%) rotate(${trueHeading - 90}deg);
                         transform-origin: center;
                     ">

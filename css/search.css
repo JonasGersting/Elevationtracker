@@ -162,7 +162,10 @@
         width: 460px;
         align-items: unset;
     }
+}
 
-
-
+@media screen and (max-width: 730px) {
+    .topSearchBar {
+        display: none;
+    }
 }
