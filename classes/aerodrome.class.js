@@ -16,48 +16,40 @@ class Aerodrome extends AirspacePolygon {
         this.aipImgsAct = false;
     }
 
+    getRotationBarHtml(trueHeading) {
+        if (this.rwys === undefined) return '';
+        return `
+            <div class="rotation-bar"
+                style="
+                    position: absolute; top: 50%; left: 50%; width: 25px; height: 3px;
+                    background-color: black; transform: translate(-50%, -50%) rotate(${trueHeading - 90}deg);
+                    transform-origin: center;">
+            </div>`;
+    }
+
+    getIconHtml(circleSize, backgroundColor, borderWidth, borderColor, rotationBarHtml) {
+        return `
+            <div class="marker-icon" style="position: relative; width: ${circleSize}px; height: ${circleSize}px; display: flex; align-items: center; justify-content: center;">
+                <div class="circle-marker"
+                    style="
+                        width: ${circleSize}px; height: ${circleSize}px; background-color: ${backgroundColor};
+                        border: ${borderWidth}px solid ${borderColor}; border-radius: 50%; box-sizing: border-box;">
+                </div>
+                ${rotationBarHtml}
+                <div class="additional-info" style="display: none; font-size: 12px; width: 35px; position: absolute; right: -32px; bottom: -18px;">
+                    ${this.icaoCode}
+                </div>
+            </div>`;
+    }
+
     createCustomIcon() {
         const trueHeading = this.rwys && this.rwys[0] ? this.rwys[0].trueHeading : 0;
         const circleSize = 18;
         const borderWidth = 3;
         const borderColor = 'black';
         const backgroundColor = 'transparent';
-        let rotationBarHtml = '';
-        if (this.rwys !== undefined) {
-            rotationBarHtml = `
-                <div class="rotation-bar"
-                    style="
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        width: 25px;
-                        height: 3px;
-                        background-color: black;
-                        transform: translate(-50%, -50%) rotate(${trueHeading - 90}deg);
-                        transform-origin: center;
-                    ">
-                </div>`;
-        }
-
-        const iconHtml = `
-            <div class="marker-icon" style="position: relative; width: ${circleSize}px; height: ${circleSize}px; display: flex; align-items: center; justify-content: center;">
-                <div class="circle-marker"
-                    style="
-                        width: ${circleSize}px;
-                        height: ${circleSize}px;
-                        background-color: ${backgroundColor};
-                        border: ${borderWidth}px solid ${borderColor};
-                        border-radius: 50%;
-                        box-sizing: border-box;
-                    ">
-                </div>
-                ${rotationBarHtml}
-                <div class="additional-info" style="display: none; font-size: 12px; width: 35px; position: absolute; right: -32px; bottom: -18px;">
-                    ${this.icaoCode}
-                </div>
-            </div>
-        `;
-
+        const rotationBarHtml = this.getRotationBarHtml(trueHeading);
+        const iconHtml = this.getIconHtml(circleSize, backgroundColor, borderWidth, borderColor, rotationBarHtml);
         return L.divIcon({
             className: 'custom-div-icon',
             html: iconHtml,
@@ -82,10 +74,8 @@ class Aerodrome extends AirspacePolygon {
 
     toggleAdditionalInfo() {
         if (!this.marker || !this.marker._icon) return;
-
         const zoomLevel = this.map.getZoom();
         const infoElement = this.marker._icon.querySelector('.additional-info');
-
         if (infoElement) {
             if (zoomLevel >= 9) {
                 infoElement.style.display = 'block';
@@ -95,21 +85,74 @@ class Aerodrome extends AirspacePolygon {
         }
     }
 
-    async onClick() {
-        this.setaipInfo(this.icaoCode);
-        currentAerodrome = this;
+    prepareDetailView() {
         const detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '100vh';
         detailDiv.innerHTML = '';
+        return detailDiv;
+    }
+
+    displayCard(detailDiv, name, icaoCode, metarTargetId) {
+        const cardHTML = this.returnCard(name, icaoCode, metarTargetId);
+        detailDiv.innerHTML = cardHTML;
+    }
+
+    loadMetarData(metarTargetId) {
+        const metarLinkElementId = `metartaf-${metarTargetId}`;
+        if (!document.getElementById(metarLinkElementId)) {
+            const fallbackLink = document.getElementById(metarTargetId);
+            if (fallbackLink) fallbackLink.textContent = `METAR/TAF für ${this.icaoCode} nicht init.`;
+            return;
+        }
+        const script = document.createElement('script');
+        script.async = true; script.defer = true; script.crossOrigin = 'anonymous';
+        script.src = `https://metar-taf.com/de/embed-js/${this.icaoCode}?qnh=hPa&rh=rh&target=${metarTargetId}`;
+        script.onerror = () => {
+            const targetLink = document.getElementById(metarTargetId);
+            if (targetLink) {
+                targetLink.textContent = `METAR/TAF für ${this.icaoCode} Ladefehler.`;
+                targetLink.href = '#error-loading-metar';
+            }
+        };
+        document.body.appendChild(script);
+    }
+
+    initializeAipButtons() {
+        try {
+            const loader = document.getElementById('loaderAipImg');
+            const btn = document.getElementById('showAipImgsBtn');
+            if (!loader || !btn) { console.warn("AIP UI elements missing."); return; }
+            loader.style.display = 'inline-block';
+            if (this.aipIds && this.aipIds.length > 0) {
+                this.currentPage = 0;
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+                console.warn(`Keine AIP Bilder für ${this.icaoCode} oder leer.`);
+            }
+            loader.style.display = 'none';
+        } catch (e) { console.error('Fehler AIP Init:', e.message); }
+    }
+
+    async onClick() {
+        this.setaipInfo(this.icaoCode);
+        currentAerodrome = this;
+        const detailDiv = this.prepareDetailView();
         const metarTargetId = `${this.icaoCode}`;
-        const cardHTML = `
+        this.displayCard(detailDiv, this.name, this.icaoCode, metarTargetId);
+        this.loadMetarData(metarTargetId);
+        this.initializeAipButtons();
+    }
+
+    returnCard(name, icaoCode, metarTargetId) {
+        return `
             <div class="overlay"></div>
             <div class="cardWrapper">
                 <div class="aerodromeCard" id="aerodromeCard">
                     <button onclick="currentAerodrome.closeDetailInfo()" class="closeButton">X</button>
-                    <h2>${this.name}</h2>
-                    <h3>${this.icaoCode}</h3>
-                    <a href="https://metar-taf.com/de/${this.icaoCode}" target="_blank" id="metartaf-${metarTargetId}" class="metar">METAR &quot;${this.name}&quot; Airfield</a>
+                    <h2>${name}</h2>
+                    <h3>${icaoCode}</h3>
+                    <a href="https://metar-taf.com/de/${icaoCode}" target="_blank" id="metartaf-${metarTargetId}" class="metar">METAR &quot;${name}&quot; Airfield</a>
                     <div class="buttonWithLoader">
                         <button class="aerodromeCardButton" id="showAipImgsBtn" onclick="currentAerodrome.toggleAIPImgs()">
                         <span class="loader z-index1100" id="loaderAipImg" style="display: none;"></span>
@@ -122,47 +165,6 @@ class Aerodrome extends AirspacePolygon {
                 <div id="aipInfo">
                 </div>
             </div>`;
-        detailDiv.innerHTML = cardHTML;
-        if (!document.getElementById(`metartaf-${metarTargetId}`)) {
-            console.error(`METAR Target Element ${metarTargetId} NICHT im DOM gefunden, bevor das Skript angehängt wurde!`);
-            const targetLinkFallback = document.getElementById(metarTargetId);
-            if (targetLinkFallback) {
-                targetLinkFallback.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht initialisiert werden.`;
-            }
-            return;
-        }
-        const metarScript = document.createElement('script');
-        metarScript.async = true;
-        metarScript.defer = true;
-        metarScript.crossOrigin = 'anonymous';
-        metarScript.src = `https://metar-taf.com/de/embed-js/${this.icaoCode}?qnh=hPa&rh=rh&target=${metarTargetId}`;
-
-        metarScript.onerror = () => {
-            console.error(`Fehler beim Laden des METAR Skripts für ${metarTargetId} von ${metarScript.src}`);
-            const targetLink = document.getElementById(metarTargetId);
-            if (targetLink) {
-                targetLink.textContent = `METAR/TAF für ${this.icaoCode} konnte nicht geladen werden.`;
-                targetLink.href = '#error-loading-metar';
-            }
-        };
-        document.body.appendChild(metarScript);
-        try {
-            let loader = document.getElementById('loaderAipImg');
-            loader.style.display = 'inline-block';
-            if (this.aipImgs) {
-                this.currentImgIndex = 0;
-                let aipImgBtn = document.getElementById('showAipImgsBtn');
-                aipImgBtn.disabled = false;
-                loader.style.display = 'none';
-            } else {
-                let aipImgBtn = document.getElementById('showAipImgsBtn');
-                aipImgBtn.disabled = true;
-                loader.style.display = 'none';
-                console.warn(`Keine AIP Bilder für ${this.icaoCode} gefunden oder this.aipImgs ist leer.`);
-            }
-        } catch (error) {
-            console.error('Fehler beim Initialisieren der AIP-Bilder Anzeige:', error.message);
-        }
     }
 
     setaipInfo(icaoCode) {
@@ -183,63 +185,70 @@ class Aerodrome extends AirspacePolygon {
         });
     }
 
+     hideAIPImgs(aipImgContainer, aerodromeCard) {
+        this.aipImgsAct = false;
+        aipImgContainer.style.width = '0px';
+        aipImgContainer.innerHTML = '';
+        aerodromeCard.style.borderRadius = '16px';
+    }
+
+    getAipContainerWidth() {
+        if (window.innerWidth <= 1000) return '500px';
+        if (window.innerWidth <= 1300) return '600px';
+        return '900px';
+    }
+
+    setAipContainerContent(aipImgContainer) {
+        aipImgContainer.innerHTML = `
+            <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
+            <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
+            <span id="pageIndicator">${this.currentPage + 1} / ${this.aipIds.length}</span>
+            <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155" frameborder="0"></iframe>
+        `;
+    }
+
+    showAIPImgs(aipImgContainer, aerodromeCard) {
+        this.aipImgsAct = true;
+        aerodromeCard.style.borderTopRightRadius = '0px';
+        aerodromeCard.style.borderBottomRightRadius = '0px';
+        aipImgContainer.style.width = this.getAipContainerWidth();
+        aipImgContainer.innerHTML = '';
+        this.setAipContainerContent(aipImgContainer);
+    }
+
     toggleAIPImgs() {
         let aipImgContainer = document.getElementById('aipInfo');
         let aerodromeCard = document.getElementById('aerodromeCard');
         if (this.aipImgsAct) {
-            this.aipImgsAct = false;
-            aipImgContainer.style.width = '0px';
-            // Reset innerHTML to remove buttons and iframe when closing
-            aipImgContainer.innerHTML = '';
-            aerodromeCard.style.borderRadius = '16px';
+            this.hideAIPImgs(aipImgContainer, aerodromeCard);
         } else {
-            this.aipImgsAct = true;
-            aerodromeCard.style.borderTopRightRadius = '0px';
-            aerodromeCard.style.borderBottomRightRadius = '0px';
+            this.showAIPImgs(aipImgContainer, aerodromeCard);
+        }
+    }
 
-            // Check screen width
-            if (window.innerWidth <= 1000) {
-                aipImgContainer.style.width = '500px';
-            } else if (window.innerWidth <= 1300) {
-                aipImgContainer.style.width = '600px';
-            } else {
-                aipImgContainer.style.width = '900px';
-            }
+    updateAipPage(direction) {
+        if (direction === 'right') {
+            this.currentPage = (this.currentPage + 1) % this.aipIds.length;
+        } else if (direction === 'left') {
+            this.currentPage = (this.currentPage - 1 + this.aipIds.length) % this.aipIds.length;
+        }
+    }
 
-            // Clear previous content before adding new
-            aipImgContainer.innerHTML = '';
-            // Add new content
-            aipImgContainer.innerHTML +=
-                `
-                    <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
-                    <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
-                    <span id="pageIndicator">${this.currentPage + 1} / ${this.aipIds.length}</span>
-                    <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155" frameborder="0"></iframe>
-                `;
+    updateAipIframeAndIndicator() {
+        let aipIframe = document.getElementById('pdfIframe');
+        let pageIndicator = document.getElementById('pageIndicator');
+        if (aipIframe) {
+            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
+        }
+        if (pageIndicator) {
+            pageIndicator.innerHTML = `${this.currentPage + 1} / ${this.aipIds.length}`;
         }
     }
 
     changeAipImg(direction) {
-        let aipIframe = document.getElementById('pdfIframe');
-        if (direction == 'right') {
-            if (this.currentPage != this.aipIds.length - 1) {
-                this.currentPage++
-            } else {
-                this.currentPage = 0;
-            }
-            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
-        }
-        if (direction == 'left') {
-            if (this.currentPage == 0) {
-                this.currentPage = this.aipIds.length - 1;
-            } else {
-                this.currentPage--;
-            }
-            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
-        }
-        let pageIndicator = document.getElementById('pageIndicator');
-        pageIndicator.innerHTML = '';
-        pageIndicator.innerHTML = `${this.currentPage + 1} / ${this.aipIds.length}`;
+        if (!this.aipIds || this.aipIds.length === 0) return;
+        this.updateAipPage(direction);
+        this.updateAipIframeAndIndicator();
     }
 
     closeDetailInfo() {

@@ -4,9 +4,13 @@ let trackedAcft = null;
 let flightDistLine = null;
 let currentTrackLine = null;
 let aircraftLayer = L.layerGroup().addTo(map);
-//current acft variables
 let trackedIcaoDest;
 let trackedEta = '';
+let radarTimer = null;
+let intervalId = null;
+let startTime = null;
+let radarActive = false;
+let aircraftInstances = [];
 
 async function showAcftDetails() {
     let trackedAcftDiv = document.getElementById('trackedAcft')
@@ -55,19 +59,19 @@ function drawDist(acftPos, adPos) {
         flightDistLine.remove();
     }
     flightDistLine = L.polyline(
-        [acftPos, adPos], // Die Koordinaten der Linie (Start- und Endpunkt)
+        [acftPos, adPos],
         {
-            color: 'black', // Farbe der Linie
-            weight: 3,         // Dicke der Linie
-            dashArray: '5, 5', // Strichmuster: gestrichelt
+            color: 'black',
+            weight: 3,
+            dashArray: '5, 5',
         }
     );
     flightDistLine.addTo(map);
 }
 
 function calcDistance(adPos, trackedPos) {
-    const adPosition = L.latLng(adPos[1], adPos[0]); // [longitude, latitude]
-    const acftPosition = L.latLng(trackedPos[0], trackedPos[1]); // acftLat, acftLon
+    const adPosition = L.latLng(adPos[1], adPos[0]);
+    const acftPosition = L.latLng(trackedPos[0], trackedPos[1]);
     const distance = acftPosition.distanceTo(adPosition);
     drawDist(acftPosition, adPosition);
     return distance;
@@ -76,7 +80,6 @@ function calcDistance(adPos, trackedPos) {
 
 function toggleRadar() {
     toggleActBtnRadar();
-
     if (radarActive) {
         cleanupRadar();
         stopRadarInterval();
@@ -88,44 +91,33 @@ function toggleRadar() {
 }
 
 function cleanupRadar() {
-    // Hide aircraft details
     const trackedAcftDiv = document.getElementById('trackedAcft');
     trackedAcftDiv.classList.add('hiddenTrackedAcft');
-
-    // Clear tracked aircraft
     if (trackedAcft) {
-        if (currentTrackLine) {
-            map.removeLayer(currentTrackLine);
-            currentTrackLine = null;
-        }
-        if (flightDistLine) {
-            map.removeLayer(flightDistLine);
-            flightDistLine = null;
-        }
-        trackedAcft = null;
+        removeTrackedInfos();
     }
-
-    // Clear destination input
     const icaoDestInput = document.getElementById('icaoDest');
     if (icaoDestInput) {
         icaoDestInput.value = '';
     }
-
-    // Reset variables
     trackedIcaoDest = null;
     trackedEta = '';
-
-    // Clear map layers
     aircraftLayer.clearLayers();
     aircraftInstances = [];
 }
 
-//flightradar24 Klon
-let radarTimer = null; // Timer für das Radar-Intervall
-let intervalId = null; // ID für setInterval
-let startTime = null;  // Zeitstempel, wann die Karte bewegt oder gezoomt wurde
-let radarActive = false;
-// Startet das Radar-Intervall
+function removeTrackedInfos() {
+    if (currentTrackLine) {
+        map.removeLayer(currentTrackLine);
+        currentTrackLine = null;
+    }
+    if (flightDistLine) {
+        map.removeLayer(flightDistLine);
+        flightDistLine = null;
+    }
+    trackedAcft = null;
+}
+
 function startRadarInterval() {
     if (radarActive) {
         if (!intervalId) {
@@ -134,32 +126,32 @@ function startRadarInterval() {
             }, 1100);
         }
     }
-
 }
-// Stoppt das Radar-Intervall
+
 function stopRadarInterval() {
     if (intervalId) {
         clearInterval(intervalId);
         intervalId = null;
     }
 }
-// Hauptfunktion, die das Radar-Intervall behandelt
+
 function radarInterval() {
     startRadarInterval();
 }
-// Funktion zur Kreisberechnung
-function calculateCircle(lat1, lon1, lat2, lon2) {
-    const toRadians = (degrees) => degrees * (Math.PI / 180);
-    const earthRadiusNM = 3440.065;
 
-    const haversineDistance = (latA, lonA, latB, lonB) => {
-        const dLat = toRadians(latB - latA);
-        const dLon = toRadians(lonB - lonA);
-        const a = Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRadians(latA)) * Math.cos(toRadians(latB)) *
-            Math.sin(dLon / 2) ** 2;
-        return 2 * earthRadiusNM * Math.asin(Math.sqrt(a));
-    };
+const toRadians = (degrees) => degrees * (Math.PI / 180);
+const EARTH_RADIUS_NM = 3440.065;
+
+function haversineDistance(latA, lonA, latB, lonB) {
+    const dLat = toRadians(latB - latA);
+    const dLon = toRadians(lonB - lonA);
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRadians(latA)) * Math.cos(toRadians(latB)) *
+        Math.sin(dLon / 2) ** 2;
+    return 2 * EARTH_RADIUS_NM * Math.asin(Math.sqrt(a));
+}
+
+function calculateCircle(lat1, lon1, lat2, lon2) {
     const centerLat = (lat1 + lat2) / 2;
     const centerLon = (lon1 + lon2) / 2;
     const distances = [
@@ -172,72 +164,79 @@ function calculateCircle(lat1, lon1, lat2, lon2) {
     radius = Math.min(radius, 250);
     return { centerLat, centerLon, radius };
 }
-// API-Abruf
-// Array für Aircraft Instanzen
-let aircraftInstances = [];
+
+
+function processReceivedAircraft(acDataArray) {
+    aircraftLayer.clearLayers();
+    aircraftInstances = [];
+    acDataArray.forEach(acftData => {
+        const aircraft = new Aircraft(acftData, map, aircraftLayer);
+        if (trackedAcft && aircraft.hex === trackedAcft.hex) {
+            aircraft.isTracked = true;
+            aircraft.updateMarkerStyle();
+            trackedAcft = aircraft;
+            trackedAcft.updateData();
+        }
+        aircraftInstances.push(aircraft);
+    });
+}
 
 async function fetchAircraftData(centerLat, centerLon, radius) {
     try {
         const response = await fetch(`https://api.adsb.one/v2/point/${centerLat}/${centerLon}/${radius}`);
         if (!response.ok) throw new Error(`API error: ${response.statusText}`);
         const data = await response.json();
-        console.log(data);
-        aircraftLayer.clearLayers();
-        aircraftInstances = [];
-        data.ac.forEach(acftData => {
-            const aircraft = new Aircraft(acftData, map, aircraftLayer);
-            if (trackedAcft && aircraft.hex === trackedAcft.hex) {
-                aircraft.isTracked = true;
-                aircraft.updateMarkerStyle();
-                trackedAcft = aircraft;
-                trackedAcft.updateData();
-            }
-            aircraftInstances.push(aircraft);
-        });
+        if (data && data.ac) {
+            processReceivedAircraft(data.ac);
+        }
     } catch (error) {
         console.error("API fetch error:", error);
     }
+}
+
+async function updateTrackedAircraftImageDetails(aircraft) {
+    trackedAcftImgJSON = await aircraft.getImage();
+    if (trackedAcftImgJSON != undefined) {
+        trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
+        trackedAcftImgLink = trackedAcftImgJSON.link;
+        trackedAcftImgPhotographer = `Photo © ${trackedAcftImgJSON.photographer}`;
+    } else {
+        trackedAcftImg = 'img/acftWhite.png';
+        trackedAcftImgLink = '';
+        trackedAcftImgPhotographer = '';
+    }
+}
+
+async function processFoundCallsignAircraft(acftData) {
+    const aircraft = new Aircraft(acftData, map, aircraftLayer);
+    aircraftInstances.push(aircraft);
+    trackedAcft = aircraft;
+    aircraft.isTracked = true;
+    aircraft.updateMarkerStyle();
+    await updateTrackedAircraftImageDetails(aircraft);
+    await aircraft.showDetails();
+    await aircraft.fetchInitialTrack();
+    map.setView([acftData.lat, acftData.lon], 10);
+    if (!radarActive) {
+        radarActive = true;
+        toggleActBtnRadar();
+    }
+    setTimeout(() => startRadarInterval(), 1000);
 }
 
 async function fetchAircraftDataCallsign(callsign) {
     const apiUrl = `https://api.adsb.one/v2/callsign/${callsign}`;
     try {
         const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error(`API-Fehler: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`API-Fehler: ${response.statusText}`);
         const data = await response.json();
         aircraftLayer.clearLayers();
         aircraftInstances = [];
         const acft = data.ac[0];
         if (acft) {
-            const aircraft = new Aircraft(acft, map, aircraftLayer);
-            aircraftInstances.push(aircraft);
-            trackedAcft = aircraft;
-            aircraft.isTracked = true;
-            aircraft.updateMarkerStyle();
-            trackedAcftImgJSON = await aircraft.getImage();
-            if (trackedAcftImgJSON != undefined) {
-                trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
-                trackedAcftImgLink = trackedAcftImgJSON.link;
-                trackedAcftImgPhotographer = `Photo © ${trackedAcftImgJSON.photographer}`;
-            } else {
-                trackedAcftImg = 'img/acftWhite.png';
-                trackedAcftImgLink = '';
-                trackedAcftImgPhotographer = '';
-            }
-            await aircraft.showDetails();
-            await aircraft.fetchInitialTrack();
-            map.setView([acft.lat, acft.lon], 10);
-            if (!radarActive) {
-                radarActive = true;
-                toggleActBtnRadar();
-            }
-
-            setTimeout(() => startRadarInterval(), 1000);
+            await processFoundCallsignAircraft(acft);
         } else {
-            alert('Es wurde kein ACFT gefunden');
-            setTimeout(() => startRadarInterval(), 1000);
+            showErrorBanner("Flugzeug mit diesem Callsign nicht gefunden.");
         }
     } catch (error) {
         console.error("Fehler beim API-Abruf:", error);
@@ -251,6 +250,7 @@ function updateAPIRequest() {
     const { centerLat, centerLon, radius } = calculateCircle(lat1, lon1, lat2, lon2);
     fetchAircraftData(centerLat, centerLon, radius);
 }
+
 map.on('move', () => {
     stopRadarInterval();
     if (startTime === null) {
@@ -260,6 +260,7 @@ map.on('move', () => {
         clearTimeout(radarTimer);
     }
 });
+
 map.on('moveend', () => {
     const elapsedTime = Date.now() - startTime;
     startTime = null;
@@ -268,6 +269,7 @@ map.on('moveend', () => {
         startRadarInterval();
     }, adjustedTimeout);
 });
+
 map.on('zoom', () => {
     stopRadarInterval();
     if (startTime === null) {
@@ -277,6 +279,7 @@ map.on('zoom', () => {
         clearTimeout(radarTimer);
     }
 });
+
 map.on('zoomend', () => {
     const elapsedTime = Date.now() - startTime;
     startTime = null;

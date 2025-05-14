@@ -1,17 +1,17 @@
 let measuring = false;
-let startPoint = null; 
-let currentLine = null; 
-let startMarker = null; 
+let startPoint = null;
+let currentLine = null;
+let startMarker = null;
 let distanceMarker = null;
 let mouseMoveHandler = null;
 let clickHandler = null;
-let allMeasurements = []; 
+let allMeasurements = [];
 
 const customIconMarker = L.icon({
     iconUrl: './img/mapPin.png',
     iconSize: [48, 48],
     iconAnchor: [24, 48],
-    popupAnchor: [0, -48] 
+    popupAnchor: [0, -48]
 });
 
 function toDMSDist(coordinate, isLatitude) {
@@ -37,7 +37,7 @@ function toggleMeasuringService() {
     } else {
         measuringBtn.classList.remove('measuringBtn-active');
         disableMeasuring();
-        resetMeasuring(); 
+        resetMeasuring();
         removeAllMeasurements();
     }
 }
@@ -54,68 +54,53 @@ function disableMeasuring() {
     map.getContainer().style.cursor = '';
     if (clickHandler) {
         map.off('click', clickHandler);
-        clickHandler = null; 
+        clickHandler = null;
     }
     if (mouseMoveHandler) {
         map.off('mousemove', mouseMoveHandler);
-        mouseMoveHandler = null; 
+        mouseMoveHandler = null;
     }
+}
+
+function initializeNewMeasurement(clickLatLng) {
+    startPoint = clickLatLng;
+    startMarker = L.marker(clickLatLng, { icon: customIconMarker }).addTo(map);
+    currentLine = L.polyline([clickLatLng, clickLatLng], {
+        color: 'rgb(40, 40, 126)', weight: 2, dashArray: '5, 10', opacity: 0.7
+    }).addTo(map);
+    distanceMarker = createDistanceLabel([clickLatLng, clickLatLng]);
+}
+
+function createAndBindPopups(currentStartMarker, currentEndMarker, measurementId) {
+    const startCoords = currentStartMarker.getLatLng();
+    const endCoords = currentEndMarker.getLatLng();
+    const startPopupContent = `<b>Startpunkt:</b><br>${toDMSDist(startCoords.lat, true)}<br>${toDMSDist(startCoords.lng, false)}<br><button class="delete-measurement-btn" onclick="deleteMeasurement(${measurementId})">Löschen</button>`;
+    currentStartMarker.bindPopup(startPopupContent);
+    const endPopupContent = `<b>Endpunkt:</b><br>${toDMSDist(endCoords.lat, true)}<br>${toDMSDist(endCoords.lng, false)}<br><button class="delete-measurement-btn" onclick="deleteMeasurement(${measurementId})">Löschen</button>`;
+    currentEndMarker.bindPopup(endPopupContent);
+}
+
+function finalizeMeasurement(endPoint) {
+    currentLine.setLatLngs([startPoint, endPoint]);
+    currentLine.setStyle({ dashArray: null, opacity: 1.0 });
+    const endMarker = L.marker(endPoint, { icon: customIconMarker }).addTo(map);
+    if (distanceMarker) map.removeLayer(distanceMarker);
+    const finalLabel = createDistanceLabel([startPoint, endPoint]);
+    const measurementId = Date.now();
+    allMeasurements.push({ id: measurementId, startMarker, endMarker, line: currentLine, label: finalLabel });
+    createAndBindPopups(startMarker, endMarker, measurementId);
+    startPoint = null;
+    currentLine = null;
+    startMarker = null;
+    distanceMarker = null;
 }
 
 function handleMapClick(e) {
     const clickLatLng = e.latlng;
     if (!startPoint) {
-        startPoint = clickLatLng;
-        startMarker = L.marker(clickLatLng, {
-            icon: customIconMarker,
-        }).addTo(map);
-        currentLine = L.polyline([clickLatLng, clickLatLng], {
-            color: 'rgb(40, 40, 126)',
-            weight: 2,
-            dashArray: '5, 10',
-            opacity: 0.7
-        }).addTo(map);
-        distanceMarker = createDistanceLabel([clickLatLng, clickLatLng]); 
+        initializeNewMeasurement(clickLatLng);
     } else {
-        const endPoint = clickLatLng;
-        currentLine.setLatLngs([startPoint, endPoint]);
-        currentLine.setStyle({ dashArray: null, opacity: 1.0 });
-        const endMarker = L.marker(endPoint, {
-            icon: customIconMarker,
-        }).addTo(map);
-        if (distanceMarker) {
-            map.removeLayer(distanceMarker); 
-        }
-        const finalLabel = createDistanceLabel([startPoint, endPoint]); 
-        const measurementId = Date.now();
-        const measurement = {
-            id: measurementId,
-            startMarker: startMarker,
-            endMarker: endMarker,
-            line: currentLine,
-            label: finalLabel 
-        };
-        allMeasurements.push(measurement);
-        const startCoords = startMarker.getLatLng();
-        const endCoords = endMarker.getLatLng();
-        const startPopupContent = `
-            <b>Startpunkt:</b><br>
-            ${toDMSDist(startCoords.lat, true)}<br>
-            ${toDMSDist(startCoords.lng, false)}<br>
-            <button class="delete-measurement-btn" onclick="deleteMeasurement(${measurementId})">Löschen</button>
-        `;
-        startMarker.bindPopup(startPopupContent);
-        const endPopupContent = `
-            <b>Endpunkt:</b><br>
-            ${toDMSDist(endCoords.lat, true)}<br>
-            ${toDMSDist(endCoords.lng, false)}<br>
-            <button class="delete-measurement-btn" onclick="deleteMeasurement(${measurementId})">Löschen</button>
-        `;
-        endMarker.bindPopup(endPopupContent);
-        startPoint = null;
-        currentLine = null;
-        startMarker = null;
-        distanceMarker = null; 
+        finalizeMeasurement(clickLatLng);
     }
 }
 
@@ -124,9 +109,9 @@ function handleMouseMove(e) {
         const currentPoints = [startPoint, e.latlng];
         currentLine.setLatLngs(currentPoints);
         if (distanceMarker) {
-            map.removeLayer(distanceMarker); 
+            map.removeLayer(distanceMarker);
         }
-        distanceMarker = createDistanceLabel(currentPoints); 
+        distanceMarker = createDistanceLabel(currentPoints);
     }
 }
 
@@ -147,12 +132,12 @@ function createDistanceLabel(points) {
         className: 'distance-permanent-label',
         html: `<div class="distance-permanent-label-inner">${distanceNM} NM</div>`,
         iconSize: [80, 20],
-        iconAnchor: [40, 10] 
+        iconAnchor: [40, 10]
     });
     return L.marker(midPoint, { icon: distanceLabelIcon }).addTo(map);
 }
 
-window.deleteMeasurement = function(id) {
+function deleteMeasurement(id) {
     const measurementIndex = allMeasurements.findIndex(m => m.id === id);
     if (measurementIndex > -1) {
         const measurement = allMeasurements[measurementIndex];

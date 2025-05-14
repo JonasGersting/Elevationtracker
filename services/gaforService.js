@@ -1,87 +1,83 @@
 
 let currentGaforCircle = null;
 
-function calcGaforRadius() {
+function initializeGaforControls() {
     const gaforLoaderRadius = document.getElementById("loaderGaforRadius");
     const gaforLoaderPos = document.getElementById("loaderGaforPos");
     const resetGafor = document.getElementById("resetGafor");
-
-    // Stelle sicher, dass die Elemente existieren, bevor auf .style oder .disabled zugegriffen wird
     if (!gaforLoaderRadius || !gaforLoaderPos || !resetGafor) {
         console.error("Eines der GAFOR UI-Elemente wurde nicht im DOM gefunden.");
-        return;
+        return null;
     }
-
     resetGafor.disabled = false;
     gaforLoaderRadius.style.display = "inline-block";
     gaforLoaderPos.style.display = "inline-block";
+    return { gaforLoaderRadius, gaforLoaderPos };
+}
 
-    // Gib dem Browser Zeit, die Loader anzuzeigen, bevor die Berechnungen starten
+function extractGaforNumbers() {
+    const inputElement = document.getElementById("gaforNumbers");
+    if (!inputElement) {
+        console.error("GAFOR Input-Element nicht gefunden.");
+        return null;
+    }
+    const input = inputElement.value.trim();
+    inputElement.value = '';
+    const numbers = input.split(/\s+/).filter(Boolean).map(num => num.padStart(2, "0"));
+    if (!numbers.length) {
+        console.error("Keine gültigen GAFOR-Nummern eingegeben.");
+        return null;
+    }
+    return numbers;
+}
+
+function filterGaforFeaturesByNumbers(numbers) {
+    const gaforFeatures = airspaceStates.gafor.airspace.filter(item =>
+        numbers.includes(item.properties.gafor_nummer)
+    );
+    if (!gaforFeatures.length) {
+        console.error("Keine GAFOR-Daten für die eingegebenen Nummern gefunden.");
+        return null;
+    }
+    return gaforFeatures;
+}
+
+function computeAndDisplayGaforCircle(gaforFeatures) {
+    const extremePoints = findFurthestPoints(gaforFeatures);
+    if (!extremePoints) return false;
+    const center = findMiddle(extremePoints);
+    if (!center) return false;
+    const radius = calculateDistance(extremePoints.point1, extremePoints.point2) / 2;
+    if (radius > 0) {
+        if (currentGaforCircle) currentGaforCircle.removeFromMap();
+        currentGaforCircle = new GaforCircle(center, radius, map);
+        currentGaforCircle.addToMap();
+        showCenterAndRadius(center, radius);
+        return true;
+    }
+    console.error("Radius konnte nicht berechnet werden oder ist null.");
+    return false;
+}
+
+function hideGaforLoaders(loaders) {
+    if (loaders && loaders.gaforLoaderRadius) loaders.gaforLoaderRadius.style.display = "none";
+    if (loaders && loaders.gaforLoaderPos) loaders.gaforLoaderPos.style.display = "none";
+}
+
+function calcGaforRadius() {
+    const loaders = initializeGaforControls();
+    if (!loaders) return;
+
     setTimeout(() => {
-        const inputElement = document.getElementById("gaforNumbers");
-        if (!inputElement) {
-            console.error("GAFOR Input-Element nicht gefunden.");
-            gaforLoaderRadius.style.display = "none";
-            gaforLoaderPos.style.display = "none";
-            return;
-        }
-        const input = inputElement.value.trim();
-        const numbers = input
-            .split(/\s+/)
-            .filter(Boolean)
-            .map(num => num.padStart(2, "0"));
+        const numbers = extractGaforNumbers();
+        if (!numbers) { hideGaforLoaders(loaders); return; }
 
-        // Leere das Input-Feld hier, nachdem der Wert gelesen wurde
-        inputElement.value = '';
+        const gaforFeatures = filterGaforFeaturesByNumbers(numbers);
+        if (!gaforFeatures) { hideGaforLoaders(loaders); return; }
 
-        if (!numbers.length) {
-            console.error("Keine gültigen GAFOR-Nummern eingegeben.");
-            gaforLoaderRadius.style.display = "none";
-            gaforLoaderPos.style.display = "none";
-            return;
-        }
-
-        const gaforFeatures = airspaceStates.gafor.airspace.filter(item =>
-            numbers.includes(item.properties.gafor_nummer)
-        );
-
-        if (!gaforFeatures.length) {
-            console.error("Keine GAFOR-Daten für die eingegebenen Nummern gefunden.");
-            gaforLoaderRadius.style.display = "none";
-            gaforLoaderPos.style.display = "none";
-            return;
-        }
-
-        const extremePoints = findFurthestPoints(gaforFeatures);
-        if (!extremePoints) {
-            gaforLoaderRadius.style.display = "none";
-            gaforLoaderPos.style.display = "none";
-            return;
-        }
-
-        const center = findMiddle(extremePoints);
-        if (!center) {
-            gaforLoaderRadius.style.display = "none";
-            gaforLoaderPos.style.display = "none";
-            return;
-        }
-
-        const radius = calculateDistance(extremePoints.point1, extremePoints.point2) / 2;
-
-        if (radius > 0) {
-            if (currentGaforCircle) {
-                currentGaforCircle.removeFromMap();
-            }
-            currentGaforCircle = new GaforCircle(center, radius, map);
-            currentGaforCircle.addToMap();
-            showCenterAndRadius(center, radius);
-        } else {
-            console.error("Radius konnte nicht berechnet werden oder ist null.");
-        }
-
-        gaforLoaderRadius.style.display = "none";
-        gaforLoaderPos.style.display = "none";
-    }, 0); // Verzögerung von 0ms
+        computeAndDisplayGaforCircle(gaforFeatures);
+        hideGaforLoaders(loaders);
+    }, 0);
 }
 
 function showCenterAndRadius(center, radius) {
@@ -177,20 +173,18 @@ function validateInput(input) {
         .replace(/\s+/g, ' ');
 }
 
-function resetGaforRadius() {
-    // Bestehenden Kreis von der Karte entfernen
+function resetGaforCircle() {
     if (currentGaforCircle) {
         currentGaforCircle.removeFromMap();
         currentGaforCircle = null;
     }
+}
 
-    // Eingabefeld für GAFOR-Nummern leeren
+function resetGaforUIElements() {
     const gaforInput = document.getElementById("gaforNumbers");
     if (gaforInput) {
         gaforInput.value = '';
     }
-
-    // Anzeige für Radius und Zentrum leeren
     const gaforRadiusDisplay = document.getElementById('gaforRadius');
     const gaforCenterDisplay = document.getElementById('gaforCenter');
     if (gaforRadiusDisplay) {
@@ -199,20 +193,23 @@ function resetGaforRadius() {
     if (gaforCenterDisplay) {
         gaforCenterDisplay.innerHTML = 'Center:';
     }
+}
 
-    // Alle GAFOR-Polygone auf Standardfarbe zurücksetzen
-    // Annahme: 'airspaceStates.gafor.polygons' enthält die Leaflet-Layer der GAFOR-Polygone
-    // und 'getDefaultGaforStyle' ist eine Funktion, die das Standard-Styling zurückgibt.
-    if (airspaceStates.gafor.airspace.length > 0) {
-        console.log('I tried painting the polygons back to default color');
-
+function resetGaforPolygonStyles() {
+    if (airspaceStates.gafor.airspace.length > 0 && polygonLayers.gafor) {
         polygonLayers.gafor.forEach(polygon => {
-            // Überprüfen, ob das Polygon eine setStyle Methode hat (typisch für L.Polygon, L.GeoJSON Layer)
-
-            polygon.layer.setStyle({ fillColor: 'lightblue', fillOpacity: 0.5 }); // Standard-Style anwenden
-            polygon.isSelected = false; // Auswahl zurücksetzen
+            polygon.layer.setStyle({ fillColor: 'lightblue', fillOpacity: 0.5 });
+            polygon.isSelected = false;
         });
     }
-    const resetGafor = document.getElementById("resetGafor");
-    resetGafor.disabled = true;
+}
+
+function resetGaforRadius() {
+    resetGaforCircle();
+    resetGaforUIElements();
+    resetGaforPolygonStyles();
+    const resetGaforButton = document.getElementById("resetGafor");
+    if (resetGaforButton) {
+        resetGaforButton.disabled = true;
+    }
 }
