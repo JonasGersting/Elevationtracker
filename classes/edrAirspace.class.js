@@ -12,12 +12,12 @@ class EdrAirspace extends AirspacePolygon {
                     direction: 'right',
                     offset: L.point(20, 0),
                     className: 'polygon-label',
-                }).setContent(this.name);
+                }).setContent(this.ident);
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
-                    if (!polygonIsBroughtUpToFront) {
-                        this.handlePolygonOverlap(this.geometry);
-                    }
+                    // if (!polygonIsBroughtUpToFront) {
+                    //     this.handlePolygonOverlap(this.geometry);
+                    // }
                     layer.bindTooltip(tooltip).openTooltip();
                     layer.setStyle({fillColor: 'white', fillOpacity: 0.8});
                 });
@@ -29,11 +29,11 @@ class EdrAirspace extends AirspacePolygon {
                 });
                 layer.on('click', async () => {
                     currentAirspace = this;
-                    const id = await this.setAipInfoAirspace(this.name);
+                    const id = await this.setAipInfoAirspace(this.ident);
                     if (id) {
                         this.showInfoPdf(id);
                     } else {
-                        console.log('No PDF ID found for:', this.name);
+                        console.log('No PDF ID found for:', this.ident);
                     }
                 });
             }

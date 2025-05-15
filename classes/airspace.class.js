@@ -13,34 +13,36 @@ class AirspacePolygon {
         this.rotation = 0;
     }
 
-    handlePolygonOverlap(layerGeometry) {
-        this.polygonLayers.forEach((otherLayer) => {
-            if (otherLayer instanceof EdrAirspace && otherLayer.name !== this.name) {
-                if (this.isPolygonOverlapping(layerGeometry, otherLayer.geometry.coordinates)) {
-                    polygonIsBroughtUpToFront = true;
-                    otherLayer.layer.bringToFront(); 
-                }
-            }
-        });
-    }
+    // handlePolygonOverlap(layerGeometry) {
+    //     console.log('handlePolygonOverlap', layerGeometry);
+        
+    //     this.polygonLayers.forEach((otherLayer) => {
+    //         if (otherLayer instanceof EdrAirspace && otherLayer.name !== this.name) {
+    //             if (this.isPolygonOverlapping(layerGeometry, otherLayer.geometry.coordinates[0])) {
+    //                 polygonIsBroughtUpToFront = true;
+    //                 otherLayer.layer.bringToFront(); 
+    //             }
+    //         }
+    //     });
+    // }
 
-    isPolygonOverlapping(currentPolygon, otherPolygon) {
-        const currentFeature = {
-            type: "Feature",
-            geometry: currentPolygon,
-            properties: {}
-        };
-        const otherFeature = {
-            type: "Feature",
-            geometry: {
-                type: "Polygon",
-                coordinates: otherPolygon
-            },
-            properties: {}
-        };
-        const isEnclosed = turf.booleanContains(currentFeature, otherFeature);
-        return isEnclosed;
-    }
+    // isPolygonOverlapping(currentPolygon, otherPolygon) {
+    //     const currentFeature = {
+    //         type: "Feature",
+    //         geometry: currentPolygon,
+    //         properties: {}
+    //     };
+    //     const otherFeature = {
+    //         type: "Feature",
+    //         geometry: {
+    //             type: "Polygon",
+    //             coordinates: otherPolygon
+    //         },
+    //         properties: {}
+    //     };
+    //     const isEnclosed = turf.booleanContains(currentFeature, otherFeature);
+    //     return isEnclosed;
+    // }
 
     removeFromMap() {
         if (this.layer) {
@@ -107,26 +109,18 @@ class AirspacePolygon {
                 });
                 resolve(id);
             } else if (this instanceof EdrAirspace) {
-                const cleanName = name.replace(/ED-R(\S+).*/, '$1').trim();
-                edrInfo.forEach(edr => {
-                    const lowerCaseEdrArray = edr["ED-R"].map(item => item.toLowerCase());
-                    console.log(lowerCaseEdrArray, 'array EDR');
-                    
-                    if (lowerCaseEdrArray.includes(cleanName.toLowerCase())) {
-                        id = edr.ID;
-                    }
-                });
+                const edrPattern = /ED-R\s*(\S+)/;
+                const edrMatch = name.match(edrPattern);
+                if (edrMatch && edrMatch[1]) {
+                    id = edrMatch[1]; // Setze die ID direkt auf den extrahierten Teil
+                }
                 resolve(id);
             } else if (this instanceof EddAirspace) {
-                const cleanName = name.replace(/ED-D(\S+).*/, '$1').trim();
-                eddInfo.forEach(edd => {
-                    const lowerCaseEdrArray = edd["ED-D"].map(item => item.toLowerCase());
-                    console.log(lowerCaseEdrArray, 'array EDD');
-                    
-                    if (lowerCaseEdrArray.includes(cleanName.toLowerCase())) {
-                        id = edd.ID;
-                    }
-                });
+                const eddPattern = /ED-D\s*(\S+)/;
+                const eddMatch = name.match(eddPattern);
+                if (eddMatch && eddMatch[1]) {
+                    id = eddMatch[1]; // Setze die ID direkt auf den extrahierten Teil
+                }
                 resolve(id);
             }
             else {

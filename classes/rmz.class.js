@@ -15,9 +15,9 @@ class RmzAirspace extends AirspacePolygon {
                 }).setContent(this.name);
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
-                    if (!polygonIsBroughtUpToFront) {
-                        this.handlePolygonOverlap(this.geometry);
-                    }
+                    // if (!polygonIsBroughtUpToFront) {
+                    //     this.handlePolygonOverlap(this.geometry);
+                    // }
                     layer.bindTooltip(tooltip).openTooltip();
                     layer.setStyle({ color: 'white', dashArray: '4 4', opacity: 1, fillOpacity: 0.6, fillColor: 'gray' });
                 });

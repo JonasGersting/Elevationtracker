@@ -248,7 +248,7 @@ function processDataByKey(key, data) {
 
 // edr, edd and ctr are processed differently due to the overlapping airspaces.
 function processItems(items, airspaceKey, map, layerArray) {
-    if (airspaceKey === 'edr' || airspaceKey === 'edd' || airspaceKey === 'ctr') {
+    if (airspaceKey === 'edr' || airspaceKey === 'ctr') {
         airspaceReverse(items, airspaceKey, map, layerArray);
     } else {
         airspaceNormal(items, airspaceKey, map, layerArray);
@@ -262,11 +262,11 @@ function airspaceReverse(items, airspaceKey, map, layerArray) {
         if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
             let polygon;
             if (airspaceKey === 'edr') {
-                polygon = new EdrAirspace(item.geometry, item.name, 'null', map, layerArray);
+                polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
             } else if (airspaceKey === 'edd') {
-                polygon = new EddAirspace(item.geometry, item.name, 'null', map, layerArray);
+                polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
             } else if (airspaceKey === 'ctr') {
-                polygon = new CtrAirspace(item.geometry, item.name, 'null', map, layerArray);
+                polygon = new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, map, layerArray);
             }
             polygon.addToMap();
             layerArray.push(polygon);
@@ -281,16 +281,16 @@ function airspaceNormal(items, airspaceKey, map, layerArray) {
             let polygon;
             switch (airspaceKey) {
                 case 'fis':
-                    polygon = new FisAirspace(item.geometry, item.name, 'null', map, layerArray);
-                    break;
-                case 'ctr':
-                    polygon = new CtrAirspace(item.geometry, item.name, 'null', map, layerArray);
+                    polygon = new FisAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
                     break;
                 case 'rmz':
                     polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
                     break;
                 case 'fir':
                     polygon = new FirAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
+                    break;
+                case 'edd':
+                    polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
                     break;
                 case 'gafor':
                     polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', map, layerArray);

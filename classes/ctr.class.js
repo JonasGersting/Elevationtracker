@@ -15,9 +15,9 @@ class CtrAirspace extends AirspacePolygon {
                 }).setContent(this.name);
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
-                    if (!polygonIsBroughtUpToFront) {
-                        this.handlePolygonOverlap(this.geometry);
-                    }
+                    // if (!polygonIsBroughtUpToFront) {
+                    //     this.handlePolygonOverlap(this.geometry);
+                    // }
                     layer.bindTooltip(tooltip).openTooltip();
                     layer.setStyle({ fillColor: 'white', fillOpacity: 0.8 });
                 });
