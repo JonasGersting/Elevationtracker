@@ -16,7 +16,8 @@ let trackedAcftImgLink = null;
 let trackedAcftImgPhotographer = null;
 const airspaceStates = {
     fis: { name: 'fisAirspace', airspace: fisAirspace, info: 'null' },
-    edr: { name: 'edrAirspace', airspace: edrAirspace, info: 'edrInfo' },
+    edrLower: { name: 'edrAirspace', airspace: edrAirspace, info: 'edrInfo' },
+    edrUpper: { name: 'edrAirspace', airspace: edrAirspace, info: 'edrInfo' },
     edd: { name: 'eddAirspace', airspace: eddAirspace, info: 'eddInfo' },
     ctr: { name: 'ctrAirspace', airspace: ctrAirspace, info: 'ctrInfo' },
     rmz: { name: 'rmzAirspace', airspace: rmzAirspace, info: 'rmzInfo' },
@@ -248,7 +249,7 @@ function processDataByKey(key, data) {
 
 // edr, edd and ctr are processed differently due to the overlapping airspaces.
 function processItems(items, airspaceKey, map, layerArray) {
-    if (airspaceKey === 'edr' || airspaceKey === 'ctr') {
+    if (airspaceKey === 'edrLower' || airspaceKey === 'edrUpper' || airspaceKey === 'ctr') {
         airspaceReverse(items, airspaceKey, map, layerArray);
     } else {
         airspaceNormal(items, airspaceKey, map, layerArray);
@@ -261,15 +262,26 @@ function airspaceReverse(items, airspaceKey, map, layerArray) {
         const item = items[i];
         if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
             let polygon;
-            if (airspaceKey === 'edr') {
-                polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
-            } else if (airspaceKey === 'edd') {
-                polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+            if (airspaceKey === 'edrLower') {
+                if (item.properties['Lower Limit'] < 100) {
+                     polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
+                } 
+            } else if (airspaceKey === 'edrUpper') {
+                 if (item.properties['Lower Limit'] >= 100) {
+                     polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
+                }  
+            }
+            else if (airspaceKey === 'edd') {
+                polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
             } else if (airspaceKey === 'ctr') {
                 polygon = new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, map, layerArray);
             }
-            polygon.addToMap();
-            layerArray.push(polygon);
+            if (polygon) {
+                polygon.addToMap();
+                layerArray.push(polygon);
+                
+            }
+            
         }
     }
 }
@@ -290,7 +302,7 @@ function airspaceNormal(items, airspaceKey, map, layerArray) {
                     polygon = new FirAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
                     break;
                 case 'edd':
-                    polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                    polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
                     break;
                 case 'gafor':
                     polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', map, layerArray);
@@ -416,12 +428,12 @@ function showMarkers(source, key) {
             }
             return item;
         });
-   checkSmallAerodromeVisibilityBasedOnZoom(key);
+    checkSmallAerodromeVisibilityBasedOnZoom(key);
 }
 
 
 function checkSmallAerodromeVisibilityBasedOnZoom(key) {
-   if (map.getZoom() >= 9 && key === "aerodrome") {
+    if (map.getZoom() >= 9 && key === "aerodrome") {
         smallAerodromeInstances.forEach(saItem => {
             saItem.addToMap();
             smallAerodromesActive = true;

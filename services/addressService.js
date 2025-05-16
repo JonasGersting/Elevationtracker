@@ -12,18 +12,18 @@ async function searchAdress() {
     }
     const data = await response.json();
     currentAddresses = data;
-    displayAddressList(); 
+    displayAddressList();
 }
 
 
 function displayAddressList() {
     const addressList = document.getElementById('addressList');
-    addressList.innerHTML = ''; 
-    addressList.style.display = 'flex'; 
+    addressList.innerHTML = '';
+    addressList.style.display = 'flex';
     if (currentAddresses.length > 0) {
         currentAddresses.forEach((addressObj, index) => {
             addressList.innerHTML += `
-            <button class="searchButton" onclick="handleAddressClick(${index})">
+            <button type="button" class="searchButton" onclick="handleAddressClick(${index})">
                 ${addressObj.display_name}
             </button>
             `;
@@ -48,18 +48,18 @@ async function handleAddressClick(index) {
     }
     let address = currentAddresses[index];
     const geojson = address.geojson;
-    const lat = parseFloat(address.lat); 
+    const lat = parseFloat(address.lat);
     const lon = parseFloat(address.lon);
     const popupContent = `<strong>Adresse:</strong> ${address.display_name}`;
     function onEachFeature(feature, layer) {
-        layer.bindPopup(popupContent); 
+        layer.bindPopup(popupContent);
     }
     currentAdressGeoJSONLayer = L.geoJSON(geojson, {
         onEachFeature: onEachFeature
     }).addTo(map);
-    let zoomLevel = 12; 
+    let zoomLevel = 12;
     if (geojson.type !== 'Polygon' && geojson.type !== 'MultiPolygon') {
-        zoomLevel = 18; 
+        zoomLevel = 18;
         currentAdressGeoJSONLayer.getLayers()[0].openPopup();
     }
     map.setView([lat, lon], zoomLevel);
@@ -133,7 +133,7 @@ const searchConfig = {
             }
         },
         filter: (item, searchTerm) => {
-            const name = item.name ? item.name.toUpperCase() : '';
+            const name = item.properties.Ident ? item.properties.Ident.toUpperCase() : '';
             return name.includes(searchTerm);
         },
         display: (items) => displaySearchResults(items, 'ED-R')
@@ -146,7 +146,7 @@ const searchConfig = {
             }
         },
         filter: (item, searchTerm) => {
-            const name = item.name ? item.name.toUpperCase() : '';
+            const name = item.properties.Ident ? item.properties.Ident.toUpperCase() : '';
             return name.includes(searchTerm);
         },
         display: (items) => displaySearchResults(items, 'ED-D')
@@ -172,7 +172,7 @@ const searchConfig = {
             }
         },
         filter: (item, searchTerm) => {
-            const name = item.name ? item.name.toUpperCase() : '';
+            const name = item.properties.nam ? item.properties.nam.toUpperCase() : '';
             return name.includes(searchTerm);
         },
         display: (items) => displaySearchResults(items, 'CTR')
@@ -230,6 +230,17 @@ const searchConfig = {
         display: (items) => displaySearchResults(items, 'NAV-Aid')
     }
 };
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' && searchInput.value.trim() !== '') {
+            event.preventDefault();
+            search();
+        }
+    });
+});
 
 async function search() {
     const deleteSearchBtn = document.getElementById('deleteSearch');
@@ -312,7 +323,7 @@ function displaySearchResults(items, type) {
 }
 
 function getDisplayParams(item, type) {
-    switch(type) {
+    switch (type) {
         case 'Flugplatz':
             return {
                 shouldDisplay: true,
@@ -337,13 +348,22 @@ function getDisplayParams(item, type) {
                 name: item['Parent Designator'],
                 buttonText: item['Parent Designator']
             };
-        default: 
+        case 'ED-R':
+        case 'ED-D':
             return {
                 shouldDisplay: true,
                 lat: item.geometry.coordinates[0][0][1],
                 lon: item.geometry.coordinates[0][0][0],
-                name: item.name || item.properties.Name,
-                buttonText: item.name || item.properties.Name
+                name: item.properties.Name,
+                buttonText: `${item.properties.Ident} - ${item.properties.Name}`
+            };
+        default:
+            return {
+                shouldDisplay: true,
+                lat: item.geometry.coordinates[0][0][1],
+                lon: item.geometry.coordinates[0][0][0],
+                name: item.name || item.properties.Name || item.properties.nam,
+                buttonText: item.name || item.properties.Name || item.properties.nam
             };
     }
 }
@@ -390,6 +410,7 @@ function resetSearch() {
     const searchInput = document.getElementById('searchInput');
     const addressList = document.getElementById('addressList');
     const deleteSearchBtn = document.getElementById('deleteSearch');
+    addressList.style.display = 'none';
 
     if (searchInput) {
         searchInput.value = ''; // Suchfeld leeren
@@ -441,7 +462,7 @@ function resetSearch() {
     initialMarkerLat = null;
     initialMarkerLon = null;
     closestNavAid = null;
-    foundNavAids = []; 
+    foundNavAids = [];
     currentSequenceFoundNavAidNames = [];
     foundNavaidId = 0;
     if (deleteSearchBtn) {

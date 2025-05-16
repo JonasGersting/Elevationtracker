@@ -50,3 +50,31 @@
     z-index: 1000;
     pointer-events: none;
 }
+
+.edr-custom-label {
+    font-family: 'Roboto', sans-serif;
+    width: 120px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 1px;
+    box-sizing: border-box;
+}
+
+.edr-custom-label:hover {
+    background-color: darkred;
+    color: white;
+}
+
+.edd-custom-label{
+    font-family: 'Roboto', sans-serif;
+    width: 120px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 1px;
+    box-sizing: border-box;
+}
+
+.edd-custom-label:hover {
+    background-color: darkorange;
+    color: white;
+}

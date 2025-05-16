@@ -15,9 +15,9 @@ class PjeAirspace extends AirspacePolygon {
                 }).setContent(`${this.name}<br>${this.ident}`);
                 layer.on('mouseover', () => {
                     isCursorOverPolygon = true;
-                    if (!polygonIsBroughtUpToFront) {
-                        this.handlePolygonOverlap(this.geometry);
-                    }
+                    // if (!polygonIsBroughtUpToFront) {
+                    //     this.handlePolygonOverlap(this.geometry);
+                    // }
                     layer.bindTooltip(tooltip).openTooltip();
                     layer.setStyle({fillColor: 'white', fillOpacity: 0.8});
                 });

@@ -41,9 +41,7 @@
                 <button class="shadow z-index1100" id="searchBtn" onclick="search()">Suche</button>
                 <button class="shadow z-index1100" id="deleteSearch" disabled onclick="resetSearch()"></button>
                 <span class="loader z-index1100" id="loader" style="display: none;"></span>
-
             </div>
-
         </div>
 
     </div>
@@ -138,7 +136,7 @@
                             onclick="toggleMap('openFlightMaps', 'additionalLayers')">
                             <span class="mapBtnTitle">openflightmaps</span>
                             <img class="mapImg"
-                                src="https://nwy-tiles-api.prod.newaydata.com/tiles/11/1073/693.png?path=2503/aero/latest"
+                                src="https://nwy-tiles-api.prod.newaydata.com/tiles/11/1073/693.png?path=2505/aero/latest"
                                 alt="">
                         </button>
                     </div>
@@ -154,7 +152,8 @@
                 <div class="mapBtn airspaceLayer smallMenuBtn">Lufträume
                     <div class="allAirspaceLayer smallMenu">
                         <button class="mapBtn" id="fis" onclick="togglePolygons('fis')">FIS</button>
-                        <button class="mapBtn" id="edr" onclick="togglePolygons('edr')">EDR</button>
+                        <button class="mapBtn" id="edrLower" onclick="togglePolygons('edrLower')">EDR bis FL100</button>
+                        <button class="mapBtn" id="edrUpper" onclick="togglePolygons('edrUpper')">EDR über FL100</button>
                         <button class="mapBtn" id="edd" onclick="togglePolygons('edd')">EDD</button>
                         <button class="mapBtn" id="ctr" onclick="togglePolygons('ctr')">CTR</button>
                         <button class="mapBtn" id="rmz" onclick="togglePolygons('rmz')">RMZ</button>
@@ -184,14 +183,14 @@
             <button class="resetGaforBtn" id="resetGafor" disabled onclick="resetGaforRadius()"></button>
         </div>
         <div class="d-flex">
-            <span id="gaforRadius">Radius:</span>             
+            <span id="gaforRadius">Radius:</span>
             <span class="gaforLoader z-index1100" id="loaderGaforRadius" style="display: none;"></span>
         </div>
         <div class="d-flex">
             <span id="gaforCenter">Center:</span>
             <span class="gaforLoader z-index1100" id="loaderGaforPos" style="display: none;"></span>
         </div>
-        
+
 
     </div>
     <div class="shadow" id="showActualPos"></div>
@@ -305,6 +304,6 @@
 <script src="classes/ctr.class.js"></script>
 <script src="classes/aerodrome.class.js"></script>
 <script src="classes/aircraft.class.js"></script>
-<script src="classes/smallAerodrome.class.js" ></script>
+<script src="classes/smallAerodrome.class.js"></script>
 
 </html>

@@ -5,8 +5,8 @@ class AirspacePolygon {
         this.name = name;
         this.ident = ident;
         this.map = map;
-        this.layer = null; 
-        this.polygonLayers = polygonLayers; 
+        this.layer = null;
+        this.polygonLayers = polygonLayers;
         this.pdfDoc = null;
         this.pageNum = 1;
         this.scale = 1;
@@ -15,7 +15,7 @@ class AirspacePolygon {
 
     // handlePolygonOverlap(layerGeometry) {
     //     console.log('handlePolygonOverlap', layerGeometry);
-        
+
     //     this.polygonLayers.forEach((otherLayer) => {
     //         if (otherLayer instanceof EdrAirspace && otherLayer.name !== this.name) {
     //             if (this.isPolygonOverlapping(layerGeometry, otherLayer.geometry.coordinates[0])) {
@@ -61,7 +61,7 @@ class AirspacePolygon {
                     <button onclick="currentAirspace.closeInfoPdf()" class="closeButton" style="position: absolute; right: 10px; top: 10px; z-index: 1000;">X</button>
                     <iframe 
                         id="pdfIframe" 
-                        src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=155" 
+                        src="https://aip.dfs.de/IFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=155" 
                         frameborder="0"
                         style="width: 100%; height: 100%;">
                     </iframe>
@@ -111,16 +111,24 @@ class AirspacePolygon {
             } else if (this instanceof EdrAirspace) {
                 const edrPattern = /ED-R\s*(\S+)/;
                 const edrMatch = name.match(edrPattern);
-                if (edrMatch && edrMatch[1]) {
-                    id = edrMatch[1]; // Setze die ID direkt auf den extrahierten Teil
-                }
+                let cleanName = edrMatch && edrMatch[1] ? edrMatch[1] : name;
+                edrInfo.forEach(edr => {
+                    const lowerCaseEdrArray = edr["ED-R"].map(item => item.toLowerCase());
+                    if (lowerCaseEdrArray.includes(cleanName.toLowerCase())) {
+                        id = edr.ID;
+                    }
+                });
                 resolve(id);
             } else if (this instanceof EddAirspace) {
                 const eddPattern = /ED-D\s*(\S+)/;
                 const eddMatch = name.match(eddPattern);
-                if (eddMatch && eddMatch[1]) {
-                    id = eddMatch[1]; // Setze die ID direkt auf den extrahierten Teil
-                }
+                let cleanName = eddMatch && eddMatch[1] ? eddMatch[1] : name;
+                eddInfo.forEach(edd => {
+                    const lowerCaseEddArray = edd["ED-D"].map(item => item.toLowerCase());
+                    if (lowerCaseEddArray.includes(cleanName.toLowerCase())) {
+                        id = edd.ID;
+                    }
+                });
                 resolve(id);
             }
             else {
@@ -135,7 +143,7 @@ class AirspacePolygon {
     }
 
     getStyle() {
-        return {}; 
+        return {};
     }
 
 
