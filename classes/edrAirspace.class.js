@@ -1,11 +1,15 @@
 class EdrAirspace extends AirspacePolygon {
-    constructor(geometry, name, ident, map, polygonLayers, centerLat, centerLon) {
-        super(geometry, name, ident, map, polygonLayers, centerLat, centerLon);
+    constructor(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit) {
+        super(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit);
         this.centerLat = centerLat; // Speichern für spätere Verwendung
         this.centerLon = centerLon; // Speichern für spätere Verwendung
         this.labelMarker = null; // Marker für das Text-Label
         // Binden des Kontexts für den Event-Handler, um 'this' korrekt zu verwenden
         this._boundUpdateLabelVisibility = this._updateLabelVisibility.bind(this);
+        this.lowerLimit = lowerLimit;
+        this.lowerLimitUnit = lowerLimitUnit;
+        this.upperLimit = upperLimit;
+        this.upperLimitUnit = upperLimitUnit;
     }
 
     addToMap() {
@@ -82,7 +86,11 @@ class EdrAirspace extends AirspacePolygon {
     _createLabelMarker() {
         // HTML-Struktur, die sowohl Ident als auch den (initial ausgeblendeten) Namen enthält
         const labelHtml = `
-            <div><b>${this.ident}</b></div>
+            <div>
+            <b>${this.ident}</b><br>
+            <span style="border-bottom: 2px solid black">${this.upperLimit} ${this.upperLimitUnit}</span><br>
+            <span>${this.lowerLimit} ${this.lowerLimitUnit}</span>        
+            </div>
             <div class="edr-label-name" style="display: none;">${this.name || 'N/A'}</div>
         `;
 

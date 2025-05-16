@@ -262,26 +262,25 @@ function airspaceReverse(items, airspaceKey, map, layerArray) {
         const item = items[i];
         if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
             let polygon;
+
+
             if (airspaceKey === 'edrLower') {
-                if (item.properties['Lower Limit'] < 100) {
-                     polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
-                } 
+                if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] < 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] < 10000)) {
+                    polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+                }
             } else if (airspaceKey === 'edrUpper') {
-                 if (item.properties['Lower Limit'] >= 100) {
-                     polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
-                }  
-            }
-            else if (airspaceKey === 'edd') {
-                polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
+                if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] >= 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] >= 10000)) {
+                    polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+                }
             } else if (airspaceKey === 'ctr') {
                 polygon = new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, map, layerArray);
             }
             if (polygon) {
                 polygon.addToMap();
                 layerArray.push(polygon);
-                
+
             }
-            
+
         }
     }
 }
