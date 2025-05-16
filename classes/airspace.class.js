@@ -46,8 +46,30 @@ class AirspacePolygon {
 
     removeFromMap() {
         if (this.layer) {
-            this.layer.remove();
+            this.layer.remove(); // Entfernt das Haupt-Polygon-Layer von der Karte
             this.layer = null;
+        }
+
+        // Prüfen, ob die Instanz EdrAirspace oder EddAirspace ist, 
+        // um deren spezifische Labels und Listener zu behandeln.
+        // Dies setzt voraus, dass die Klassen EdrAirspace und EddAirspace definiert und zugänglich sind.
+        if (this.map && (this instanceof EdrAirspace || this instanceof EddAirspace)) {
+            // Die folgenden Eigenschaften sind spezifisch für EdrAirspace und EddAirspace.
+            // Wir greifen auf sie zu, als ob 'this' eine Instanz dieser Unterklassen wäre.
+            const specializedInstance = this;
+
+            if (specializedInstance.labelMarker) {
+                // Sicherstellen, dass der labelMarker auf der Karte ist, bevor versucht wird, ihn zu entfernen
+                if (this.map.hasLayer(specializedInstance.labelMarker)) {
+                    this.map.removeLayer(specializedInstance.labelMarker);
+                }
+                specializedInstance.labelMarker = null; // Referenz in der Instanz auf null setzen
+            }
+
+            // Den Zoom-Event-Listener entfernen, der spezifisch für diese Unterklassen ist
+            if (specializedInstance._boundUpdateLabelVisibility) {
+                this.map.off('zoomend', specializedInstance._boundUpdateLabelVisibility);
+            }
         }
     }
 
