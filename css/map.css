@@ -39,6 +39,19 @@
     cursor: grab;
 }
 
+.fis-label{
+    color: white;
+    font-size: 26px;
+    font-weight: 500;
+    opacity: 1;
+    transform: translateX(-50%) translateY(-50%);
+    background-color: rgb(10, 60, 135);
+    box-sizing: border-box;
+    padding: 4px;
+    border-radius: 8px;
+    opacity: 0.8;
+}
+
 /* Distance Measurements */
 .distance-label {
     position: absolute;

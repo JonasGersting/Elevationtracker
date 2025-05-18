@@ -278,7 +278,7 @@ function airspaceNormal(items, airspaceKey, map, layerArray) {
                     polygon = new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, map, layerArray, item.properties.latitude, item.properties.longitude, item.properties.lowerlimit, item.properties.lowerlimitunit, item.properties.upperlimit, item.properties.uplimitunit);
                     break;
                 case 'fis':
-                    polygon = new FisAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
+                    polygon = new FisAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray, item.properties.SVS);
                     break;
                 case 'rmz':
                     polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
