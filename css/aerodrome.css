@@ -52,6 +52,19 @@
     display: flex;
     position: relative;
     background: linear-gradient(45deg, rgb(10, 60, 135), rgb(15, 90, 210));
+    flex-direction: column;
+
+}
+
+.airspaceInfoCardHeader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    box-sizing: border-box;
+    text-align: center;
+    gap: 12px;
+    flex-direction: column;
 }
 
 .metar {

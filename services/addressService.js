@@ -309,17 +309,37 @@ function displaySearchResults(items, type) {
         const limitedResults = items.slice(0, 10);
         limitedResults.forEach((item) => {
             const displayParams = getDisplayParams(item, type);
-            if (displayParams.shouldDisplay) {
-                addressList.innerHTML += `
+            if (type === 'ED-R') {
+                let edrType = findEdrType(displayParams);
+                if (displayParams.shouldDisplay) {
+                    addressList.innerHTML += `
+                <button class="searchButton" onclick="goToLocation('${edrType}', ${displayParams.lat}, ${displayParams.lon}, '${displayParams.name}')">
+                     ${displayParams.buttonText}
+                </button>
+                `;
+                }
+            } else {
+                if (displayParams.shouldDisplay) {
+                    addressList.innerHTML += `
                 <button class="searchButton" onclick="goToLocation('${type}', ${displayParams.lat}, ${displayParams.lon}, '${displayParams.name}')">
                      ${displayParams.buttonText}
                 </button>
                 `;
+                }
             }
         });
     } else {
         showNoResults(type);
     }
+}
+
+function findEdrType(displayParams) {
+    if ((displayParams.lowerLimitUnit === 'FL' && displayParams.lowerLimit < 100) || (displayParams.lowerLimitUnit === 'FT' && displayParams.lowerLimit < 10000)) {
+        return 'edrLower'
+    } else {
+        return 'edrUpper'
+    }
+
 }
 
 function getDisplayParams(item, type) {
@@ -349,21 +369,38 @@ function getDisplayParams(item, type) {
                 buttonText: item['Parent Designator']
             };
         case 'ED-R':
+            return {
+                shouldDisplay: true,
+                lat: item.properties['Center Latitude'],
+                lon: item.properties['Center Longitude'],
+                name: item.properties.Name,
+                buttonText: `${item.properties.Ident} - ${item.properties.Name}`,
+                lowerLimit: item.properties['Lower Limit'],
+                lowerLimitUnit: item.properties['Lower Limit Unit']
+            };
         case 'ED-D':
             return {
                 shouldDisplay: true,
-                lat: item.geometry.coordinates[0][0][1],
-                lon: item.geometry.coordinates[0][0][0],
+                lat: item.properties['Center Latitude'],
+                lon: item.properties['Center Longitude'],
                 name: item.properties.Name,
                 buttonText: `${item.properties.Ident} - ${item.properties.Name}`
             };
+        case 'CTR':
+            return {
+                shouldDisplay: true,
+                lat: item.properties.latitude,
+                lon: item.properties.longitude,
+                name: item.properties.nam,
+                buttonText: item.properties.nam
+            }
         default:
             return {
                 shouldDisplay: true,
-                lat: item.geometry.coordinates[0][0][1],
-                lon: item.geometry.coordinates[0][0][0],
-                name: item.name || item.properties.Name || item.properties.nam,
-                buttonText: item.name || item.properties.Name || item.properties.nam
+                lat: item.properties['Center Latitude'],
+                lon: item.properties['Center Longitude'],
+                name: item.name || item.properties.Name,
+                buttonText: item.name || item.properties.Name
             };
     }
 }
@@ -375,7 +412,8 @@ function goToLocation(type, lat, lon, name) {
         'Flugplatz': { markerKey: 'aerodrome', zoom: 13, isMarker: true },
         'NAV-Aid': { markerKey: 'navaid', zoom: 13, isMarker: true },
         'Hinderniss': { markerKey: 'obstacle', zoom: 14, isMarker: true },
-        'ED-R': { polygonKey: 'edr', zoom: 11, isMarker: false },
+        'edrLower': { polygonKey: 'edrLower', zoom: 11, isMarker: false },
+        'edrUpper': { polygonKey: 'edrUpper', zoom: 11, isMarker: false },
         'ED-D': { polygonKey: 'edd', zoom: 9, isMarker: false },
         'RMZ': { polygonKey: 'rmz', zoom: 11, isMarker: false },
         'CTR': { polygonKey: 'ctr', zoom: 11, isMarker: false },

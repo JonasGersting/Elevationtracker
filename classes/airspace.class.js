@@ -309,7 +309,11 @@ class AirspacePolygon {
             <div class="overlay"></div>
             <div class="cardWrapper">
                 <div class="airspaceInfoCard"">
-                    <button onclick="currentAirspace.closeInfoPdf()" class="closeButton" style="position: absolute; right: 10px; top: 10px; z-index: 1000;">X</button>
+                    <div class="airspaceInfoCardHeader">
+                        <h3>${this.name}</h3>
+                        <h3>${this.ident || ''}</h3>
+                        <button onclick="currentAirspace.closeInfoPdf()" class="closeButton" style="position: absolute; right: 10px; top: 10px; z-index: 1000;">X</button>
+                    </div>    
                     <iframe 
                         id="pdfIframe" 
                         src="https://aip.dfs.de/IFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=155" 
