@@ -79,9 +79,12 @@ class AirspacePolygon {
 
         let limitsHtml = '';
 
+        const lowerLimitDisplay = (this.lowerLimit === 0 || this.lowerLimit === "0") ? "GND" : `${this.lowerLimit} ${this.lowerLimitUnit}`;
         limitsHtml = `
                 <span style="border-bottom: 1px solid #555; display: inline-block; margin-bottom: 2px; padding-bottom: 1px;">${this.upperLimit} ${this.upperLimitUnit}</span><br>
-                <span style="display: inline-block; margin-top: 1px;">${this.lowerLimit} ${this.lowerLimitUnit}</span>`;
+                <span style="display: inline-block; margin-top: 1px;">${lowerLimitDisplay}</span>`;
+
+
 
 
         let primaryDisplay = '';

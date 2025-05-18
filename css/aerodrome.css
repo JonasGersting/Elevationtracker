@@ -65,6 +65,7 @@
     text-align: center;
     gap: 12px;
     flex-direction: column;
+    height: 100px;
 }
 
 .metar {
