@@ -1,49 +1,49 @@
 class TmzAirspace extends AirspacePolygon {
-    constructor(geometry, name, ident, map, polygonLayers) {
-        super(geometry, name, ident, map, polygonLayers);
+    constructor(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit) {
+        super(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit);
+        this.labelHighlightColor = 'navy'; // Spezifische Highlight-Farbe für TMZ
+        this.labelHighlightTextColor = 'white';
     }
 
     addToMap() {
+        const onFeature = (feature, layer) => {
+            layer.on('mouseover', () => {
+                isCursorOverPolygon = true;
+                layer.setStyle(this.getSpecificHoverStyle());
+                layer.bringToFront();
+            });
+
+            layer.on('mouseout', () => {
+                isCursorOverPolygon = false;
+                layer.setStyle(this.getStyle());
+            });
+        };
+
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
-            onEachFeature: (feature, layer) => {
-                const tooltip = L.tooltip({
-                    permanent: false,       
-                    direction: 'right',    
-                    offset: L.point(20, 0), 
-                    className: 'polygon-label',
-                }).setContent(this.name);
-                layer.on('mouseover', () => {
-                    isCursorOverPolygon = true;
-                    layer.bindTooltip(tooltip).openTooltip();
-                    layer.setStyle({ color: 'white', dashArray: '4 4', fillOpacity: 0.6, fillColor: 'darkblue' });
-                });
-                layer.on('mouseout', () => {
-                    isCursorOverPolygon = false;  
-                    layer.closeTooltip();        
-                    layer.unbindTooltip();       
-                    layer.setStyle(this.getStyle());
-                });
-                layer.on('click', async () => {
-                    currentAirspace = this;
-                    const id = await this.setAipInfoAirspace(this.name);
-                    if (id) {
-                        this.showInfoPdf(id);
-                    } else {
-                        console.log('No PDF ID found for:', this.name);
-                    }
-                });
-            }
+            onEachFeature: onFeature
         }).addTo(this.map);
+
+        super.addToMap();
     }
+
+    getSpecificHoverStyle() {
+        return { color: 'white', dashArray: '4 4', fillOpacity: 0.6, fillColor: 'darkblue' };
+    }
+
+
+
+
+    
 
     getStyle() {
         return {
-            color: 'darkblue',   
-            weight: 2,           
-            opacity: 1,          
-            dashArray: '4 4',    
-            fillOpacity: 0      
+            color: 'darkblue',
+            fillColor: 'darkblue', // Füllfarbe für den Normalzustand (auch wenn fillOpacity 0 ist)
+            weight: 2,
+            opacity: 1,
+            dashArray: '4 4',
+            fillOpacity: 0 // TMZ ist oft nur ein Rahmen
         };
     }
 }

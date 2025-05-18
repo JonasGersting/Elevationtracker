@@ -1,51 +1,49 @@
 class CtrAirspace extends AirspacePolygon {
-    constructor(geometry, name, ident, map, polygonLayers) {
-        super(geometry, name, ident, map, polygonLayers);
+    constructor(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit) {
+        super(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit);
+        this.labelHighlightColor = '#8B0000'; // Dunkelrot, aber etwas anders als EDR für Unterscheidung
+        this.labelHighlightTextColor = 'white';
     }
 
-    addToMap() {
+       addToMap() {
+        const onFeature = (feature, layer) => {
+            layer.on('mouseover', () => {
+                isCursorOverPolygon = true;
+                layer.setStyle(this.getSpecificHoverStyle());
+                layer.bringToFront();
+                // Die Label-Interaktion (Farbe, zIndex, temporäre Sichtbarkeit)
+                // wird jetzt durch _boundPolygonMouseoverForLabel in AirspacePolygon gehandhabt.
+            });
+
+            layer.on('mouseout', () => {
+                isCursorOverPolygon = false;
+                layer.setStyle(this.getStyle());
+                // Die Label-Interaktion (Farbe, zIndex, temporäre Sichtbarkeit)
+                // wird jetzt durch _boundPolygonMouseoutForLabel in AirspacePolygon gehandhabt.
+            });
+
+            // Der Klick-Handler wurde in die AirspacePolygon-Klasse verschoben (_boundPolygonClick)
+        };
+
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
-            onEachFeature: (feature, layer) => {
-                const tooltip = L.tooltip({
-                    permanent: false,
-                    direction: 'right',
-                    offset: L.point(20, 0),
-                    className: 'polygon-label',
-                }).setContent(this.name);
-                layer.on('mouseover', () => {
-                    isCursorOverPolygon = true;
-                    // if (!polygonIsBroughtUpToFront) {
-                    //     this.handlePolygonOverlap(this.geometry);
-                    // }
-                    layer.bindTooltip(tooltip).openTooltip();
-                    layer.setStyle({ fillColor: 'white', fillOpacity: 0.8 });
-                });
-                layer.on('mouseout', () => {
-                    isCursorOverPolygon = false;  
-                    layer.closeTooltip();
-                    layer.unbindTooltip(); 
-                    layer.setStyle({ fillColor: 'darkred', fillOpacity: 0.2 });
-                });
-                layer.on('click', async () => {
-                    currentAirspace = this;
-                    const id = await this.setAipInfoAirspace(this.name);
-                    if (id) {
-                        this.showInfoPdf(id);
-                    } else {
-                        console.log('No PDF ID found for:', this.name);
-                    }
-                });
-            }
+            onEachFeature: onFeature
         }).addTo(this.map);
+
+        super.addToMap(); // Ruft Label-Initialisierung und zentrale Listener-Bindung in der Basisklasse auf
+    }
+
+    getSpecificHoverStyle() {
+        return { fillColor: 'white', fillOpacity: 0.8 };
     }
 
     getStyle() {
         return {
-            color: 'darkred', 
-            weight: 2,     
-            opacity: 0.6,  
-            fillOpacity: 0.2 
+            color: 'darkred',
+            fillColor: 'darkred', // Füllfarbe für den Normalzustand
+            weight: 2,
+            opacity: 0.6,
+            fillOpacity: 0.2
         };
     }
 }

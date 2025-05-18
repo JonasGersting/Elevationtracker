@@ -249,41 +249,12 @@ function processDataByKey(key, data) {
 
 // edr, edd and ctr are processed differently due to the overlapping airspaces.
 function processItems(items, airspaceKey, map, layerArray) {
-    if (airspaceKey === 'edrLower' || airspaceKey === 'edrUpper' || airspaceKey === 'ctr') {
-        airspaceReverse(items, airspaceKey, map, layerArray);
-    } else {
-        airspaceNormal(items, airspaceKey, map, layerArray);
-    }
+    // airspaceReverse wurde entfernt, airspaceNormal behandelt jetzt alle Fälle
+    airspaceNormal(items, airspaceKey, map, layerArray);
 }
 
 
-function airspaceReverse(items, airspaceKey, map, layerArray) {
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
-            let polygon;
 
-
-            if (airspaceKey === 'edrLower') {
-                if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] < 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] < 10000)) {
-                    polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
-                }
-            } else if (airspaceKey === 'edrUpper') {
-                if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] >= 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] >= 10000)) {
-                    polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
-                }
-            } else if (airspaceKey === 'ctr') {
-                polygon = new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, map, layerArray);
-            }
-            if (polygon) {
-                polygon.addToMap();
-                layerArray.push(polygon);
-
-            }
-
-        }
-    }
-}
 
 function airspaceNormal(items, airspaceKey, map, layerArray) {
     for (let i = items.length - 1; i >= 0; i--) {
@@ -291,17 +262,32 @@ function airspaceNormal(items, airspaceKey, map, layerArray) {
         if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
             let polygon;
             switch (airspaceKey) {
+                case 'edrLower':
+                    if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] < 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] < 10000)) {
+                        polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+                    }
+                    break;
+                case 'edrUpper':
+                    if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] >= 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] >= 10000)) {
+
+                        polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+
+                    }
+                    break;
+                case 'ctr':
+                    polygon = new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, map, layerArray, item.properties.latitude, item.properties.longitude, item.properties.lowerlimit, item.properties.lowerlimitunit, item.properties.upperlimit, item.properties.uplimitunit);
+                    break;
                 case 'fis':
                     polygon = new FisAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
                     break;
                 case 'rmz':
-                    polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                    polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
                     break;
                 case 'fir':
                     polygon = new FirAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
                     break;
                 case 'edd':
-                    polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude']);
+                    polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
                     break;
                 case 'gafor':
                     polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', map, layerArray);
@@ -310,14 +296,16 @@ function airspaceNormal(items, airspaceKey, map, layerArray) {
                     polygon = new PjeAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
                     break;
                 case 'tmz':
-                    polygon = new TmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
+                    polygon = new TmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
                     break;
                 case 'atz':
                     polygon = new AtzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
                     break;
             }
-            polygon.addToMap();
-            layerArray.push(polygon);
+            if (polygon) {
+                polygon.addToMap();
+                layerArray.push(polygon);
+            }
         }
     }
 }
