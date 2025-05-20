@@ -306,6 +306,9 @@ class AirspacePolygon {
     }
 
     showInfoPdf(pdfId) {
+        let pdfPath = this.returnCorrectAipPath(pdfId);
+        console.log(pdfPath);
+        
         let detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '100vh';
         detailDiv.innerHTML = `
@@ -314,18 +317,26 @@ class AirspacePolygon {
                 <div class="airspaceInfoCard"">
                     <div class="airspaceInfoCardHeader">
                         <h3>${this.name}</h3>
-                        <h3>${this.ident || ''}</h3>
+                        <h3>${this.ident}</h3>
                         <button onclick="currentAirspace.closeInfoPdf()" class="closeButton" style="position: absolute; right: 10px; top: 10px; z-index: 1000;">X</button>
                     </div>    
                     <iframe 
                         id="pdfIframe" 
-                        src="https://aip.dfs.de/IFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=155" 
+                        src=${pdfPath} 
                         frameborder="0"
                         style="width: 100%; height: 100%;">
                     </iframe>
                 </div>
             </div>
         `;
+    }
+
+    returnCorrectAipPath(pdfId){
+        if (this.ident === ('Kiel' || 'Eckernförd' || 'Hohe Düne')) {
+            return `vfraip://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`
+        } else{
+            return `https://aip.dfs.de/IFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`
+        }
     }
 
     setAipInfoAirspace(name) {
