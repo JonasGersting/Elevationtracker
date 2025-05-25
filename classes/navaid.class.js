@@ -25,19 +25,19 @@ class Navaid extends AirspacePolygon {
             iconSize: iconSize,
         });
         this.marker = L.marker([this.lat, this.long], { icon: customIcon }).addTo(this.map);
-        const popupContent = this.returnPopUpContent();
+        const popupContent = this.returnPopUpContent(this.name, this.type, this.designator, this.charted, this.icaoCode, this.correctType);
         this.marker.bindPopup(popupContent);
     }
 
-    returnPopUpContent() {
-        `
+    returnPopUpContent(name, type, designator, charted, icaoCode, correctType) {
+       return `
             <div style="word-wrap: break-word;">
-                <b>Name:</b> ${this.name}<br>
-                <b>Type:</b> ${this.type}<br>
-                <b>Designator:</b> ${this.designator}<br>
-                <b>Charted:</b> ${this.charted}<br>
-                <b>ICAO:</b> ${this.icaoCode}<br>
-                <b>Correct Type:</b> ${this.correctType}<br>
+                <b>Name:</b> ${name}<br>
+                <b>Type:</b> ${type}<br>
+                <b>Designator:</b> ${designator}<br>
+                <b>Charted:</b> ${charted}<br>
+                <b>ICAO:</b> ${icaoCode}<br>
+                <b>Correct Type:</b> ${correctType}<br>
             </div>
         `;
     }
