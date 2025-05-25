@@ -312,16 +312,18 @@ function displaySearchResults(items, type) {
             if (type === 'ED-R') {
                 let edrType = findEdrType(displayParams);
                 if (displayParams.shouldDisplay) {
+                    const escapedName = displayParams.name.replace(/"/g, '&quot;');
                     addressList.innerHTML += `
-                <button class="searchButton" onclick="goToLocation('${edrType}', ${displayParams.lat}, ${displayParams.lon}, '${displayParams.name}')">
+                <button class="searchButton" onclick="goToLocation('${edrType}', ${displayParams.lat}, ${displayParams.lon}, '${escapedName}')">
                      ${displayParams.buttonText}
                 </button>
                 `;
                 }
             } else {
                 if (displayParams.shouldDisplay) {
+                    const escapedName = displayParams.name.replace(/"/g, '&quot;');
                     addressList.innerHTML += `
-                <button class="searchButton" onclick="goToLocation('${type}', ${displayParams.lat}, ${displayParams.lon}, '${displayParams.name}')">
+                <button class="searchButton" onclick="goToLocation('${type}', ${displayParams.lat}, ${displayParams.lon}, '${escapedName}')">
                      ${displayParams.buttonText}
                 </button>
                 `;

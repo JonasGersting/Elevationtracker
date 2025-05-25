@@ -1,6 +1,6 @@
 class Navaid extends AirspacePolygon {
-    constructor(lat, long, name, map, type, designator, charted, icaoCode) {
-        super(lat, long, name, map, type, designator, charted);
+    constructor(lat, long, name, map, type, designator, charted, icaoCode, correctType) {
+        super(lat, long, name, map, type, designator, charted, correctType);
         this.lat = lat;
         this.long = long;
         this.name = name;
@@ -9,6 +9,7 @@ class Navaid extends AirspacePolygon {
         this.designator = designator;
         this.charted = charted;
         this.icaoCode = icaoCode;
+        this.correctType = correctType;
     }
 
     addToMap() {
@@ -31,7 +32,8 @@ class Navaid extends AirspacePolygon {
                 <b>Type:</b> ${this.type}<br>
                 <b>Designator:</b> ${this.designator}<br>
                 <b>Charted:</b> ${this.charted}<br>
-                <b>ICAO:</b> ${this.icaoCode}
+                <b>ICAO:</b> ${this.icaoCode}<br>
+                <b>Correct Type:</b> ${this.correctType}<br>
             </div>
         `;
         this.marker.bindPopup(popupContent);

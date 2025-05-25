@@ -404,7 +404,7 @@ function showMarkers(source, key) {
                     smallAerodromeInstances.push(item);
                 }
             } else if (key === "navaid") {
-                item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted, data.properties.icaocode);
+                item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted, data.properties.icaocode, data.properties.type || 'unknown');
             }
             if (item && !(item instanceof SmallAerodrome)) {
                 item.addToMap();

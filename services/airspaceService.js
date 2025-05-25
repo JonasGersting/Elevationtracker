@@ -220,7 +220,7 @@ function findClosestNavAid(markerLat, markerLon) {
 
         // Anwenden der Filterkriterien
         if (((navaid.properties.charted && navaid.properties.charted.includes('ICAO500')) ||
-            (navaid.properties.dme_charted && (navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted.includes('NN')))) && navaid.properties.icaocode == 'ED') {
+            (navaid.properties.dme_charted && (navaid.properties.dme_charted.includes('ICAO500') || navaid.properties.dme_charted.includes('NN')))) && (navaid.properties.icaocode == 'ED' || navaid.properties.icaocode == 'ET')) {
 
             const navaidLat = navaid.geometry.coordinates[1];
             const navaidLon = navaid.geometry.coordinates[0];
@@ -252,7 +252,7 @@ function findClosestNavAid(markerLat, markerLon) {
         polylines.push(line);
         const popupContent = `
             <div>
-                <p>${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAidData.properties.txtname} ${closestNavAidData.properties['select-source-layer']} ${closestNavAidData.properties.ident}</p>
+                <p>${shortestDistance.toFixed(2)}NM ${returnOrientation(angle.toFixed(2))} ${closestNavAidData.properties.txtname} ${closestNavAidData.properties.type || closestNavAidData.properties['select-source-layer']} ${closestNavAidData.properties.ident}</p>
                 <button class="navAidBtn" onclick="findClosestNavAid(${markerLat}, ${markerLon})" >Finde nächstes Navaid</button>
             </div>
         `;
