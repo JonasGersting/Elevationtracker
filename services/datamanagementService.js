@@ -243,16 +243,7 @@ function processDataByKey(key, data) {
 }
 
 
-// edr, edd and ctr are processed differently due to the overlapping airspaces.
 function processItems(items, airspaceKey, map, layerArray) {
-    // airspaceReverse wurde entfernt, airspaceNormal behandelt jetzt alle Fälle
-    airspaceNormal(items, airspaceKey, map, layerArray);
-}
-
-
-
-
-function airspaceNormal(items, airspaceKey, map, layerArray) {
     for (let i = items.length - 1; i >= 0; i--) {
         const item = items[i];
         if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {

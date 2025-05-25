@@ -190,7 +190,7 @@ async function fetchAircraftData(centerLat, centerLon, radius) {
             processReceivedAircraft(data.ac);
         }
     } catch (error) {
-        console.error("API fetch error:", error);
+        showErrorBanner("Fehler beim Abrufen der Flugdaten. Bitte versuchen Sie es später erneut.");
     }
 }
 
@@ -239,7 +239,7 @@ async function fetchAircraftDataCallsign(callsign) {
             showErrorBanner("Flugzeug mit diesem Callsign nicht gefunden.");
         }
     } catch (error) {
-        console.error("Fehler beim API-Abruf:", error);
+        showErrorBanner("Fehler beim Abrufen der Flugdaten. Bitte versuchen Sie es später erneut.");
     }
 }
 

@@ -8,29 +8,28 @@ class EdrAirspace extends AirspacePolygon {
     addToMap() {
         const onFeature = (feature, layer) => {
             layer.on('mouseover', () => {
-                isCursorOverPolygon = true;
-                layer.setStyle(this.getSpecificHoverStyle());
-                layer.bringToFront();
-                // Die Label-Interaktion (Farbe, zIndex, temporäre Sichtbarkeit)
-                // wird jetzt durch _boundPolygonMouseoverForLabel in AirspacePolygon gehandhabt.
+                this.edrHoverOn(layer);
             });
-
             layer.on('mouseout', () => {
-                isCursorOverPolygon = false;
-                layer.setStyle(this.getStyle());
-                // Die Label-Interaktion (Farbe, zIndex, temporäre Sichtbarkeit)
-                // wird jetzt durch _boundPolygonMouseoutForLabel in AirspacePolygon gehandhabt.
+                this.edrHoverOut(layer);
             });
-
-            // Der Klick-Handler wurde in die AirspacePolygon-Klasse verschoben (_boundPolygonClick)
         };
-
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
             onEachFeature: onFeature
         }).addTo(this.map);
+        super.addToMap();
+    }
 
-        super.addToMap(); // Ruft Label-Initialisierung und zentrale Listener-Bindung in der Basisklasse auf
+    edrHoverOn(layer) {
+        isCursorOverPolygon = true;
+        layer.setStyle(this.getSpecificHoverStyle());
+        layer.bringToFront();
+    }
+
+    edrHoverOut(layer) {
+        isCursorOverPolygon = false;
+        layer.setStyle(this.getStyle());
     }
 
     getSpecificHoverStyle() {

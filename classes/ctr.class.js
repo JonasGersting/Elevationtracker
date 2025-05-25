@@ -5,32 +5,31 @@ class CtrAirspace extends AirspacePolygon {
         this.labelHighlightTextColor = 'white';
     }
 
-       addToMap() {
+    addToMap() {
         const onFeature = (feature, layer) => {
             layer.on('mouseover', () => {
-                isCursorOverPolygon = true;
-                layer.setStyle(this.getSpecificHoverStyle());
-                layer.bringToFront();
-                // Die Label-Interaktion (Farbe, zIndex, temporäre Sichtbarkeit)
-                // wird jetzt durch _boundPolygonMouseoverForLabel in AirspacePolygon gehandhabt.
+                this.ctrHoverOn(layer);
             });
-
             layer.on('mouseout', () => {
-                isCursorOverPolygon = false;
-                layer.setStyle(this.getStyle());
-                // Die Label-Interaktion (Farbe, zIndex, temporäre Sichtbarkeit)
-                // wird jetzt durch _boundPolygonMouseoutForLabel in AirspacePolygon gehandhabt.
+                this.ctrHoverOut(layer);
             });
-
-            // Der Klick-Handler wurde in die AirspacePolygon-Klasse verschoben (_boundPolygonClick)
         };
-
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
             onEachFeature: onFeature
         }).addTo(this.map);
+        super.addToMap();
+    }
 
-        super.addToMap(); // Ruft Label-Initialisierung und zentrale Listener-Bindung in der Basisklasse auf
+    ctrHoverOn(layer) {
+        isCursorOverPolygon = true;
+        layer.setStyle(this.getSpecificHoverStyle());
+        layer.bringToFront();
+    }
+
+    ctrHoverOut(layer) {
+        isCursorOverPolygon = false;
+        layer.setStyle(this.getStyle());
     }
 
     getSpecificHoverStyle() {
@@ -40,7 +39,7 @@ class CtrAirspace extends AirspacePolygon {
     getStyle() {
         return {
             color: 'darkred',
-            fillColor: 'darkred', // Füllfarbe für den Normalzustand
+            fillColor: 'darkred',
             weight: 2,
             opacity: 0.6,
             fillOpacity: 0.2

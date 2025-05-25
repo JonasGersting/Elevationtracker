@@ -12,18 +12,15 @@ class RmzAirspace extends AirspacePolygon {
                 layer.setStyle(this.getSpecificHoverStyle());
                 layer.bringToFront();
             });
-
             layer.on('mouseout', () => {
                 isCursorOverPolygon = false;
                 layer.setStyle(this.getStyle());
             });
         };
-
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
             onEachFeature: onFeature
         }).addTo(this.map);
-
         super.addToMap();
     }
 

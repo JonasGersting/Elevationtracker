@@ -1,4 +1,3 @@
-// Firebase-Konfiguration
 const firebaseConfig = {
     apiKey: "AIzaSyCWsmUh_XdU95JquEVer_UPPhmehnHztvE",
     authDomain: "aromaps-3b242.firebaseapp.com",
@@ -10,15 +9,12 @@ const firebaseConfig = {
     measurementId: "G-BS3BDK1C03"
   };
 
-  // Firebase initialisieren
   const app = firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const database = firebase.database();
 
-  // Mach Firebase-Objekte global verfügbar
   window.firebaseApp = app;
   window.firebaseAuth = auth;
   window.firebaseDatabase = database;
 
-  console.log("Firebase wurde initialisiert und ist global verfügbar.");
 

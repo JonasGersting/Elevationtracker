@@ -9,17 +9,21 @@ class FisAirspace extends AirspacePolygon {
             style: this.getStyle(),
             onEachFeature: (feature, layer) => {
                 const center = layer.getBounds().getCenter();
-                const label = L.divIcon({
-                    className: 'fis-label',
-                    html: `<div>${this.svsNumber}</div>`,
-                    iconSize: null
-                });
+                const label = this.returnLabel(this.svsNumber);
                 this.labelMarker = L.marker(center, {
                     icon: label,
                     interactive: false
                 }).addTo(this.map);
             }
         }).addTo(this.map);
+    }
+
+    returnLabel(svsNumber) {
+        return L.divIcon({
+            className: 'fis-label',
+            html: `<div>${svsNumber}</div>`,
+            iconSize: null
+        });
     }
 
     removeFromMap() {
