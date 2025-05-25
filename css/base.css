@@ -46,6 +46,17 @@ h3 {
     position: absolute;
 }
 
+.text-shadow{
+    text-shadow: -2px -2px 0px white, 
+    2px -2px 0px white, 
+    -2px 2px 0px white, 
+    2px 2px 0px white, 
+    0px -2px 0px white, 
+    0px 2px 0px white, 
+    -2px 0px 0px white, 
+    2px 0px 0px white; ;
+}
+
 .toSmallSpan{
     color: white;
     font-size: 2em;

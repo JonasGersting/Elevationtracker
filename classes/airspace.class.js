@@ -114,7 +114,7 @@ class AirspacePolygon {
 
         const divIcon = L.divIcon({
             html: labelHtml,
-            className: 'airspace-custom-label', // Generische CSS-Klasse
+            className: 'airspace-custom-label text-shadow', // Generische CSS-Klasse
             iconSize: null,
         });
 
@@ -129,6 +129,8 @@ class AirspacePolygon {
         this.labelMarker.on('mouseover', (e) => {
             const iconElement = this.labelMarker.getElement();
             if (iconElement) {
+                iconElement.classList.remove('text-shadow'); // Entferne den Text-Schatten-Effekt
+
                 iconElement.style.backgroundColor = this.labelHighlightColor;
                 iconElement.style.color = this.labelHighlightTextColor;
                 iconElement.style.zIndex = '1000'; // Label nach vorne bringen
@@ -151,6 +153,7 @@ class AirspacePolygon {
         this.labelMarker.on('mouseout', (e) => {
             const iconElement = this.labelMarker.getElement();
             if (iconElement) {
+                iconElement.classList.add('text-shadow'); // Entferne den Text-Schatten-Effekt
                 iconElement.style.backgroundColor = '';
                 iconElement.style.color = '';
                 iconElement.style.zIndex = ''; // z-index zurücksetzen
@@ -191,6 +194,7 @@ class AirspacePolygon {
             // Label-Hintergrund/Textfarbe setzen (verwendet subklassenspezifische Farben)
             iconElement.style.backgroundColor = this.labelHighlightColor;
             iconElement.style.color = this.labelHighlightTextColor;
+            iconElement.classList.remove('text-shadow'); // Text-Schatten entfernen
         }
 
         if (currentZoom < 9 && !this.map.hasLayer(this.labelMarker)) {
@@ -208,6 +212,7 @@ class AirspacePolygon {
             // Label-Hintergrund/Textfarbe zurücksetzen
             iconElement.style.backgroundColor = '';
             iconElement.style.color = '';
+            iconElement.classList.add('text-shadow'); // Text-Schatten hinzufügen
         }
 
         if (this._labelTemporarilyVisibleByHover) {
@@ -308,7 +313,7 @@ class AirspacePolygon {
     showInfoPdf(pdfId) {
         let pdfPath = this.returnCorrectAipPath(pdfId);
         console.log(pdfPath);
-        
+
         let detailDiv = document.getElementById('aerodromeInfoDetail');
         detailDiv.style.height = '100vh';
         detailDiv.innerHTML = `
@@ -331,10 +336,10 @@ class AirspacePolygon {
         `;
     }
 
-    returnCorrectAipPath(pdfId){
+    returnCorrectAipPath(pdfId) {
         if (this.ident === ('Kiel' || 'Eckernförd' || 'Hohe Düne')) {
             return `vfraip://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`
-        } else{
+        } else {
             return `https://aip.dfs.de/IFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`
         }
     }

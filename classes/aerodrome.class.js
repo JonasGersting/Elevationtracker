@@ -36,7 +36,7 @@ class Aerodrome extends AirspacePolygon {
                         border: ${borderWidth}px solid ${borderColor}; border-radius: 50%; box-sizing: border-box;">
                 </div>
                 ${rotationBarHtml}
-                <div class="additional-info" style="display: none; font-size: 12px; width: 35px; position: absolute; right: -32px; bottom: -18px;">
+                <div class="additional-info text-shadow" style="display: none; font-size: 12px; width: 35px; position: absolute; right: -32px; bottom: -18px;">
                     ${this.icaoCode}
                 </div>
             </div>`;
