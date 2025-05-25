@@ -203,7 +203,7 @@ class Aerodrome extends AirspacePolygon {
             <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
             <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
             <span id="pageIndicator">${this.currentPage + 1} / ${this.aipIds.length}</span>
-            <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155" frameborder="0"></iframe>
+            <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=page-fit" frameborder="0"></iframe>
         `;
     }
 
@@ -238,7 +238,7 @@ class Aerodrome extends AirspacePolygon {
         let aipIframe = document.getElementById('pdfIframe');
         let pageIndicator = document.getElementById('pageIndicator');
         if (aipIframe) {
-            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=155`;
+            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=page-fit`;
         }
         if (pageIndicator) {
             pageIndicator.innerHTML = `${this.currentPage + 1} / ${this.aipIds.length}`;

@@ -7,7 +7,12 @@ function toDMS(coordinate, isLatitude) {
     const direction = isLatitude
         ? coordinate >= 0 ? 'N' : 'S'
         : coordinate >= 0 ? 'E' : 'W';
-    return `${degrees}° ${minutes}' ${seconds}''${direction}`;
+    
+    const degreesStr = String(degrees).padStart(2, '0');
+    const minutesStr = String(minutes).padStart(2, '0');
+    const secondsStr = String(seconds).padStart(2, '0');
+
+    return `${degreesStr}° ${minutesStr}' ${secondsStr}''${direction}`;
 }
 
 function showCursorCoordinates(map) {

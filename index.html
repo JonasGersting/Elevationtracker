@@ -179,16 +179,10 @@
     <div class="shadow" id="calcGaforRadius">
         <div class="gaforInput">
             <input id="gaforNumbers" oninput="validateInput(this)" type="text" placeholder="45 34 1 4...">
-            <button class="gaforBtn" onclick="calcGaforRadius()">Radius</button>
-            <button class="resetGaforBtn" id="resetGafor" disabled onclick="resetGaforRadius()"></button>
+            <button class="gaforBtn" onclick="processSelectedGaforAreas()">Polygon</button>
+            <button class="resetGaforBtn" id="resetGafor" disabled onclick="resetGaforVisuals()"></button>
         </div>
-        <div class="d-flex">
-            <span id="gaforRadius">Radius:</span>
-            <span class="gaforLoader z-index1100" id="loaderGaforRadius" style="display: none;"></span>
-        </div>
-        <div class="d-flex">
-            <span id="gaforCenter">Center:</span>
-            <span class="gaforLoader z-index1100" id="loaderGaforPos" style="display: none;"></span>
+        <div id="gaforPolygonInfo">
         </div>
 
 
@@ -294,7 +288,6 @@
 <script src="classes/rmz.class.js"></script>
 <script src="classes/firAirspace.class.js"></script>
 <script src="classes/gaforAirspace.class.js"></script>
-<script src="classes/gaforCircle.class.js"></script>
 <script src="classes/pjeAirspace.class.js"></script>
 <script src="classes/tmzAirspace.class.js"></script>
 <script src="classes/atzAirspace.class.js"></script>

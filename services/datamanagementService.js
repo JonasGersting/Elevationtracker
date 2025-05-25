@@ -45,9 +45,7 @@ function removePolygonsIfExist(airspaceKey, gaforCalc) {
         polygonLayers[airspaceKey] = [];
         if (airspaceKey === 'gafor') {
             gaforCalc.style.display = 'none';
-            if (typeof currentGaforCircle !== 'undefined' && currentGaforCircle) {
-                currentGaforCircle.removeFromMap();
-            }
+            resetGaforVisuals();
         }
         return true;
     }
@@ -56,11 +54,9 @@ function removePolygonsIfExist(airspaceKey, gaforCalc) {
 
 function prepareGaforUI(gaforCalc) {
     let gaforInput = document.getElementById('gaforNumbers');
+    let gaforDisplay = document.getElementById('gaforPolygonInfo');
     gaforInput.value = '';
-    let gaforRadius = document.getElementById('gaforRadius');
-    gaforRadius.innerHTML = `<span id="gaforRadius">Radius:</span>`;
-    let gaforCenter = document.getElementById('gaforCenter');
-    gaforCenter.innerHTML = `<span id="gaforCenter">Center:</span>`;
+    gaforDisplay.innerHTML = '';
     gaforCalc.style.display = 'flex';
 }
 
