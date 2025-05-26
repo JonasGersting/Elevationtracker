@@ -35,7 +35,7 @@ class Aircraft {
 
     _getMarkerIconConfig() {
         const rotation = this.heading || this.track;
-        const color = this.isTracked ? 'rgb(181 117 33)' : this.getAltitudeColor();
+        const color = this.isTracked ? '#FF961B' : this.getAltitudeColor();
         return L.divIcon({
             html: this.getSvgForType(rotation, color),
             className: 'planeIcon',
@@ -76,10 +76,10 @@ class Aircraft {
     _handleExistingTrackedAircraftOnClick() {
         if (trackedAcft && trackedAcft === this) {
             this.untrackAircraft();
-            return true; 
+            return true;
         }
         if (trackedAcft && trackedAcft !== this) {
-            trackedAcft.untrackAircraft(); 
+            trackedAcft.untrackAircraft();
         }
         return false;
     }
@@ -119,8 +119,8 @@ class Aircraft {
         if (!trackedAcftDiv) return;
         trackedAcftDiv.classList.add('hiddenTrackedAcft');
         const idsToClear = ['trackedCallsign', 'trackedReg', 'trackedAltitude',
-                            'trackedPos', 'trackedType', 'trackedIas',
-                            'trackedHeading', 'trackedTrack', 'lastPos', 'ETA'];
+            'trackedPos', 'trackedType', 'trackedIas',
+            'trackedHeading', 'trackedTrack', 'lastPos', 'ETA'];
         idsToClear.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.innerHTML = '';
@@ -143,7 +143,7 @@ class Aircraft {
     _resetGlobalTrackingState() {
         const icaoDestInput = document.getElementById('icaoDest');
         if (icaoDestInput) icaoDestInput.value = '';
-        
+
         trackedIcaoDest = null;
         trackedEta = '';
         trackedAcft = null;
@@ -246,7 +246,7 @@ class Aircraft {
         if (fetchedTrackData.length > 0) {
             const firstPoint = fetchedTrackData[0];
             if (firstPoint && firstPoint.length > 4 && firstPoint[4] !== "ground") {
-                 return fetchedTrackData;
+                return fetchedTrackData;
             }
         }
         return [];
@@ -286,9 +286,9 @@ class Aircraft {
 
     updateAndDrawTrack() {
         const currentPosCoords = [this.position[0], this.position[1]];
-        if (trackCoordinates.length === 0 || 
-            trackCoordinates[trackCoordinates.length -1][0] !== currentPosCoords[0] ||
-            trackCoordinates[trackCoordinates.length -1][1] !== currentPosCoords[1]) {
+        if (trackCoordinates.length === 0 ||
+            trackCoordinates[trackCoordinates.length - 1][0] !== currentPosCoords[0] ||
+            trackCoordinates[trackCoordinates.length - 1][1] !== currentPosCoords[1]) {
             trackCoordinates.push(currentPosCoords);
         }
         this.drawTrack();
@@ -299,7 +299,7 @@ class Aircraft {
             this.map.removeLayer(currentTrackLine);
         }
         if (trackCoordinates.length === 0) {
-             trackCoordinates.push([this.position[0], this.position[1]]);
+            trackCoordinates.push([this.position[0], this.position[1]]);
         }
         currentTrackLine = L.polyline(trackCoordinates, {
             color: 'green',
@@ -356,8 +356,8 @@ class Aircraft {
 
     getAltitudeColor() {
         if (this.altitude === 'ground') return '#454545';
-        if (this.altitude <= 10000) return '#75930F';
-        return '#08387F';
+        if (this.altitude <= 10000) return '#90B712';
+        return '#0F5AD2';
     }
 
     _getHelicopterSvg(rotation, color) {
@@ -393,9 +393,8 @@ class Aircraft {
     _getFourEngAcftSvg(rotation, color) {
         return `
             <div style="transform: rotate(${rotation - 90}deg);">
-            <?xml version="1.0" standalone="no"?>
-            <svg xmlns="http://www.w3.org/2000/svg" height="32pt" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1920 1664" width="32pt">
-            <path d="m6759 16622c-118-31-179-92-164-162 14-64 90-130 342-299 84-57 169-121 189-144s70-103 111-177c76-136 818-1504 1323-2440 150-278 314-577 365-665 146-253 327-589 461-857 139-278 169-342 179-387 4-17 10-31 14-31 16 0 161-383 161-425 0-11 6-29 14-40 22-33 426-1268 530-1620 43-147 86-314 86-334 0-12-68-13-512-9-708 8-2000-7-2745-32-343-11-710-21-817-23-107-1-198-5-202-10-11-11-104-9-104 3 0 6-20 10-45 10-31 0-45-4-45-14 0-8-15-16-37-20-57-9-63-8-63 14 0 17-7 20-50 20-47 0-50-2-50-25 0-21-5-25-27-25-16 0-38-3-50-6-20-5-23-2-23 20s-4 26-27 26c-51 0-73-11-73-35s-22-35-72-35c-24 0-28 4-28 26s-3 25-22 20c-13-3-35-6-50-6-24 0-28-4-28-30 0-25-4-30-35-36-45-8-65 0-65 26 0 19-4 20-37 15-61-10-63-12-57-43 6-27 4-29-33-35-57-10-63-9-63 12 0 27-12 32-60 25-39-6-41-9-38-37l3-31-175-38c-96-21-185-38-198-38-31 0-371 266-832 651-565 472-984 870-1277 1214-137 160-330 322-411 345-20 5-136 10-257 10-190 0-225-2-254-18-56-28-76-64-75-135 1-90 22-149 145-414 159-341 406-902 584-1323 43-102 120-279 170-395l92-210-66-7c-36-3-208-11-381-18-822-29-1514-84-1794-141-174-35-200-68-86-106 128-42 469-84 1125-138 139-11 942-55 1013-55 51 0 72-4 72-12 0-7-12-38-26-68s-79-179-144-330c-218-506-445-1009-585-1290-132-267-163-379-131-464 31-80 36-81 321-81 239 0 252 1 291 22 77 41 188 139 334 293 370 391 538 556 850 829 397 348 1111 921 1148 921 9 0 121-23 247-51 127-27 245-53 263-56 31-5 33-9 28-33-5-26-2-29 39-39 56-14 55-14 55 8 0 27 12 32 59 25 37-6 41-9 41-36 0-31 7-36 60-40 30-3 35 0 38 20 4 23 17 26 72 16 28-6 31-10 26-34-5-25-2-28 32-34 56-9 62-8 62 13 0 28 15 34 60 26 36-6 40-10 40-36 0-25 4-29 28-29 15 0 37-3 49-6 18-5 22-1 25 23 3 26 5 28 43 25 51-5 55-8 55-38 0-22 4-24 50-24 43 0 50 3 50 20s7 20 50 20 50-3 50-20 7-20 50-20c39 0 50 3 50 16 0 14 8 15 48 9 26-4 49-11 50-16 4-11 102-12 102-1 0 5 28 5 63 1 34-4 121-8 192-8 72-1 155-3 185-6 30-2 129-7 220-10s359-15 595-25c237-11 478-20 538-20 59 0 107-3 107-7 0-5 109-8 242-8 134 1 421-2 638-6s612-8 878-9c265-1 482-5 482-10 0-63-606-1883-633-1901-5-4-13-28-18-53-11-60-115-308-183-436-7-14-41-83-76-155-109-229-346-662-540-990-43-71-137-238-210-370s-139-244-146-248-18-25-24-46c-5-21-19-48-30-61-11-12-22-32-26-44-7-22-72-140-570-1034-175-315-328-589-338-610-55-107-452-812-472-839-14-18-123-98-243-178-121-80-237-165-259-189-69-75-66-132 10-189 83-62 214-79 368-47 181 37 688 216 803 283 110 65 363 340 484 525 194 300 654 876 1294 1622 130 151 245 285 256 298 26 29 123 33 123 5 0-19 39-55 125-116l60-42 472-3 472-3 35 32 36 31v295 295l-31 29-31 29-388 2-389 3 97 110c352 398 929 1045 1208 1355l330 365 127 3c106 2 127 0 127-12 0-19 119-120 173-148 42-21 47-21 482-15 242 4 453 7 468 7 17 0 37 10 52 26l25 27v299 300l-31 29-31 29h-450-450l109 118c59 64 308 335 553 602 584 638 666 719 855 852 83 58 169 117 191 132l42 27 1188-2c805-1 1252 2 1384 10 641 38 1148 105 1555 205 265 65 423 125 599 225 164 93 306 244 306 325 0 112-176 275-435 401-296 145-800 257-1500 334-449 50-853 64-2135 77-459 4-712 10-725 17-39 20-382 261-532 374-147 109-165 127-455 446-397 436-972 1077-976 1088-2 5 198 9 456 9h460l26 31 26 31v285 285l-29 29-29 29h-469c-459 0-469 0-503-21-58-36-160-122-160-136 0-9-16-13-54-13h-54l-184 218c-639 756-1122 1369-1337 1697-137 209-323 425-458 532-98 77-656 292-875 337-97 20-155 19-239-2z" transform="matrix(.1 0 0 -.1 0 1664)" fill="${color}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke"/>
+            <svg xmlns="http://www.w3.org/2000/svg" height="28pt" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1920 1664" width="1920pt">
+                <path d="m6759 16622c-118-31-179-92-164-162 14-64 90-130 342-299 84-57 169-121 189-144s70-103 111-177c76-136 818-1504 1323-2440 150-278 314-577 365-665 146-253 327-589 461-857 139-278 169-342 179-387 4-17 10-31 14-31 16 0 161-383 161-425 0-11 6-29 14-40 22-33 426-1268 530-1620 43-147 86-314 86-334 0-12-68-13-512-9-708 8-2000-7-2745-32-343-11-710-21-817-23-107-1-198-5-202-10-11-11-104-9-104 3 0 6-20 10-45 10-31 0-45-4-45-14 0-8-15-16-37-20-57-9-63-8-63 14 0 17-7 20-50 20-47 0-50-2-50-25 0-21-5-25-27-25-16 0-38-3-50-6-20-5-23-2-23 20s-4 26-27 26c-51 0-73-11-73-35s-22-35-72-35c-24 0-28 4-28 26s-3 25-22 20c-13-3-35-6-50-6-24 0-28-4-28-30 0-25-4-30-35-36-45-8-65 0-65 26 0 19-4 20-37 15-61-10-63-12-57-43 6-27 4-29-33-35-57-10-63-9-63 12 0 27-12 32-60 25-39-6-41-9-38-37l3-31-175-38c-96-21-185-38-198-38-31 0-371 266-832 651-565 472-984 870-1277 1214-137 160-330 322-411 345-20 5-136 10-257 10-190 0-225-2-254-18-56-28-76-64-75-135 1-90 22-149 145-414 159-341 406-902 584-1323 43-102 120-279 170-395l92-210-66-7c-36-3-208-11-381-18-822-29-1514-84-1794-141-174-35-200-68-86-106 128-42 469-84 1125-138 139-11 942-55 1013-55 51 0 72-4 72-12 0-7-12-38-26-68s-79-179-144-330c-218-506-445-1009-585-1290-132-267-163-379-131-464 31-80 36-81 321-81 239 0 252 1 291 22 77 41 188 139 334 293 370 391 538 556 850 829 397 348 1111 921 1148 921 9 0 121-23 247-51 127-27 245-53 263-56 31-5 33-9 28-33-5-26-2-29 39-39 56-14 55-14 55 8 0 27 12 32 59 25 37-6 41-9 41-36 0-31 7-36 60-40 30-3 35 0 38 20 4 23 17 26 72 16 28-6 31-10 26-34-5-25-2-28 32-34 56-9 62-8 62 13 0 28 15 34 60 26 36-6 40-10 40-36 0-25 4-29 28-29 15 0 37-3 49-6 18-5 22-1 25 23 3 26 5 28 43 25 51-5 55-8 55-38 0-22 4-24 50-24 43 0 50 3 50 20s7 20 50 20 50-3 50-20 7-20 50-20c39 0 50 3 50 16 0 14 8 15 48 9 26-4 49-11 50-16 4-11 102-12 102-1 0 5 28 5 63 1 34-4 121-8 192-8 72-1 155-3 185-6 30-2 129-7 220-10s359-15 595-25c237-11 478-20 538-20 59 0 107-3 107-7 0-5 109-8 242-8 134 1 421-2 638-6s612-8 878-9c265-1 482-5 482-10 0-63-606-1883-633-1901-5-4-13-28-18-53-11-60-115-308-183-436-7-14-41-83-76-155-109-229-346-662-540-990-43-71-137-238-210-370s-139-244-146-248-18-25-24-46c-5-21-19-48-30-61-11-12-22-32-26-44-7-22-72-140-570-1034-175-315-328-589-338-610-55-107-452-812-472-839-14-18-123-98-243-178-121-80-237-165-259-189-69-75-66-132 10-189 83-62 214-79 368-47 181 37 688 216 803 283 110 65 363 340 484 525 194 300 654 876 1294 1622 130 151 245 285 256 298 26 29 123 33 123 5 0-19 39-55 125-116l60-42 472-3 472-3 35 32 36 31v295 295l-31 29-31 29-388 2-389 3 97 110c352 398 929 1045 1208 1355l330 365 127 3c106 2 127 0 127-12 0-19 119-120 173-148 42-21 47-21 482-15 242 4 453 7 468 7 17 0 37 10 52 26l25 27v299 300l-31 29-31 29h-450-450l109 118c59 64 308 335 553 602 584 638 666 719 855 852 83 58 169 117 191 132l42 27 1188-2c805-1 1252 2 1384 10 641 38 1148 105 1555 205 265 65 423 125 599 225 164 93 306 244 306 325 0 112-176 275-435 401-296 145-800 257-1500 334-449 50-853 64-2135 77-459 4-712 10-725 17-39 20-382 261-532 374-147 109-165 127-455 446-397 436-972 1077-976 1088-2 5 198 9 456 9h460l26 31 26 31v285 285l-29 29-29 29h-480-480l-58-44c-33-24-76-60-97-80l-38-36h-119-120l-197 223c-243 272-877 997-1192 1362l-234 270 391 3 391 2 30 31 31 31v290 290l-29 29-29 29h-469c-459 0-469 0-503-21-58-36-160-122-160-136 0-9-16-13-54-13h-54l-184 218c-639 756-1122 1369-1337 1697-137 209-323 425-458 532-98 77-656 292-875 337-97 20-155 19-239-2z" transform="matrix(.1 0 0 -.1 0 1664)" fill="${color}" stroke="black" stroke-width="2" vector-effect="non-scaling-stroke"/>
             </svg>
             </div>`;
     }
@@ -435,17 +434,17 @@ class Aircraft {
 
     _isHelicopter() {
         return helAcft.includes(this.type) ||
-               (this.callsign && (
-                   (this.callsign.startsWith('DH') && this.callsign.replace(/\s/g, '').length == 5) ||
-                   this.callsign.startsWith('CHX') ||
-                   this.callsign.startsWith('HSO')
-               ));
+            (this.callsign && (
+                (this.callsign.startsWith('DH') && this.callsign.replace(/\s/g, '').length == 5) ||
+                this.callsign.startsWith('CHX') ||
+                this.callsign.startsWith('HSO')
+            ));
     }
 
     _isPistonAcft() {
         return pistonAcft.includes(this.type) ||
-               (this.callsign && (this.callsign.startsWith('DM') && this.callsign.replace(/\s/g, '').length == 5)) ||
-               (this.callsign && (this.callsign.startsWith('DE') && this.callsign.replace(/\s/g, '').length == 5));
+            (this.callsign && (this.callsign.startsWith('DM') && this.callsign.replace(/\s/g, '').length == 5)) ||
+            (this.callsign && (this.callsign.startsWith('DE') && this.callsign.replace(/\s/g, '').length == 5));
     }
 
     getSvgForType(rotation, color) {
@@ -453,13 +452,13 @@ class Aircraft {
             return this._getHelicopterSvg(rotation, color);
         } else if (this.type == 'GLID') {
             return this._getGliderSvg(rotation, color);
-        } else if (businessAcft.includes(this.type)) { 
+        } else if (businessAcft.includes(this.type)) {
             return this._getBusinessAcftSvg(rotation, color);
         } else if (this._isPistonAcft()) {
             return this._getPistonAcftSvg(rotation, color);
-        } else if (turboAcft.includes(this.type)) { 
+        } else if (turboAcft.includes(this.type)) {
             return this._getTurboAcftSvg(rotation, color);
-        } else if (fourEngAcft.includes(this.type)) { 
+        } else if (fourEngAcft.includes(this.type)) {
             return this._getFourEngAcftSvg(rotation, color);
         } else if (this.type == 'BALL' || this.type == 'SHIP') {
             return this._getBallOrShipSvg(color);
