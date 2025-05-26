@@ -1,7 +1,7 @@
 class RmzAirspace extends AirspacePolygon {
     constructor(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit) {
         super(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit);
-        this.labelHighlightColor = 'dimgray'; // Spezifische Highlight-Farbe für RMZ
+        this.labelHighlightColor = 'dimgray';
         this.labelHighlightTextColor = 'white';
     }
 
@@ -31,11 +31,11 @@ class RmzAirspace extends AirspacePolygon {
     getStyle() {
         return {
             color: 'gray',
-            fillColor: 'gray', // Füllfarbe für den Normalzustand (auch wenn fillOpacity 0 ist)
+            fillColor: 'gray',
             weight: 2,
             opacity: 0.6,
             dashArray: '4 4',
-            fillOpacity: 0 // RMZ ist oft nur ein Rahmen
+            fillOpacity: 0
         };
     }
 }

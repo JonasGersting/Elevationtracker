@@ -1,7 +1,7 @@
 class TmzAirspace extends AirspacePolygon {
     constructor(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit) {
         super(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit);
-        this.labelHighlightColor = 'navy'; // Spezifische Highlight-Farbe für TMZ
+        this.labelHighlightColor = 'navy';
         this.labelHighlightTextColor = 'white';
     }
 
@@ -31,19 +31,14 @@ class TmzAirspace extends AirspacePolygon {
         return { color: 'white', dashArray: '4 4', fillOpacity: 0.6, fillColor: 'darkblue' };
     }
 
-
-
-
-    
-
     getStyle() {
         return {
             color: 'darkblue',
-            fillColor: 'darkblue', // Füllfarbe für den Normalzustand (auch wenn fillOpacity 0 ist)
+            fillColor: 'darkblue', 
             weight: 2,
             opacity: 1,
             dashArray: '4 4',
-            fillOpacity: 0 // TMZ ist oft nur ein Rahmen
+            fillOpacity: 0 
         };
     }
 }
