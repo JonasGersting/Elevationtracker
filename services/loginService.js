@@ -14,11 +14,9 @@ function handleLoginError(error) {
 async function signInWithFirebaseToken(customAuthToken) {
     await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
     await firebase.auth().signInWithCustomToken(customAuthToken);
-    console.log("Erfolgreich mit Custom Token angemeldet.");
 }
 
 function handleNoTokenError() {
-    console.error("Login fehlgeschlagen: Kein Custom Token von der Funktion erhalten.");
     showErrorBanner("Login fehlgeschlagen: Ungültige Antwort vom Server.");
 }
 
@@ -88,10 +86,10 @@ function handleInitError(error) {
 async function init() {
     if (isInitialized) return;
     isInitialized = true;
-    removeOverlay();
     try {
         await fetchInitialData();
         initializeMapRelatedFeatures();
+        removeOverlay();
     } catch (error) {
         handleInitError(error);
     }
