@@ -267,6 +267,11 @@
     opacity: 0.6;
 }
 
+.border-radius-bottom16 {
+    border-bottom-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);

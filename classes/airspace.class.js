@@ -322,7 +322,7 @@ class AirspacePolygon {
                         <h3>${this.ident || ''}</h3>
                         <button onclick="currentAirspace.closeInfoPdf()" class="closeButton" style="position: absolute; right: 10px; top: 10px; z-index: 1000;">X</button>
                     </div>    
-                    <iframe id="pdfIframe" src=${pdfPath} frameborder="0" style="width: 100%; height: 100%;"></iframe>
+                    <iframe class="border-radius-bottom16" id="pdfIframe" src=${pdfPath} frameborder="0" style="width: 100%; height: 100%;"></iframe>
                 </div>
             </div>
         `;
