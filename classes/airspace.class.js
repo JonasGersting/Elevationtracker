@@ -19,17 +19,17 @@ class AirspacePolygon {
         this.upperLimitUnit = upperLimitUnit;
         this.labelMarker = null;
         this.labelHighlightColor = 'darkgrey';
-        this.labelHighlightTextColor = 'white'; 
+        this.labelHighlightTextColor = 'white';
         this._boundUpdateLabelVisibility = this._updateLabelVisibility.bind(this);
         this._labelTemporarilyVisibleByHover = false;
         this._boundPolygonMouseoverForLabel = this._onPolygonMouseoverForLabel.bind(this);
         this._boundPolygonMouseoutForLabel = this._onPolygonMouseoutForLabel.bind(this);
-        this._boundPolygonClick = this._onPolygonClick.bind(this); 
+        this._boundPolygonClick = this._onPolygonClick.bind(this);
 
     }
 
 
-       _shouldHaveLabel() {
+    _shouldHaveLabel() {
         return this instanceof EdrAirspace ||
             this instanceof EddAirspace ||
             this instanceof CtrAirspace ||
@@ -319,7 +319,7 @@ class AirspacePolygon {
                 <div class="airspaceInfoCard">
                     <div class="airspaceInfoCardHeader">
                         <h3>${this.name}</h3>
-                        <h3>${this.ident}</h3>
+                        <h3>${this.ident || ''}</h3>
                         <button onclick="currentAirspace.closeInfoPdf()" class="closeButton" style="position: absolute; right: 10px; top: 10px; z-index: 1000;">X</button>
                     </div>    
                     <iframe id="pdfIframe" src=${pdfPath} frameborder="0" style="width: 100%; height: 100%;"></iframe>
@@ -337,9 +337,9 @@ class AirspacePolygon {
     }
 
     returnCorrectAipPath(pdfId) {
-        const vfrIdents = ['Kiel', 'Eckernförd', 'Hohe Düne'];
+        const vfrIdents = ['ED-R KIEL', 'ED-R ECKERNFÖRD', 'ED-R HOHE DÜNE'];
         if (vfrIdents.includes(this.ident)) {
-            return `vfraip://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`;
+            return `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`;
         } else {
             return `https://aip.dfs.de/IFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`;
         }
@@ -357,14 +357,14 @@ class AirspacePolygon {
     }
 
     _findEdrId(name) {
-        const edrPattern = /ED-R\s*(\S+)/;
+        const edrPattern = /ED-R\s*(.+)/;
         const edrMatch = name.match(edrPattern);
         const cleanName = edrMatch && edrMatch[1] ? edrMatch[1] : name;
         return this._findIdInArray(edrInfo, cleanName, "ED-R");
     }
 
     _findEddId(name) {
-        const eddPattern = /ED-D\s*(\S+)/;
+        const eddPattern = /ED-D\s*(.+)/;
         const eddMatch = name.match(eddPattern);
         const cleanName = eddMatch && eddMatch[1] ? eddMatch[1] : name;
         return this._findIdInArray(eddInfo, cleanName, "ED-D");
@@ -372,6 +372,8 @@ class AirspacePolygon {
 
     _findPjeId(name) {
         const cleanName = name.replace('PJA', '').trim();
+        console.log(cleanName, 'PJE');
+        
         return this._findIdInArray(pjeInfo, cleanName, "PJE");
     }
 

@@ -236,7 +236,7 @@
 
 #deleteSearch:not(:disabled):hover {
     background-color: rgb(40, 40, 126);
-    background-image: url('../img/closeAddressgreen.png');
+    background-image: url('../img/closeAddressGreen.png');
 }
 
 #deleteSearch:disabled{
