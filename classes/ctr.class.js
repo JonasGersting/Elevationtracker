@@ -1,7 +1,7 @@
 class CtrAirspace extends AirspacePolygon {
     constructor(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit) {
         super(geometry, name, ident, map, polygonLayers, centerLat, centerLon, lowerLimit, lowerLimitUnit, upperLimit, upperLimitUnit);
-        this.labelHighlightColor = '#8B0000'; // Dunkelrot, aber etwas anders als EDR für Unterscheidung
+        this.labelHighlightColor = '#8B0000';
         this.labelHighlightTextColor = 'white';
     }
 

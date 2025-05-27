@@ -453,7 +453,7 @@ function resetSearch() {
     addressList.style.display = 'none';
 
     if (searchInput) {
-        searchInput.value = ''; // Suchfeld leeren
+        searchInput.value = '';
     }
 
     let trackedAcftDiv = document.getElementById('trackedAcft');

@@ -5,26 +5,34 @@ class TmzAirspace extends AirspacePolygon {
         this.labelHighlightTextColor = 'white';
     }
 
+    attachTmzEventHandlers(feature, layer) {
+        layer.on('mouseover', () => {
+            this.tmzHover(layer);
+        });
+
+        layer.on('mouseout', () => {
+            this.tmzHoverOut(layer);
+        });
+    }
+
     addToMap() {
-        const onFeature = (feature, layer) => {
-            layer.on('mouseover', () => {
-                isCursorOverPolygon = true;
-                layer.setStyle(this.getSpecificHoverStyle());
-                layer.bringToFront();
-            });
-
-            layer.on('mouseout', () => {
-                isCursorOverPolygon = false;
-                layer.setStyle(this.getStyle());
-            });
-        };
-
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
-            onEachFeature: onFeature
+            onEachFeature: (feature, layer) => this.attachTmzEventHandlers(feature, layer)
         }).addTo(this.map);
 
         super.addToMap();
+    }
+
+    tmzHover(layer) {
+        isCursorOverPolygon = true;
+        layer.setStyle(this.getSpecificHoverStyle());
+        layer.bringToFront();
+    }
+
+    tmzHoverOut(layer) {
+        isCursorOverPolygon = false;
+        layer.setStyle(this.getStyle());
     }
 
     getSpecificHoverStyle() {
@@ -34,11 +42,11 @@ class TmzAirspace extends AirspacePolygon {
     getStyle() {
         return {
             color: 'darkblue',
-            fillColor: 'darkblue', 
+            fillColor: 'darkblue',
             weight: 2,
             opacity: 1,
             dashArray: '4 4',
-            fillOpacity: 0 
+            fillOpacity: 0
         };
     }
 }

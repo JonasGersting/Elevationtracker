@@ -5,24 +5,34 @@ class RmzAirspace extends AirspacePolygon {
         this.labelHighlightTextColor = 'white';
     }
 
+    attachRmzEventHandlers(layer) {
+        layer.on('mouseover', () => {
+            this.rmzHover(layer);
+        });
+        layer.on('mouseout', () => {
+            this.rmzHoverOut(layer);
+        });
+    }
+
     addToMap() {
-        const onFeature = (feature, layer) => {
-            layer.on('mouseover', () => {
-                isCursorOverPolygon = true;
-                layer.setStyle(this.getSpecificHoverStyle());
-                layer.bringToFront();
-            });
-            layer.on('mouseout', () => {
-                isCursorOverPolygon = false;
-                layer.setStyle(this.getStyle());
-            });
-        };
         this.layer = L.geoJSON(this.geometry, {
             style: this.getStyle(),
-            onEachFeature: onFeature
+            onEachFeature: (feature, layer) => this.attachRmzEventHandlers(layer)
         }).addTo(this.map);
         super.addToMap();
     }
+
+    rmzHover(layer) {
+        isCursorOverPolygon = true;
+        layer.setStyle(this.getSpecificHoverStyle());
+        layer.bringToFront();
+    }
+
+    rmzHoverOut(layer) {
+        isCursorOverPolygon = false;
+        layer.setStyle(this.getStyle());
+    }
+
 
     getSpecificHoverStyle() {
         return { color: 'white', dashArray: '4 4', opacity: 1, fillOpacity: 0.6, fillColor: 'gray' };
