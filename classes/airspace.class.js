@@ -117,6 +117,11 @@ class AirspacePolygon {
         });
     }
 
+    getPolygonStyleForLabelHover() {
+        // Standard-Hover-Stil für das Polygon, wenn über das Label gehovert wird
+        return { fillColor: 'white', fillOpacity: 0.8 };
+    }
+
     _handleLabelMouseover(event) {
         const iconElement = event.target.getElement();
         if (!iconElement) return;
@@ -129,7 +134,7 @@ class AirspacePolygon {
             if (nameEl) nameEl.style.display = 'block';
         }
         if (this.layer) {
-            this.layer.setStyle({ fillColor: 'white', fillOpacity: 0.8 });
+            this.layer.setStyle(this.getPolygonStyleForLabelHover()); // Geänderte Zeile
             this.layer.bringToFront();
         }
     }
@@ -373,7 +378,7 @@ class AirspacePolygon {
     _findPjeId(name) {
         const cleanName = name.replace('PJA', '').trim();
         console.log(cleanName, 'PJE');
-        
+
         return this._findIdInArray(pjeInfo, cleanName, "PJE");
     }
 

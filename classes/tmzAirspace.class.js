@@ -49,4 +49,7 @@ class TmzAirspace extends AirspacePolygon {
             fillOpacity: 0
         };
     }
+     getPolygonStyleForLabelHover() {
+        return this.getSpecificHoverStyle();
+    }
 }

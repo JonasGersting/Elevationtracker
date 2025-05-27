@@ -48,4 +48,7 @@ class RmzAirspace extends AirspacePolygon {
             fillOpacity: 0
         };
     }
+     getPolygonStyleForLabelHover() {
+        return this.getSpecificHoverStyle();
+    }
 }
