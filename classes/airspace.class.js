@@ -20,16 +20,14 @@ class AirspacePolygon {
         this.labelMarker = null;
         this.labelHighlightColor = 'darkgrey';
         this.labelHighlightTextColor = 'white';
-        this._boundUpdateLabelVisibility = this._updateLabelVisibility.bind(this);
-        this._labelTemporarilyVisibleByHover = false;
-        this._boundPolygonMouseoverForLabel = this._onPolygonMouseoverForLabel.bind(this);
-        this._boundPolygonMouseoutForLabel = this._onPolygonMouseoutForLabel.bind(this);
-        this._boundPolygonClick = this._onPolygonClick.bind(this);
-
+        this.boundUpdateLabelVisibility = this.updateLabelVisibility.bind(this);
+        this.labelTemporarilyVisibleByHover = false;
+        this.boundPolygonMouseoverForLabel = this.onPolygonMouseoverForLabel.bind(this);
+        this.boundPolygonMouseoutForLabel = this.onPolygonMouseoutForLabel.bind(this);
+        this.boundPolygonClick = this.onPolygonClick.bind(this);
     }
 
-
-    _shouldHaveLabel() {
+    shouldHaveLabel() {
         return this instanceof EdrAirspace ||
             this instanceof EddAirspace ||
             this instanceof CtrAirspace ||
@@ -37,25 +35,23 @@ class AirspacePolygon {
             this instanceof TmzAirspace;
     }
 
-    _initializeLabel() {
+    initializeLabel() {
         if (!this.map) return;
-        this._createLabelMarker();
+        this.createLabelMarker();
         if (this.labelMarker) {
-            this._updateLabelVisibility();
-            this.map.on('zoomend', this._boundUpdateLabelVisibility);
+            this.updateLabelVisibility();
+            this.map.on('zoomend', this.boundUpdateLabelVisibility);
         }
     }
 
-    _ensureLabelCenterCoordinates() {
+    ensureLabelCenterCoordinates() {
         if (this.centerLat && this.centerLon) return true;
         if (!this.layer) {
-            console.error(`Layer für ${this.ident || this.name} nicht vorhanden, Label kann nicht positioniert werden.`);
             return false;
         }
         try {
             const bounds = this.layer.getBounds();
             if (!bounds.isValid()) {
-                console.error(`Ungültige Bounds für ${this.ident || this.name}, Label kann nicht positioniert werden.`);
                 return false;
             }
             const center = bounds.getCenter();
@@ -63,19 +59,18 @@ class AirspacePolygon {
             this.centerLon = center.lng;
             return true;
         } catch (e) {
-            console.error(`Fehler beim Ermitteln des Zentrums für ${this.ident || this.name}:`, e);
             return false;
         }
     }
 
-    _getLimitsDisplayHtml() {
+    getLimitsDisplayHtml() {
         const lowerDisplay = (this.lowerLimit === 0 || this.lowerLimit === "0") ? "GND" : `${this.lowerLimit} ${this.lowerLimitUnit}`;
         return `
             <span style="border-bottom: 1px solid #555; display: inline-block; margin-bottom: 2px; padding-bottom: 1px;">${this.upperLimit} ${this.upperLimitUnit}</span><br>
             <span style="display: inline-block; margin-top: 1px;">${lowerDisplay}</span>`;
     }
 
-    _getLabelPrimaryAndSecondaryDisplay() {
+    getLabelPrimaryAndSecondaryDisplay() {
         let primaryDisplay = '';
         let secondaryDisplayHtml = '';
         if (this instanceof EdrAirspace || this instanceof EddAirspace) {
@@ -91,7 +86,7 @@ class AirspacePolygon {
         return { primaryDisplay, secondaryDisplayHtml };
     }
 
-    _buildFinalLabelHtml(primaryDisplay, limitsHtml, secondaryDisplayHtml) {
+    buildFinalLabelHtml(primaryDisplay, limitsHtml, secondaryDisplayHtml) {
         return `
             <div style="line-height: 1.2;">
                 <b>${primaryDisplay}</b><br>
@@ -101,7 +96,7 @@ class AirspacePolygon {
         `;
     }
 
-    _createLeafletDivIcon(htmlContent) {
+    createLeafletDivIcon(htmlContent) {
         return L.divIcon({
             html: htmlContent,
             className: 'airspace-custom-label text-shadow',
@@ -109,7 +104,7 @@ class AirspacePolygon {
         });
     }
 
-    _createLeafletLabelMarkerInstance(position, icon) {
+    createLeafletLabelMarkerInstance(position, icon) {
         return L.marker(position, {
             icon: icon,
             pane: 'markerPane',
@@ -122,7 +117,7 @@ class AirspacePolygon {
         return { fillColor: 'white', fillOpacity: 0.8 };
     }
 
-    _handleLabelMouseover(event) {
+    handleLabelMouseover(event) {
         const iconElement = event.target.getElement();
         if (!iconElement) return;
         iconElement.classList.remove('text-shadow');
@@ -139,7 +134,7 @@ class AirspacePolygon {
         }
     }
 
-    _handleLabelMouseout(event) {
+    handleLabelMouseout(event) {
         const iconElement = event.target.getElement();
         if (!iconElement) return;
         iconElement.classList.add('text-shadow');
@@ -153,37 +148,35 @@ class AirspacePolygon {
         if (this.layer) this.layer.setStyle(this.getStyle());
     }
 
-  async _handleLabelClick() {
+    async handleLabelClick() {
         currentAirspace = this;
         const identifierForLookup = (this instanceof EdrAirspace || this instanceof EddAirspace)
-            ? this.ident 
+            ? this.ident
             : (this.name || this.ident);
         const id = await this.setAipInfoAirspace(identifierForLookup);
         if (id) {
             this.showInfoPdf(id);
-        } else {
-            console.log('No PDF ID found for (label click):', identifierForLookup);
         }
     }
 
-    _addEventListenersToLabelMarker() {
-        this.labelMarker.on('mouseover', this._handleLabelMouseover.bind(this));
-        this.labelMarker.on('mouseout', this._handleLabelMouseout.bind(this));
-        this.labelMarker.on('click', this._handleLabelClick.bind(this));
+    addEventListenersToLabelMarker() {
+        this.labelMarker.on('mouseover', this.handleLabelMouseover.bind(this));
+        this.labelMarker.on('mouseout', this.handleLabelMouseout.bind(this));
+        this.labelMarker.on('click', this.handleLabelClick.bind(this));
     }
 
-    _createLabelMarker() {
-        if (!this._ensureLabelCenterCoordinates()) return;
-        const limitsHtml = this._getLimitsDisplayHtml();
-        const { primaryDisplay, secondaryDisplayHtml } = this._getLabelPrimaryAndSecondaryDisplay();
-        const labelHtml = this._buildFinalLabelHtml(primaryDisplay, limitsHtml, secondaryDisplayHtml);
-        const divIcon = this._createLeafletDivIcon(labelHtml);
+    createLabelMarker() {
+        if (!this.ensureLabelCenterCoordinates()) return;
+        const limitsHtml = this.getLimitsDisplayHtml();
+        const { primaryDisplay, secondaryDisplayHtml } = this.getLabelPrimaryAndSecondaryDisplay();
+        const labelHtml = this.buildFinalLabelHtml(primaryDisplay, limitsHtml, secondaryDisplayHtml);
+        const divIcon = this.createLeafletDivIcon(labelHtml);
         const markerPosition = L.latLng(this.centerLat, this.centerLon);
-        this.labelMarker = this._createLeafletLabelMarkerInstance(markerPosition, divIcon);
-        this._addEventListenersToLabelMarker();
+        this.labelMarker = this.createLeafletLabelMarkerInstance(markerPosition, divIcon);
+        this.addEventListenersToLabelMarker();
     }
 
-    _styleLabelOnPolygonHover() {
+    styleLabelOnPolygonHover() {
         const iconElement = this.labelMarker.getElement();
         if (!iconElement) return;
         iconElement.style.zIndex = '1000';
@@ -192,20 +185,20 @@ class AirspacePolygon {
         iconElement.classList.remove('text-shadow');
     }
 
-    _showLabelTemporarily(currentZoom) {
+    showLabelTemporarily(currentZoom) {
         if (currentZoom < 9 && !this.map.hasLayer(this.labelMarker)) {
             this.labelMarker.addTo(this.map);
-            this._labelTemporarilyVisibleByHover = true;
+            this.labelTemporarilyVisibleByHover = true;
         }
     }
 
-    _onPolygonMouseoverForLabel() {
+    onPolygonMouseoverForLabel() {
         if (!this.map || !this.labelMarker) return;
-        this._styleLabelOnPolygonHover();
-        this._showLabelTemporarily(this.map.getZoom());
+        this.styleLabelOnPolygonHover();
+        this.showLabelTemporarily(this.map.getZoom());
     }
 
-    _resetLabelStyleAfterPolygonHover() {
+    resetLabelStyleAfterPolygonHover() {
         const iconElement = this.labelMarker.getElement();
         if (!iconElement) return;
         iconElement.style.zIndex = '';
@@ -214,75 +207,73 @@ class AirspacePolygon {
         iconElement.classList.add('text-shadow');
     }
 
-    _hideTemporaryLabel() {
-        if (this._labelTemporarilyVisibleByHover) {
+    hideTemporaryLabel() {
+        if (this.labelTemporarilyVisibleByHover) {
             if (this.map.hasLayer(this.labelMarker)) {
                 this.map.removeLayer(this.labelMarker);
             }
-            this._labelTemporarilyVisibleByHover = false;
+            this.labelTemporarilyVisibleByHover = false;
         }
     }
 
-    _onPolygonMouseoutForLabel() {
+    onPolygonMouseoutForLabel() {
         if (!this.map || !this.labelMarker) return;
-        this._resetLabelStyleAfterPolygonHover();
-        this._hideTemporaryLabel();
+        this.resetLabelStyleAfterPolygonHover();
+        this.hideTemporaryLabel();
     }
 
-    async _onPolygonClick() {
+    async onPolygonClick() {
         currentAirspace = this;
         const identifier = (this instanceof EdrAirspace || this instanceof EddAirspace)
             ? this.ident
             : (this.name || this.ident);
         if (!identifier) {
-            console.log('Kein Identifikator (Name oder Ident) für AIP-Abfrage vorhanden.');
             return;
         }
         const id = await this.setAipInfoAirspace(identifier);
         if (id) this.showInfoPdf(id);
-        else console.log('No PDF ID found for:', identifier);
     }
 
-    _manageLabelLayer(shouldBeVisible) {
+    manageLabelLayer(shouldBeVisible) {
         if (shouldBeVisible) {
             if (!this.map.hasLayer(this.labelMarker)) {
                 this.labelMarker.addTo(this.map);
             }
-            this._labelTemporarilyVisibleByHover = false;
+            this.labelTemporarilyVisibleByHover = false;
         } else {
-            if (!this._labelTemporarilyVisibleByHover && this.map.hasLayer(this.labelMarker)) {
+            if (!this.labelTemporarilyVisibleByHover && this.map.hasLayer(this.labelMarker)) {
                 this.map.removeLayer(this.labelMarker);
             }
         }
     }
 
-    _updateLabelVisibility() {
+    updateLabelVisibility() {
         if (!this.labelMarker || !this.map) return;
         const currentZoom = this.map.getZoom();
         const labelShouldBeNormallyVisible = currentZoom >= 9;
-        this._manageLabelLayer(labelShouldBeNormallyVisible);
+        this.manageLabelLayer(labelShouldBeNormallyVisible);
     }
 
     addToMap() {
-        if (this._shouldHaveLabel()) {
-            this._initializeLabel();
+        if (this.shouldHaveLabel()) {
+            this.initializeLabel();
             if (this.layer) {
-                this.layer.on('mouseover', this._boundPolygonMouseoverForLabel);
-                this.layer.on('mouseout', this._boundPolygonMouseoutForLabel);
-                this.layer.on('click', this._boundPolygonClick);
+                this.layer.on('mouseover', this.boundPolygonMouseoverForLabel);
+                this.layer.on('mouseout', this.boundPolygonMouseoutForLabel);
+                this.layer.on('click', this.boundPolygonClick);
             }
         }
     }
 
-    _removePolygonEventListenersFromLayer() {
-        if (this.layer && this._shouldHaveLabel()) {
-            this.layer.off('mouseover', this._boundPolygonMouseoverForLabel);
-            this.layer.off('mouseout', this._boundPolygonMouseoutForLabel);
-            this.layer.off('click', this._boundPolygonClick);
+    removePolygonEventListenersFromLayer() {
+        if (this.layer && this.shouldHaveLabel()) {
+            this.layer.off('mouseover', this.boundPolygonMouseoverForLabel);
+            this.layer.off('mouseout', this.boundPolygonMouseoutForLabel);
+            this.layer.off('click', this.boundPolygonClick);
         }
     }
 
-    _removePolygonLayerFromMap() {
+    removePolygonLayerFromMap() {
         if (this.layer) {
             if (this.map && this.map.hasLayer(this.layer)) {
                 this.map.removeLayer(this.layer);
@@ -291,7 +282,7 @@ class AirspacePolygon {
         }
     }
 
-    _removeLabelMarkerFromMapInstance() {
+    removeLabelMarkerFromMapInstance() {
         if (this.labelMarker) {
             if (this.map && this.map.hasLayer(this.labelMarker)) {
                 this.map.removeLayer(this.labelMarker);
@@ -300,30 +291,30 @@ class AirspacePolygon {
         }
     }
 
-    _removeLabelZoomListener() {
-        if (this.map && this._boundUpdateLabelVisibility) {
-            this.map.off('zoomend', this._boundUpdateLabelVisibility);
+    removeLabelZoomListener() {
+        if (this.map && this.boundUpdateLabelVisibility) {
+            this.map.off('zoomend', this.boundUpdateLabelVisibility);
         }
     }
 
-    _cleanupLabelResources() {
-        if (this._shouldHaveLabel()) {
-            this._removeLabelMarkerFromMapInstance();
-            this._removeLabelZoomListener();
+    cleanupLabelResources() {
+        if (this.shouldHaveLabel()) {
+            this.removeLabelMarkerFromMapInstance();
+            this.removeLabelZoomListener();
         }
     }
 
     removeFromMap() {
-        this._removePolygonEventListenersFromLayer();
-        this._removePolygonLayerFromMap();
-        this._cleanupLabelResources();
+        this.removePolygonEventListenersFromLayer();
+        this.removePolygonLayerFromMap();
+        this.cleanupLabelResources();
     }
 
-    _getPdfDetailDiv() {
+    getPdfDetailDiv() {
         return document.getElementById('aerodromeInfoDetail');
     }
 
-    _buildPdfViewerHtmlContent(pdfPath) {
+    buildPdfViewerHtmlContent(pdfPath) {
         return `
             <div class="overlay"></div>
             <div class="cardWrapper">
@@ -341,10 +332,10 @@ class AirspacePolygon {
 
     showInfoPdf(pdfId) {
         const pdfPath = this.returnCorrectAipPath(pdfId);
-        const detailDiv = this._getPdfDetailDiv();
+        const detailDiv = this.getPdfDetailDiv();
         if (!detailDiv) return;
         detailDiv.style.height = '100vh';
-        detailDiv.innerHTML = this._buildPdfViewerHtmlContent(pdfPath);
+        detailDiv.innerHTML = this.buildPdfViewerHtmlContent(pdfPath);
     }
 
     returnCorrectAipPath(pdfId) {
@@ -356,7 +347,7 @@ class AirspacePolygon {
         }
     }
 
-    _findIdInArray(items, targetName, arrayKey) {
+    findIdInArray(items, targetName, arrayKey) {
         let foundId = null;
         items.forEach(item => {
             const lowerCaseArray = item[arrayKey].map(val => val.toLowerCase());
@@ -367,36 +358,34 @@ class AirspacePolygon {
         return foundId;
     }
 
-    _findEdrId(name) {
+    findEdrId(name) {
         const edrPattern = /ED-R\s*(.+)/;
         const edrMatch = name.match(edrPattern);
         const cleanName = edrMatch && edrMatch[1] ? edrMatch[1] : name;
-        return this._findIdInArray(edrInfo, cleanName, "ED-R");
+        return this.findIdInArray(edrInfo, cleanName, "ED-R");
     }
 
-    _findEddId(name) {
+    findEddId(name) {
         const eddPattern = /ED-D\s*(.+)/;
         const eddMatch = name.match(eddPattern);
         const cleanName = eddMatch && eddMatch[1] ? eddMatch[1] : name;
-        return this._findIdInArray(eddInfo, cleanName, "ED-D");
+        return this.findIdInArray(eddInfo, cleanName, "ED-D");
     }
 
-    _findPjeId(name) {
+    findPjeId(name) {
         const cleanName = name.replace('PJA', '').trim();
-        console.log(cleanName, 'PJE');
-
-        return this._findIdInArray(pjeInfo, cleanName, "PJE");
+        return this.findIdInArray(pjeInfo, cleanName, "PJE");
     }
 
     setAipInfoAirspace(name) {
         return new Promise((resolve) => {
             let id = null;
-            if (this instanceof RmzAirspace) id = this._findIdInArray(rmzInfo, name, "RMZ");
-            else if (this instanceof CtrAirspace) id = this._findIdInArray(ctrInfo, name, "CTRs");
-            else if (this instanceof PjeAirspace) id = this._findPjeId(name);
-            else if (this instanceof TmzAirspace) id = this._findIdInArray(tmzInfo, name, "TMZ");
-            else if (this instanceof EdrAirspace) id = this._findEdrId(name);
-            else if (this instanceof EddAirspace) id = this._findEddId(name);
+            if (this instanceof RmzAirspace) id = this.findIdInArray(rmzInfo, name, "RMZ");
+            else if (this instanceof CtrAirspace) id = this.findIdInArray(ctrInfo, name, "CTRs");
+            else if (this instanceof PjeAirspace) id = this.findPjeId(name);
+            else if (this instanceof TmzAirspace) id = this.findIdInArray(tmzInfo, name, "TMZ");
+            else if (this instanceof EdrAirspace) id = this.findEdrId(name);
+            else if (this instanceof EddAirspace) id = this.findEddId(name);
             resolve(id);
         });
     }

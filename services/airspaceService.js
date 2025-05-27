@@ -83,7 +83,7 @@ function updateActiveDistanceLine(e) {
 
 function calculateDistanceNavAid(lat1, lon1, lat2, lon2) {
     const toRad = deg => deg * (Math.PI / 180);
-    const R = 3440; // Nautical miles
+    const R = 3440;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -228,13 +228,11 @@ function processFoundClosestNavAid(data, latLng, markerLat, markerLon, distance)
         <button class="navAidBtn" onclick="findClosestNavAid(${markerLat}, ${markerLon})">Finde nächstes Navaid</button>
         </div>`;
     line.bindPopup(popupContent).openPopup();
-    console.log('Nächstes NavAid:', data.properties.txtname, 'Distanz:', distance);
 }
 
 function handleNoFurtherNavAidsFound() {
     const message = currentSequenceFoundNavAidNames.length > 0 ? "Keine weiteren passenden NavAids für diesen Punkt gefunden." : "Es wurde kein passendes Navaid gefunden.";
     alert(message);
-    console.log('Kein (weiteres) passendes NavAid gefunden.');
 }
 
 function findClosestNavAid(markerLat, markerLon) {

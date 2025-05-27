@@ -38,13 +38,11 @@ function toggleBuildings() {
         try {
             osmb = new OSMBuildings(map);
             osmb.load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
-            console.log("OSM Buildings aktiviert");
         } catch (e) {
             console.error("Fehler beim Aktivieren von OSM Buildings:", e);
         }
     } else {
         if (osmb) {
-            console.log("Setze OSM Buildings-Referenz zurück");
             map.removeLayer(osmb);
             osmb = null;
         }
