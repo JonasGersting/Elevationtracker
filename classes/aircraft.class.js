@@ -2,13 +2,13 @@ class Aircraft {
     constructor(aircraftData, map, aircraftLayer) {
         this.map = map;
         this.aircraftLayer = aircraftLayer;
-        this._initBaseProps(aircraftData);
-        this._initMovementProps(aircraftData);
-        this._initInternalState();
-        this._createAndAddMarker();
+        this.initBaseProps(aircraftData);
+        this.initMovementProps(aircraftData);
+        this.initInternalState();
+        this.createAndAddMarker();
     }
 
-    _initBaseProps(data) {
+    initBaseProps(data) {
         const { lat, lon, t, alt_baro, hex, flight, r } = data;
         this.position = [lat, lon];
         this.type = t;
@@ -18,7 +18,7 @@ class Aircraft {
         this.registration = r;
     }
 
-    _initMovementProps(data) {
+    initMovementProps(data) {
         const { ias, true_heading, track, gs, seen_pos } = data;
         this.speed = ias;
         this.heading = true_heading;
@@ -27,13 +27,13 @@ class Aircraft {
         this.lastPos = seen_pos;
     }
 
-    _initInternalState() {
+    initInternalState() {
         this.isTracked = false;
         this.marker = null;
         this.trackLine = null;
     }
 
-    _getMarkerIconConfig() {
+    getMarkerIconConfig() {
         const rotation = this.heading || this.track;
         const color = this.isTracked ? '#FF961B' : this.getAltitudeColor();
         return L.divIcon({
@@ -45,7 +45,7 @@ class Aircraft {
         });
     }
 
-    _getMarkerTooltipContent() {
+    getMarkerTooltipContent() {
         return `
             <div>
                 <strong>Callsign:</strong> ${this.callsign || 'Unknown'}<br>
@@ -55,17 +55,17 @@ class Aircraft {
         `;
     }
 
-    _getMarkerTooltipOptions() {
+    getMarkerTooltipOptions() {
         return {
             direction: 'top',
             offset: [0, -15]
         };
     }
 
-    _createAndAddMarker() {
-        const iconConfig = this._getMarkerIconConfig();
-        const tooltipContent = this._getMarkerTooltipContent();
-        const tooltipOptions = this._getMarkerTooltipOptions();
+    createAndAddMarker() {
+        const iconConfig = this.getMarkerIconConfig();
+        const tooltipContent = this.getMarkerTooltipContent();
+        const tooltipOptions = this.getMarkerTooltipOptions();
 
         this.marker = L.marker(this.position, { icon: iconConfig });
         this.marker.bindTooltip(tooltipContent, tooltipOptions);
@@ -73,7 +73,7 @@ class Aircraft {
         this.aircraftLayer.addLayer(this.marker);
     }
 
-    _handleExistingTrackedAircraftOnClick() {
+    handleExistingTrackedAircraftOnClick() {
         if (trackedAcft && trackedAcft === this) {
             this.untrackAircraft();
             return true;
@@ -84,13 +84,13 @@ class Aircraft {
         return false;
     }
 
-    _startTrackingThisAircraft() {
+    startTrackingThisAircraft() {
         trackedAcft = this;
         this.isTracked = true;
         this.updateMarkerStyle();
     }
 
-    async _fetchAndSetAircraftImageDetails() {
+    async fetchAndSetAircraftImageDetails() {
         const imageData = await this.getImage();
         if (imageData && typeof imageData === 'object' && imageData.thumbnail) {
             trackedAcftImg = imageData.thumbnail.src;
@@ -106,15 +106,15 @@ class Aircraft {
     }
 
     async handleClick() {
-        if (this._handleExistingTrackedAircraftOnClick()) return;
+        if (this.handleExistingTrackedAircraftOnClick()) return;
 
-        this._startTrackingThisAircraft();
-        await this._fetchAndSetAircraftImageDetails();
+        this.startTrackingThisAircraft();
+        await this.fetchAndSetAircraftImageDetails();
         await this.showDetails();
         await this.fetchInitialTrack();
     }
 
-    _clearTrackedAircraftDOM() {
+    clearTrackedAircraftDOM() {
         const trackedAcftDiv = document.getElementById('trackedAcft');
         if (!trackedAcftDiv) return;
         trackedAcftDiv.classList.add('hiddenTrackedAcft');
@@ -129,7 +129,7 @@ class Aircraft {
         if (imgEl) imgEl.src = 'img/acftWhite.png';
     }
 
-    _clearMapTrackingLayers() {
+    clearMapTrackingLayers() {
         if (currentTrackLine) {
             this.map.removeLayer(currentTrackLine);
             currentTrackLine = null;
@@ -140,7 +140,7 @@ class Aircraft {
         }
     }
 
-    _resetGlobalTrackingState() {
+    resetGlobalTrackingState() {
         const icaoDestInput = document.getElementById('icaoDest');
         if (icaoDestInput) icaoDestInput.value = '';
 
@@ -156,9 +156,9 @@ class Aircraft {
 
         this.isTracked = false;
         this.updateMarkerStyle();
-        this._clearTrackedAircraftDOM();
-        this._clearMapTrackingLayers();
-        this._resetGlobalTrackingState();
+        this.clearTrackedAircraftDOM();
+        this.clearMapTrackingLayers();
+        this.resetGlobalTrackingState();
     }
 
     updateMarkerStyle() {
@@ -174,7 +174,7 @@ class Aircraft {
         this.marker.setIcon(icon);
     }
 
-    _updateTrackedInfoInDOM() {
+    updateTrackedInfoInDOM() {
         document.getElementById('trackedCallsign').innerHTML = this.callsign || 'N/A';
         document.getElementById('trackedReg').innerHTML = this.registration || 'N/A';
         document.getElementById('trackedImg').src = trackedAcftImg;
@@ -192,7 +192,7 @@ class Aircraft {
     async showDetails() {
         const trackedAcftDiv = document.getElementById('trackedAcft');
         if (trackedAcftDiv) trackedAcftDiv.classList.remove('hiddenTrackedAcft');
-        this._updateTrackedInfoInDOM();
+        this.updateTrackedInfoInDOM();
         this.checkLastPos();
     }
 
@@ -222,13 +222,13 @@ class Aircraft {
         }
     }
 
-    _getInitialTrackUrl() {
+    getInitialTrackUrl() {
         const corsProxy = 'https://proxy.corsfix.com/?';
         const hexSuffix = this.hex.slice(-2);
         return `${corsProxy}https://globe.airplanes.live/data/traces/${hexSuffix}/trace_full_${this.hex}.json`;
     }
 
-    _findLastGroundIndexInTrack(fetchedTrackData) {
+    findLastGroundIndexInTrack(fetchedTrackData) {
         for (let i = fetchedTrackData.length - 1; i >= 0; i--) {
             const pointData = fetchedTrackData[i];
             if (pointData && pointData.length > 3 &&
@@ -239,7 +239,7 @@ class Aircraft {
         return -1;
     }
 
-    _extractLastFlightLeg(fetchedTrackData, lastGroundIndex) {
+    extractLastFlightLeg(fetchedTrackData, lastGroundIndex) {
         if (lastGroundIndex !== -1 && lastGroundIndex < fetchedTrackData.length - 1) {
             return fetchedTrackData.slice(lastGroundIndex + 1);
         }
@@ -252,14 +252,14 @@ class Aircraft {
         return [];
     }
 
-    _parseTrackData(rawData) {
+    parseTrackData(rawData) {
         const fetchedTrackData = rawData.trace || rawData.path || [];
         if (!fetchedTrackData.length) return [];
-        const lastGroundIndex = this._findLastGroundIndexInTrack(fetchedTrackData);
-        return this._extractLastFlightLeg(fetchedTrackData, lastGroundIndex);
+        const lastGroundIndex = this.findLastGroundIndexInTrack(fetchedTrackData);
+        return this.extractLastFlightLeg(fetchedTrackData, lastGroundIndex);
     }
 
-    _setTrackLoaderVisibility(isLoading) {
+    setTrackLoaderVisibility(isLoading) {
         const loader = document.getElementById('trackedAcftLoader');
         if (loader) {
             isLoading ? loader.classList.remove('d-none') : loader.classList.add('d-none');
@@ -267,20 +267,20 @@ class Aircraft {
     }
 
     async fetchInitialTrack() {
-        this._setTrackLoaderVisibility(true);
-        const url = this._getInitialTrackUrl();
+        this.setTrackLoaderVisibility(true);
+        const url = this.getInitialTrackUrl();
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Track data fetch failed: ${response.status}`);
             const data = await response.json();
-            const lastLegData = this._parseTrackData(data);
+            const lastLegData = this.parseTrackData(data);
             trackCoordinates = lastLegData.map(item => [item[1], item[2]]);
         } catch (error) {
             console.error("Initial track fetch error:", error);
             trackCoordinates = [];
         } finally {
             this.updateAndDrawTrack();
-            this._setTrackLoaderVisibility(false);
+            this.setTrackLoaderVisibility(false);
         }
     }
 
@@ -323,35 +323,35 @@ class Aircraft {
         trackedEta = 'N/A';
     }
 
-    _updateMarkerPosition() {
+    updateMarkerPosition() {
         if (this.marker) {
             this.marker.setLatLng(this.position);
         }
     }
 
-    _handleTrackedStateUpdates() {
+    handleTrackedStateUpdates() {
         if (!this.isTracked) return;
         this.showDetails();
         this.updateAndDrawTrack();
     }
 
-    _handleEtaUpdates() {
+    handleEtaUpdates() {
         if (!trackedIcaoDest) return;
         this.calcEta(trackedIcaoDest);
         const etaEl = document.getElementById('ETA');
         if (etaEl) etaEl.innerHTML = `${trackedEta}min`;
     }
 
-    _handleUntrackedStateUpdates() {
+    handleUntrackedStateUpdates() {
         if (this.isTracked) return;
         this.updateMarkerStyle();
     }
 
     async updateData() {
-        this._updateMarkerPosition();
-        this._handleTrackedStateUpdates();
-        this._handleEtaUpdates();
-        this._handleUntrackedStateUpdates();
+        this.updateMarkerPosition();
+        this.handleTrackedStateUpdates();
+        this.handleEtaUpdates();
+        this.handleUntrackedStateUpdates();
     }
 
     getAltitudeColor() {
@@ -360,37 +360,37 @@ class Aircraft {
         return '#0F5AD2';
     }
 
-    _getHelicopterSvg(rotation, color) {
+    getHelicopterSvg(rotation, color) {
         return `
             <div style="transform: rotate(${rotation - 90}deg);">
            <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg height="24pt" width="24pt" viewBox="0 0 129 97" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M10.641,51.985l-7.247,-0c-1.608,-0 -2.914,-1.583 -2.914,-3.532c-0,-1.949 1.306,-3.531 2.914,-3.531l7.247,0l-0,-11.939l-2.222,-3.862l10.382,-0l-0,15.801l29.212,0c3.128,-4.619 12.252,-8.389 24.205,-10.161l-23.317,-28.254c-1.137,-1.378 -1.137,-3.615 0,-4.994c1.138,-1.378 2.984,-1.378 4.121,0l26.761,32.428c2.543,-0.18 5.169,-0.275 7.856,-0.275c2.686,0 5.313,0.095 7.855,0.275l26.761,-32.428c1.137,-1.378 2.984,-1.378 4.121,0c1.137,1.379 1.137,3.616 0,4.994l-23.316,28.254c14.881,2.206 25.377,7.509 25.377,13.692c-0,6.184 -10.496,11.486 -25.377,13.693l23.316,28.253c1.137,1.379 1.137,3.616 0,4.994c-1.137,1.378 -2.984,1.378 -4.121,0l-26.761,-32.427c-2.542,0.18 -5.169,0.274 -7.855,0.274c-2.687,0 -5.313,-0.094 -7.856,-0.274l-26.761,32.427c-1.137,1.378 -2.983,1.378 -4.121,0c-1.137,-1.378 -1.137,-3.615 0,-4.994l23.317,-28.253c-11.953,-1.772 -21.077,-5.542 -24.205,-10.161l-29.212,-0l-0,15.801l-10.609,0l2.449,-3.882l-0,-11.919Z" style="fill:${color};stroke:#000;stroke-width:8px;"/></svg>
             </div>`;
     }
-    _getGliderSvg(rotation, color) {
+    getGliderSvg(rotation, color) {
         return `
              <div style="transform: rotate(${rotation - 180}deg);">
                       <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="36pt" height="36pt" viewBox="0 0 418 418" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M200.127,251.163c-37.011,-0.018 -189.276,-4.03 -194.597,-6.686c-1.528,-0.763 -0.744,-12.164 -0.744,-12.164c64.114,-6.037 129.804,-7.871 196.058,-8.202c0.943,-26.525 2.726,-69.856 4.793,-95.774c-7.588,-0.894 -26.208,-3.231 -30.692,-5.125c-1.348,-0.569 -0.714,-8.808 -0.714,-8.808l33.137,-2.611c0.498,-3.193 1.004,-4.994 1.509,-4.994c0.508,0 0.989,1.782 1.451,4.994l33.144,2.611c0,-0 0.634,8.239 -0.714,8.808c-4.523,1.911 -23.433,4.272 -30.89,5.149c1.765,25.918 3.044,69.226 3.692,95.744c66.712,0.312 132.859,2.13 197.409,8.208c-0,0 0.784,11.401 -0.744,12.164c-5.401,2.696 -162.195,6.789 -196.186,6.684l-0,24.824c-0,4.391 -2.771,34.971 -7.162,34.971c-4.39,-0 -8.75,-30.58 -8.75,-34.971l0,-24.822Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="0" width="417.755" height="417.755" style="fill:none;"/></svg>
             </div>`;
     }
-    _getBusinessAcftSvg(rotation, color) {
+    getBusinessAcftSvg(rotation, color) {
         return `
             <div style="transform: rotate(${rotation}deg);">
              <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg height="28pt" width="28pt" viewBox="0 0 344 344" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M154.91,200.479l-42.092,8.469l-106.729,46.327c-0,-0 -1.083,-15.428 1.162,-17.192c1.957,-1.538 57.124,-36.405 95.786,-61.975c11.126,-7.359 36.039,-27.192 51.873,-42.014l0,-60.961c0.416,-74.74 33.668,-76.238 33.244,-0l-0,60.977c15.835,14.82 40.758,34.644 51.876,41.998c38.663,25.57 93.829,60.437 95.787,61.975c2.244,1.764 1.162,17.192 1.162,17.192l-106.729,-46.327l-42.096,-8.464l-0,21.361c1.254,-3.172 4.226,-5.318 7.579,-5.127l2.413,0.138c4.301,0.245 7.61,4.243 7.385,8.922l-1.569,32.551c-0.059,1.232 -1.265,0.822 -3.05,0.112l-1.732,5.557l-8.423,-0.481l-1.229,-5.918c-0.516,0.14 -0.995,0.273 -1.424,0.375c-0.403,3.144 -3.239,8.131 -6.372,11.254c14.588,11.024 47.275,35.817 49.16,38.062c1.338,1.593 0.641,19.263 0.641,19.263l-55.039,-24.819c-0.625,4.385 -2.611,12.316 -4.96,12.316c-2.302,0 -4.254,-7.611 -4.921,-12.044l-54.436,24.547c0,-0 -0.696,-17.67 0.641,-19.263c1.87,-2.227 34.038,-26.633 48.798,-37.788c-3.23,-3.086 -6.215,-8.247 -6.651,-11.487c-0.473,-0.105 -1.014,-0.256 -1.602,-0.416l-1.23,5.918l-8.422,0.481l-1.732,-5.557c-1.786,0.71 -2.992,1.12 -3.051,-0.112l-1.568,-32.551c-0.226,-4.679 3.083,-8.677 7.384,-8.922l2.413,-0.138c3.519,-0.2 6.619,2.173 7.753,5.606l0,-21.845Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="-0" width="343.068" height="343.068" style="fill:none;"/></svg>
             </div>`;
     }
-    _getPistonAcftSvg(rotation, color) {
+    getPistonAcftSvg(rotation, color) {
         return `
             <div style="transform: rotate(${rotation + 90}deg);">
             <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg height="28pt" width="28pt" viewBox="0 0 375 375" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M59.724,188.988l-3.537,-0.97l3.535,-0.969c0.006,-27.991 2.095,-50.692 4.668,-50.692c2.493,-0 4.532,21.331 4.661,48.134l3.149,-0.863l0,-8.239l40.291,-6.337l8.621,0l0,-69.706l5.796,-88.053c0,0 0.611,-5.314 6.809,-5.83c8.604,-0.717 30.721,-0.426 30.721,-0.426l10.863,94.309l0,69.706l8.621,0l79.836,11.278l8.537,-51.482l25.727,-0.016l8.651,51.758l-14.048,3.818l25.563,3.61l-25.079,3.543l13.564,3.686l-8.651,51.758l-25.727,-0.016l-8.505,-51.286l-79.868,11.281l-8.621,0l0,69.707l-10.676,92.682c0,-0 -22.304,0.191 -30.908,-0.526c-6.198,-0.517 -6.915,-5.713 -6.915,-5.713l-5.69,-86.443l0,-69.707l-8.621,0l-40.291,-6.336l0,-8.239l-3.159,-0.866c-0.204,26.018 -2.21,46.475 -4.651,46.475c-2.521,-0 -4.578,-21.808 -4.666,-49.03Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="0" width="374.375" height="374.375" style="fill:none;"/></svg>
              </div>`;
     }
-    _getTurboAcftSvg(rotation, color) {
+    getTurboAcftSvg(rotation, color) {
         return `
             <div style="transform: rotate(${rotation + 90}deg);">
             <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg height="28pt" width="28pt" viewBox="0 0 373 373" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><path d="M175.148,206.165l0,69.599l-10.676,92.682c0,0 -22.304,0.191 -30.907,-0.526c-6.199,-0.517 -6.915,-5.713 -6.915,-5.713l-5.69,-86.443l-0,-0.227l-10.657,-0c-2.434,-0 -5.724,-0.647 -9.14,-1.771c-0.747,15.047 -2.758,25.836 -5.119,25.836c-2.615,-0 -4.8,-13.236 -5.315,-30.834c-3.651,-2.49 -6.239,-5.466 -6.239,-8.576c-0,-3.118 2.6,-5.92 6.265,-8.19c0.559,-17.175 2.716,-29.989 5.289,-29.989c2.347,0 4.348,10.664 5.106,25.575c3.42,-0.972 6.716,-1.509 9.153,-1.509l10.657,-0l-0,-40.021l-8.621,-0l-31.987,-5.031c-2.572,-0.5 -5.454,-1.257 -8.305,-2.22c-1.83,-0.618 -3.646,-1.321 -5.359,-2.097c-1.889,-0.856 -3.652,-1.799 -5.166,-2.813c-2.993,-2.005 -5.014,-4.285 -5.12,-6.705c-0.003,-0.066 -0.004,-0.133 -0.004,-0.2c-0,-2.495 2.049,-4.846 5.126,-6.906c1.513,-1.013 3.274,-1.956 5.162,-2.811c1.713,-0.776 3.53,-1.48 5.361,-2.098c1.768,-0.598 3.548,-1.115 5.259,-1.542l35.033,-5.509l8.621,-0l-0,-40.221l-10.657,0c-2.434,0 -5.724,-0.646 -9.14,-1.771c-0.747,15.048 -2.758,25.837 -5.119,25.837c-2.615,-0 -4.8,-13.236 -5.315,-30.834c-3.651,-2.49 -6.239,-5.466 -6.239,-8.576c-0,-3.118 2.6,-5.92 6.265,-8.19c0.559,-17.175 2.716,-29.989 5.289,-29.989c2.347,0 4.348,10.664 5.106,25.575c3.42,-0.972 6.716,-1.51 9.153,-1.51l10.657,0l-0,-0.028l5.795,-88.052c0,-0 0.611,-5.314 6.81,-5.831c8.603,-0.717 30.72,-0.425 30.72,-0.425l10.863,94.308l0,69.357l7.978,0c5.903,0 46.523,2.45 81.337,6.453l7.679,-46.308l25.061,-0.016c-0.486,16.789 -0.722,33.766 -0.701,50.935c11.826,2.246 19.621,4.747 19.621,7.421c0,0.182 -0.036,0.364 -0.107,0.545c-0.082,0.209 -0.211,0.417 -0.384,0.625c-1.876,2.252 -8.998,4.432 -19.046,6.459c0.17,17.203 0.596,34.598 1.283,52.189l-25.727,-0.017l-7.821,-47.163c-34.783,4.383 -75.3,7.266 -81.195,7.266l-7.978,0Z" style="fill:${color};stroke:#000;stroke-width:8px;"/><rect x="0" y="0" width="372.521" height="372.521" style="fill:none;"/></svg>
              </div>`;
     }
-    _getFourEngAcftSvg(rotation, color) {
+    getFourEngAcftSvg(rotation, color) {
         return `
             <div style="transform: rotate(${rotation - 90}deg);">
             <svg xmlns="http://www.w3.org/2000/svg" height="38pt" width="38pt" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1920 1664" width="1920pt">
@@ -398,16 +398,16 @@ class Aircraft {
             </svg>
             </div>`;
     }
-    _getBallOrShipSvg(color) {
+    getBallOrShipSvg(color) {
         return `
             <div> 
             <?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="100%" height="100%" viewBox="0 0 174 174" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"><rect x="0" y="0" width="173.267" height="173.267" style="fill:none;"/><g><g><path d="M86.829,3.091c0,-0 -13.208,21.263 -13.766,45.836c-0.559,24.573 11.051,81.41 11.051,81.41" style="fill:none;stroke:#000;stroke-width:1px;"/><path d="M86.633,3.08c0,-0 13.209,21.263 13.767,45.836c0.559,24.573 -11.051,81.41 -11.051,81.41" style="fill:none;stroke:#000;stroke-width:1px;"/><path id="_--xml-version--1.0--encoding--UTF-8--standalone--no---" serif:id="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;" d="M86.829,3.091c0,-0 -27.41,3.403 -39.765,27.25c-8.196,15.821 -0.292,34.674 2.479,41.508c2.859,7.053 28.106,58.488 28.106,58.488" style="fill:${color};stroke:#000;stroke-width:1px;"/><path id="_--xml-version--1.0--encoding--UTF-8--standalone--no---1" serif:id="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;" d="M86.829,3.08c0,-0 27.411,3.403 39.765,27.25c8.197,15.821 0.293,34.674 -2.478,41.508c-2.859,7.053 -28.106,58.488 -28.106,58.488" style="fill:none;stroke:#000;stroke-width:1px;"/></g><path d="M101.2,130.499l-3.126,10.142l-20.435,-0l-3.812,-9.837l27.373,-0.305Z" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M84.525,140.641l0.537,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M91.162,140.641l-0.537,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M77.639,140.641l1.909,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M98.074,140.641l-1.909,13.991" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M48.466,99.811c-11.003,-14.496 -18.046,-32.985 -19.168,-46.719c-2.208,-27.049 21.128,-49.403 57.531,-50.001c35.546,-0.584 58.784,22.113 57.208,50.001c-0.777,13.753 -7.742,32.232 -18.747,46.719c-0.119,0.157 -0.239,0.313 -0.359,0.469l-23.731,30.219l-27.373,0.305l-25.468,-30.993l0.107,0Z" style="fill:none;stroke:#000;stroke-width:1.7px;"/><path d="M77.639,154.632l20.435,0l-0,3.508l-0.953,-0l-0,12.047l-18.529,0l0,-12.047l-0.953,-0l0,-3.508Z" style="fill:${color};stroke:#000;stroke-width:1.7px;"/></g></svg>
             </div>`;
     }
-    _getTowerSvg() {
+    getTowerSvg() {
         return `<img src="img/pole.svg" style="width: 42px; height:42px;">`;
     }
-    _getDefaultAcftSvg(rotation, color) {
+    getDefaultAcftSvg(rotation, color) {
         return `
             <div style="transform: rotate(${rotation - 90}deg);">
             <svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" height="28pt" width="28pt" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -432,7 +432,7 @@ class Aircraft {
         </div>`;
     }
 
-    _isHelicopter() {
+    isHelicopter() {
         return helAcft.includes(this.type) ||
             (this.callsign && (
                 (this.callsign.startsWith('DH') && this.callsign.replace(/\s/g, '').length == 5) ||
@@ -441,31 +441,31 @@ class Aircraft {
             ));
     }
 
-    _isPistonAcft() {
+    isPistonAcft() {
         return pistonAcft.includes(this.type) ||
             (this.callsign && (this.callsign.startsWith('DM') && this.callsign.replace(/\s/g, '').length == 5)) ||
             (this.callsign && (this.callsign.startsWith('DE') && this.callsign.replace(/\s/g, '').length == 5));
     }
 
     getSvgForType(rotation, color) {
-        if (this._isHelicopter()) {
-            return this._getHelicopterSvg(rotation, color);
+        if (this.isHelicopter()) {
+            return this.getHelicopterSvg(rotation, color);
         } else if (this.type == 'GLID') {
-            return this._getGliderSvg(rotation, color);
+            return this.getGliderSvg(rotation, color);
         } else if (businessAcft.includes(this.type)) {
-            return this._getBusinessAcftSvg(rotation, color);
-        } else if (this._isPistonAcft()) {
-            return this._getPistonAcftSvg(rotation, color);
+            return this.getBusinessAcftSvg(rotation, color);
+        } else if (this.isPistonAcft()) {
+            return this.getPistonAcftSvg(rotation, color);
         } else if (turboAcft.includes(this.type)) {
-            return this._getTurboAcftSvg(rotation, color);
+            return this.getTurboAcftSvg(rotation, color);
         } else if (fourEngAcft.includes(this.type)) {
-            return this._getFourEngAcftSvg(rotation, color);
+            return this.getFourEngAcftSvg(rotation, color);
         } else if (this.type == 'BALL' || this.type == 'SHIP') {
-            return this._getBallOrShipSvg(color);
+            return this.getBallOrShipSvg(color);
         } else if (this.registration == 'TWR') {
-            return this._getTowerSvg();
+            return this.getTowerSvg();
         } else {
-            return this._getDefaultAcftSvg(rotation, color);
+            return this.getDefaultAcftSvg(rotation, color);
         }
     }
 }

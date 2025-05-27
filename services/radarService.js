@@ -37,7 +37,6 @@ async function showAcftDetails() {
     eta.innerHTML = `${trackedAcft.eta}min`;
 }
 
-
 function showETA() {
     let dest = document.getElementById('icaoDest').value.toUpperCase();
     trackedAcft.calcEta(dest);
@@ -52,7 +51,6 @@ function validateLength(input) {
         flightDistLine.remove();
     }
 }
-
 
 function drawDist(acftPos, adPos) {
     if (flightDistLine) {
@@ -76,7 +74,6 @@ function calcDistance(adPos, trackedPos) {
     drawDist(acftPosition, adPosition);
     return distance;
 }
-
 
 function toggleRadar() {
     toggleActBtnRadar();

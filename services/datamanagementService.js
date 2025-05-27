@@ -1,4 +1,3 @@
-
 let fisAirspace = [];
 let edrAirspace = [];
 let eddAirspace = [];
@@ -38,12 +37,11 @@ let smallAerodromesActive = false;
 const DB_NAME = 'cacheDatabase';
 const STORE_NAME = 'cacheStore';
 
-
 function removePolygonsIfExist(airspaceKey, gaforCalc) {
     if (polygonLayers[airspaceKey] && polygonLayers[airspaceKey].length > 0) {
         polygonLayers[airspaceKey].forEach(polygon => polygon.removeFromMap());
         polygonLayers[airspaceKey] = [];
-        if (airspaceKey === 'gafor') {
+        if (airspaceKey === 'gafor' && gaforCalc) {
             gaforCalc.style.display = 'none';
             resetGaforVisuals();
         }
@@ -55,9 +53,9 @@ function removePolygonsIfExist(airspaceKey, gaforCalc) {
 function prepareGaforUI(gaforCalc) {
     let gaforInput = document.getElementById('gaforNumbers');
     let gaforDisplay = document.getElementById('gaforPolygonInfo');
-    gaforInput.value = '';
-    gaforDisplay.innerHTML = '';
-    gaforCalc.style.display = 'flex';
+    if (gaforInput) gaforInput.value = '';
+    if (gaforDisplay) gaforDisplay.innerHTML = '';
+    if (gaforCalc) gaforCalc.style.display = 'flex';
 }
 
 async function fetchAndSetAirspaceData(airspaceKey) {
@@ -72,33 +70,25 @@ async function fetchAdditionalAirspaceInfo(airspaceKey) {
     }
 }
 
-function initializeAndProcessPolygons(airspaceKey, airspaceData, mapInstance) {
+function initializePolygonLayerArray(airspaceKey) {
     if (!polygonLayers[airspaceKey]) {
         polygonLayers[airspaceKey] = [];
     }
-    if (!airspaceData) return;
-    const itemsToProcess = airspaceData === ctrAirspace ? airspaceData : [...airspaceData].reverse();
-    processItems(itemsToProcess, airspaceKey, mapInstance, polygonLayers[airspaceKey]);
 }
 
 async function togglePolygons(airspaceKey) {
     let gaforCalc = document.getElementById('calcGaforRadius');
     toggleActBtn(airspaceKey);
+    if (removePolygonsIfExist(airspaceKey, gaforCalc)) return;
 
-    if (removePolygonsIfExist(airspaceKey, gaforCalc)) {
-        return;
-    }
-
-    if (airspaceKey === 'gafor') {
-        prepareGaforUI(gaforCalc);
-    }
-
+    if (airspaceKey === 'gafor') prepareGaforUI(gaforCalc);
     let airspaceData = await fetchAndSetAirspaceData(airspaceKey);
     await fetchAdditionalAirspaceInfo(airspaceKey);
-    initializeAndProcessPolygons(airspaceKey, airspaceData, map);
+    initializePolygonLayerArray(airspaceKey);
+    if (!airspaceData) return;
+    const itemsToProcess = airspaceData === ctrAirspace ? airspaceData : [...airspaceData].reverse();
+    processItems(itemsToProcess, airspaceKey, map, polygonLayers[airspaceKey]);
 }
-
-
 
 async function getDB() {
     return idb.openDB(DB_NAME, 1, {
@@ -115,38 +105,20 @@ async function getFromIndexedDB(key, maxAge = 2 * 60 * 60 * 1000) {
     const cachedItem = await db.get(STORE_NAME, key);
     if (!cachedItem) return null;
     const { data, timestamp } = cachedItem;
-    const age = Date.now() - timestamp;
-    if (age < maxAge) {
-        return data;
-    }
+    if ((Date.now() - timestamp) < maxAge) return data;
     await db.delete(STORE_NAME, key);
     return null;
 }
 
 async function saveToIndexedDB(key, data) {
     const db = await getDB();
-    const payload = {
-        key,
-        data,
-        timestamp: Date.now(),
-    };
-    await db.put(STORE_NAME, payload);
-}
-
-async function saveToIndexedDB(key, data) {
-    const db = await getDB();
-    const payload = {
-        key,
-        data,
-        timestamp: Date.now(),
-    };
-    await db.put(STORE_NAME, payload);
+    await db.put(STORE_NAME, { key, data, timestamp: Date.now() });
 }
 
 async function getAndProcessCachedData(key) {
     const cachedData = await getFromIndexedDB(key);
     if (cachedData) {
-        processDataByKey(key, cachedData);
+        assignDataToGlobalVar(key, cachedData);
         return cachedData;
     }
     return null;
@@ -154,284 +126,245 @@ async function getAndProcessCachedData(key) {
 
 async function fetchProcessAndCacheFirebaseData(key) {
     const database = firebase.database();
-    const dataRef = database.ref(key);
-    const snapshot = await dataRef.once("value");
-
-    if (snapshot.exists()) {
-        let data = snapshot.val();
-        if (data !== null) {
-            if (Array.isArray(data) && data.length > 0 && data[0]?.features) {
-                data = data[0].features;
-            }
-            await saveToIndexedDB(key, data);
-            processDataByKey(key, data);
-            return data;
-        }
+    const snapshot = await database.ref(key).once("value");
+    if (!snapshot.exists()) {
+        showErrorBanner(`Keine Daten für ${key} gefunden.`);
+        return null;
     }
-    showErrorBanner(`Keine Daten für ${key} gefunden.`);
-    return null;
+    let data = snapshot.val();
+    if (data === null) return null;
+    if (Array.isArray(data) && data.length > 0 && data[0]?.features) data = data[0].features;
+    await saveToIndexedDB(key, data);
+    assignDataToGlobalVar(key, data);
+    return data;
 }
 
 function handleGetDataError(error, key) {
-    if (error.code === 'PERMISSION_DENIED') {
-        showErrorBanner("Zugriff auf Datenbank verweigert. Bitte neu anmelden.");
-    } else {
-        showErrorBanner(`Fehler beim Laden von ${key}.`);
-    }
+    const message = error.code === 'PERMISSION_DENIED' ? "Zugriff auf Datenbank verweigert. Bitte neu anmelden." : `Fehler beim Laden von ${key}.`;
+    showErrorBanner(message); 
     throw error;
 }
 
 async function getData(key) {
     let data = await getAndProcessCachedData(key);
-    if (data) {
-        return data;
-    }
+    if (data) return data;
     try {
-        data = await fetchProcessAndCacheFirebaseData(key);
-        return data;
+        return await fetchProcessAndCacheFirebaseData(key);
     } catch (error) {
         handleGetDataError(error, key);
     }
 }
 
+const dataAssignments = {
+    aerodromes: (data) => { aerodromes = data; markerData.aerodrome.source = data; },
+    navAids: (data) => { navAids = data; markerData.navaid.source = data; },
+    obstacles: (data) => { obstacles = data; markerData.obstacle.source = data; },
+    fisAirspace: (data) => fisAirspace = data,
+    edrAirspace: (data) => edrAirspace = data,
+    eddAirspace: (data) => eddAirspace = data,
+    ctrAirspace: (data) => ctrAirspace = data,
+    aipInfo: (data) => aipInfo = data,
+    rmzAirspace: (data) => rmzAirspace = data,
+    firAirspace: (data) => firAirspace = data,
+    gaforAirspace: (data) => gaforAirspace = data,
+    pjeAirspace: (data) => pjeAirspace = data,
+    tmzAirspace: (data) => tmzAirspace = data,
+    atzAirspace: (data) => atzAirspace = data,
+    ctrInfo: (data) => ctrInfo = data,
+    eddInfo: (data) => eddInfo = data,
+    edrInfo: (data) => edrInfo = data,
+    rmzInfo: (data) => rmzInfo = data,
+    tmzInfo: (data) => tmzInfo = data,
+    pjeInfo: (data) => pjeInfo = data,
+};
 
-function processDataByKey(key, data) {
-    if (key === 'aerodromes') {
-        aerodromes = data;
-        markerData.aerodrome.source = data;
-    } else if (key === 'navAids') {
-        navAids = data;
-        markerData.navaid.source = data;
-    } else if (key === 'obstacles') {
-        obstacles = data;
-        markerData.obstacle.source = data;
-    } else if (key === 'fisAirspace') {
-        fisAirspace = data;
-    } else if (key === 'edrAirspace') {
-        edrAirspace = data;
-    } else if (key === 'eddAirspace') {
-        eddAirspace = data;
-    } else if (key === 'ctrAirspace') {
-        ctrAirspace = data;
-    } else if (key === 'aipInfo') {
-        aipInfo = data;
-    } else if (key === 'rmzAirspace') {
-        rmzAirspace = data;
-    } else if (key === 'firAirspace') {
-        firAirspace = data;
-    } else if (key === 'gaforAirspace') {
-        gaforAirspace = data;
-    } else if (key === 'pjeAirspace') {
-        pjeAirspace = data;
-    } else if (key === 'tmzAirspace') {
-        tmzAirspace = data;
-    } else if (key === 'atzAirspace') {
-        atzAirspace = data;
-    } else if (key === 'ctrInfo') {
-        ctrInfo = data;
-    } else if (key === 'eddInfo') {
-        eddInfo = data;
-    } else if (key === 'edrInfo') {
-        edrInfo = data;
-    } else if (key === 'rmzInfo') {
-        rmzInfo = data;
-    } else if (key === 'tmzInfo') {
-        tmzInfo = data;
-    } else if (key === 'pjeInfo') {
-        pjeInfo = data;
+function assignDataToGlobalVar(key, data) {
+    if (dataAssignments[key]) {
+        dataAssignments[key](data);
     }
 }
 
+function createEdrPolygon(item, mapInstance, layerArray, isUpper) {
+    const lowerLimit = item.properties['Lower Limit'];
+    const lowerUnit = item.properties['Lower Limit Unit'];
+    const condition = (lowerUnit === 'FL' && lowerLimit < 100) || (lowerUnit === 'FT' && lowerLimit < 10000);
+    if (isUpper ? !condition : condition) {
+        return new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], lowerLimit, lowerUnit, item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+    }
+    return null;
+}
 
-function processItems(items, airspaceKey, map, layerArray) {
+function createCtrPolygon(item, mapInstance, layerArray) {
+    return new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, mapInstance, layerArray, item.properties.latitude, item.properties.longitude, item.properties.lowerlimit, item.properties.lowerlimitunit, item.properties.upperlimit, item.properties.uplimitunit);
+}
+
+function createFisPolygon(item, mapInstance, layerArray) {
+    return new FisAirspace(item.geometry, item.properties.Ident, 'null', mapInstance, layerArray, item.properties.SVS);
+}
+
+function createRmzPolygon(item, mapInstance, layerArray) {
+    return new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+}
+
+function createFirPolygon(item, mapInstance, layerArray) {
+    return new FirAirspace(item.geometry, item.properties.Ident, 'null', mapInstance, layerArray);
+}
+
+function createEddPolygon(item, mapInstance, layerArray) {
+    return new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+}
+
+function createGaforPolygon(item, mapInstance, layerArray) {
+    return new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', mapInstance, layerArray);
+}
+
+function createPjePolygon(item, mapInstance, layerArray) {
+    return new PjeAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray);
+}
+
+function createTmzPolygon(item, mapInstance, layerArray) {
+    return new TmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+}
+
+function createAtzPolygon(item, mapInstance, layerArray) {
+    return new AtzAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray);
+}
+
+const polygonConstructors = {
+    edrLower: (item, map, layers) => createEdrPolygon(item, map, layers, false),
+    edrUpper: (item, map, layers) => createEdrPolygon(item, map, layers, true),
+    ctr: createCtrPolygon, fis: createFisPolygon, rmz: createRmzPolygon,
+    fir: createFirPolygon, edd: createEddPolygon, gafor: createGaforPolygon,
+    pje: createPjePolygon, tmz: createTmzPolygon, atz: createAtzPolygon,
+};
+
+function processItems(items, airspaceKey, mapInstance, layerArray) {
     for (let i = items.length - 1; i >= 0; i--) {
         const item = items[i];
         if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
-            let polygon;
-            switch (airspaceKey) {
-                case 'edrLower':
-                    if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] < 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] < 10000)) {
-                        polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
-                    }
-                    break;
-                case 'edrUpper':
-                    if ((item.properties['Lower Limit Unit'] == 'FL' && item.properties['Lower Limit'] >= 100) || (item.properties['Lower Limit Unit'] == 'FT' && item.properties['Lower Limit'] >= 10000)) {
-
-                        polygon = new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
-
-                    }
-                    break;
-                case 'ctr':
-                    polygon = new CtrAirspace(item.geometry, item.properties.nam, item.properties.Ident, map, layerArray, item.properties.latitude, item.properties.longitude, item.properties.lowerlimit, item.properties.lowerlimitunit, item.properties.upperlimit, item.properties.uplimitunit);
-                    break;
-                case 'fis':
-                    polygon = new FisAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray, item.properties.SVS);
-                    break;
-                case 'rmz':
-                    polygon = new RmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
-                    break;
-                case 'fir':
-                    polygon = new FirAirspace(item.geometry, item.properties.Ident, 'null', map, layerArray);
-                    break;
-                case 'edd':
-                    polygon = new EddAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
-                    break;
-                case 'gafor':
-                    polygon = new GaforAirspace(item.geometry, item.properties.gafor_nummer, 'null', map, layerArray);
-                    break;
-                case 'pje':
-                    polygon = new PjeAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
-                    break;
-                case 'tmz':
-                    polygon = new TmzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
-                    break;
-                case 'atz':
-                    polygon = new AtzAirspace(item.geometry, item.properties.Name, item.properties.Ident, map, layerArray);
-                    break;
-            }
-            if (polygon) {
-                polygon.addToMap();
-                layerArray.push(polygon);
+            const constructor = polygonConstructors[airspaceKey];
+            if (constructor) {
+                const polygon = constructor(item, mapInstance, layerArray);
+                if (polygon) {
+                    polygon.addToMap();
+                    layerArray.push(polygon);
+                }
             }
         }
     }
 }
 
 function initializeSmallAerodromeEventHandler() {
-    if (map) {
-        map.on('zoomend', handleSmallAerodromeVisibilityBasedOnZoom);
-    } else {
-        console.error("Karte nicht initialisiert, bevor initializeMapEventHandlers aufgerufen wurde.");
-    }
+    if (map) map.on('zoomend', handleSmallAerodromeVisibilityBasedOnZoom);
+    else console.error("Karte nicht initialisiert.");
+}
+
+function addMarkersToMap(key) {
+    const source = markerData[key].source;
+    if (key === "obstacle") showObstacleMarkers(source, key);
+    else showGenericMarkers(source, key);
+    markerData[key].added = true;
+}
+
+function removeMarkersFromMap(key) {
+    if (key === "obstacle") removeObstacleClusterLayer(key);
+    else if (key === "aerodrome") removeAerodromeMarkersFromMap(key);
+    else markerData[key].markers.forEach(item => item.marker && map.removeLayer(item.marker));
+
+    markerData[key].markers = [];
+    markerData[key].added = false;
 }
 
 function toggleMarkers(key) {
     toggleActBtn(key);
-    if (!markerData[key]) {
-        console.warn(`Unbekannter Schlüssel: ${key}`);
-        return;
-    }
-    const { markers, added, source } = markerData[key];
-    if (!added) {
-        if (key === "obstacle") {
-            showObstacleMarkers(source, key);
-        } else {
-            showMarkers(source, key);
-        }
-    } else {
-        if (key === "obstacle") {
-            removeObstaceMarkers(key);
-        } else {
-            if (key === "aerodrome") {
-                removeAerodromeMarkers(key);
-            }
-            markers.forEach(item => item.marker && map.removeLayer(item.marker));
-            markerData[key].markers = [];
-        }
-    }
-    markerData[key].added = !added;
+    if (!markerData[key]) { console.warn(`Unbekannter Schlüssel: ${key}`); return; }
+    if (!markerData[key].added) addMarkersToMap(key);
+    else removeMarkersFromMap(key);
 }
 
-function removeObstaceMarkers(key) {
-    map.removeLayer(markerData[key].clusterLayer);
-    markerData[key].markers = [];
-
+function removeObstacleClusterLayer(key) {
+    if (markerData[key].clusterLayer) map.removeLayer(markerData[key].clusterLayer);
+    markerData[key].clusterLayer = null;
 }
 
-function removeAerodromeMarkers(key) {
+function removeAerodromeMarkersFromMap(key) {
     if (smallAerodromesActive) {
-        smallAerodromeInstances.forEach(saItem => {
-            map.removeLayer(saItem.marker);
-
-        });
+        smallAerodromeInstances.forEach(saItem => map.removeLayer(saItem.marker));
         smallAerodromesActive = false;
     }
-    smallAerodromeInstances = [];
+    smallAerodromeInstances = []; 
+    markerData[key].markers.forEach(item => {
+        if (item && item.marker && !(item instanceof SmallAerodrome)) map.removeLayer(item.marker);
+    });
+}
+
+function createAndAddObstacleMarker(data, clusterGroup) {
+    const obstacle = new Obstacle(data.geoLat, data.geoLong, data.txtName, data['Parent Designator'], data['Type of Obstacle'], data.LIGHTED, data.DayMarking, data['ValElev (ft)'], data['valHgt (ft)'], map);
+    obstacle.marker.options.parentDesignator = data['Parent Designator']; 
+    obstacle.addToCluster(clusterGroup);
+    return obstacle;
+}
+
+function setupObstacleClusterTooltip(clusterGroup) {
+    clusterGroup.on('clustermouseover', function (e) {
+        const markersInCluster = e.layer.getAllChildMarkers();
+        const designators = [...new Set(markersInCluster.map(m => m.options.parentDesignator))];
+        e.layer.bindTooltip(designators.join('<br>')).openTooltip();
+    });
 }
 
 function showObstacleMarkers(source, key) {
     const markerClusterGroup = L.markerClusterGroup();
-    markerClusterGroup.on('clustermouseover', function (e) {
-        const cluster = e.layer;
-        const markers = cluster.getAllChildMarkers();
-        const parentDesignators = [...new Set(markers.map(marker => marker.options.parentDesignator))];
-        const tooltipContent = parentDesignators.join('<br>');
-        cluster.bindTooltip(tooltipContent).openTooltip();
-    });
+    setupObstacleClusterTooltip(markerClusterGroup);
     markerData[key].markers = source
         .filter(data => data.geoLat && data.geoLong)
-        .map(data => {
-            const obstacle = new Obstacle(
-                data.geoLat,
-                data.geoLong,
-                data.txtName,
-                data['Parent Designator'],
-                data['Type of Obstacle'],
-                data.LIGHTED,
-                data.DayMarking,
-                data['ValElev (ft)'],
-                data['valHgt (ft)'],
-                map
-            );
-            obstacle.marker.options.parentDesignator = data['Parent Designator'];
-            obstacle.addToCluster(markerClusterGroup);
-            return obstacle;
-        });
+        .map(data => createAndAddObstacleMarker(data, markerClusterGroup));
     map.addLayer(markerClusterGroup);
     markerData[key].clusterLayer = markerClusterGroup;
 }
 
-
-function showMarkers(source, key) {
-    markerData[key].markers = source
-        .map(data => {
-            let item;
-            if (key === "aerodrome") {
-                initializeSmallAerodromeEventHandler();
-                if (data.icaoCode) {
-                    item = new Aerodrome(data.geometry, data.name, map, data.icaoCode, data.runways);
-                } else {
-                    item = new SmallAerodrome(data.geometry, data.name, map, data.runways);
-                    smallAerodromeInstances.push(item);
-                }
-            } else if (key === "navaid") {
-                item = new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted, data.properties.icaocode, data.properties.type || 'unknown');
-            }
-            if (item && !(item instanceof SmallAerodrome)) {
-                item.addToMap();
-            }
-            return item;
-        });
-    checkSmallAerodromeVisibilityBasedOnZoom(key);
+function createAerodromeMarker(data) {
+    if (data.icaoCode) return new Aerodrome(data.geometry, data.name, map, data.icaoCode, data.runways);
+    const smallAero = new SmallAerodrome(data.geometry, data.name, map, data.runways);
+    smallAerodromeInstances.push(smallAero);
+    return smallAero;
 }
 
-
-function checkSmallAerodromeVisibilityBasedOnZoom(key) {
-    if (map.getZoom() >= 9 && key === "aerodrome") {
-        smallAerodromeInstances.forEach(saItem => {
-            saItem.addToMap();
-            smallAerodromesActive = true;
-        })
-    }
+function createNavaidMarker(data) {
+    return new Navaid(data.geometry.coordinates[1], data.geometry.coordinates[0], data.properties.txtname, map, data.properties['select-source-layer'], data.properties.ident, data.properties.charted || data.properties.dme_charted, data.properties.icaocode, data.properties.type || 'unknown');
 }
 
+function showGenericMarkers(source, key) {
+    markerData[key].markers = source.map(data => {
+        let item;
+        if (key === "aerodrome") {
+            initializeSmallAerodromeEventHandler();
+            item = createAerodromeMarker(data);
+        } else if (key === "navaid") {
+            item = createNavaidMarker(data);
+        }
+        if (item && !(item instanceof SmallAerodrome)) item.addToMap();
+        return item;
+    });
+    if (key === "aerodrome") checkSmallAerodromeVisibilityBasedOnZoom();
+}
+
+function updateSmallAerodromeVisibility(show) {
+    smallAerodromeInstances.forEach(saItem => {
+        if (show) saItem.addToMap();
+        else map.removeLayer(saItem.marker);
+    });
+    smallAerodromesActive = show;
+}
+
+function checkSmallAerodromeVisibilityBasedOnZoom() {
+    if (!map || !markerData.aerodrome.added) return;
+    const currentZoom = map.getZoom();
+    if (currentZoom >= 9 && !smallAerodromesActive) updateSmallAerodromeVisibility(true);
+    else if (currentZoom < 9 && smallAerodromesActive) updateSmallAerodromeVisibility(false);
+}
 
 function handleSmallAerodromeVisibilityBasedOnZoom() {
-    if (!map) {
-        return;
-    }
-    const currentZoom = map.getZoom();
-    if (currentZoom >= 9 && !smallAerodromesActive) {
-        smallAerodromeInstances.forEach(saItem => {
-            saItem.addToMap();
-            smallAerodromesActive = true;
-        })
-    }
-    if (currentZoom < 9 && smallAerodromesActive) {
-        smallAerodromeInstances.forEach(saItem => {
-            map.removeLayer(saItem.marker);
-            smallAerodromesActive = false;
-        })
-    }
+    checkSmallAerodromeVisibilityBasedOnZoom();
 }
 

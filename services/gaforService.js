@@ -2,23 +2,16 @@ let currentGaforBoundingPolygon = null;
 
 function extractGaforNumbers() {
     const inputElement = document.getElementById("gaforNumbers");
-    if (!inputElement) {
-        console.error("GAFOR Input-Element nicht gefunden.");
-        return null;
-    }
+    if (!inputElement) { console.error("GAFOR Input-Element nicht gefunden."); return null; }
     const input = inputElement.value.trim();
-    inputElement.value = '';
+    inputElement.value = ''; // Clear after read
     const numbers = input.split(/\s+/).filter(Boolean).map(num => num.padStart(2, "0"));
-    if (!numbers.length) {
-        showErrorBanner("Bitte geben Sie gültige GAFOR-Nummern ein.");
-        return null;
-    }
+    if (!numbers.length) { showErrorBanner("Bitte geben Sie gültige GAFOR-Nummern ein."); return null; }
     return numbers;
 }
 
 function filterGaforFeaturesByNumbers(numbers) {
-    // Ensure airspaceStates.gafor.airspace is loaded and available
-    if (!airspaceStates || !airspaceStates.gafor || !airspaceStates.gafor.airspace) {
+    if (!airspaceStates?.gafor?.airspace) { // Optional chaining for safety
         showErrorBanner("GAFOR Airspace-Daten sind nicht verfügbar.");
         return null;
     }
@@ -32,229 +25,172 @@ function filterGaforFeaturesByNumbers(numbers) {
     return gaforFeatures;
 }
 
-function findBoundingBox(gaforFeatures) {
-    let overallMinLat = Infinity, overallMaxLat = -Infinity, overallMinLon = Infinity, overallMaxLon = -Infinity;
-    
-    let northMostPoint = null; // Will store [lat, lon]
-    let southMostPoint = null; // Will store [lat, lon]
-    let eastMostPoint = null;  // Will store [lat, lon]
-    let westMostPoint = null;  // Will store [lat, lon]
-
-    let foundAnyCoords = false;
-
-    gaforFeatures.forEach(item => {
-        if (!item.geometry || !item.geometry.coordinates) return;
-
-        const type = item.geometry.type;
-        const coords = item.geometry.coordinates;
-
-        function processSingleCoordinate(lat, lon) {
-            if (!foundAnyCoords) {
-                // Initialize with the first valid point
-                overallMaxLat = lat; northMostPoint = [lat, lon];
-                overallMinLat = lat; southMostPoint = [lat, lon];
-                overallMaxLon = lon; eastMostPoint  = [lat, lon];
-                overallMinLon = lon; westMostPoint  = [lat, lon];
-                foundAnyCoords = true;
-            } else {
-                // Update overall bounding box extents
-                if (lat > overallMaxLat) overallMaxLat = lat;
-                if (lat < overallMinLat) overallMinLat = lat;
-                if (lon > overallMaxLon) overallMaxLon = lon;
-                if (lon < overallMinLon) overallMinLon = lon;
-
-                // Determine extreme points
-                // Northernmost: highest latitude. If tie, the first one encountered is kept.
-                if (lat > northMostPoint[0]) {
-                    northMostPoint = [lat, lon];
-                }
-                // Southernmost: lowest latitude. If tie, the first one encountered is kept.
-                if (lat < southMostPoint[0]) {
-                    southMostPoint = [lat, lon];
-                }
-                // Easternmost: highest longitude. If tie, the first one encountered is kept.
-                if (lon > eastMostPoint[1]) { // Compare with longitude (index 1)
-                    eastMostPoint = [lat, lon];
-                }
-                // Westernmost: lowest longitude. If tie, the first one encountered is kept.
-                if (lon < westMostPoint[1]) { // Compare with longitude (index 1)
-                    westMostPoint = [lat, lon];
-                }
-            }
-        }
-        
-        function processRing(ring) { // ring is array of [lon, lat]
-            ring.forEach(point => {
-                const lon = point[0];
-                const lat = point[1];
-                if (typeof lon === 'number' && typeof lat === 'number' && isFinite(lon) && isFinite(lat)) {
-                    processSingleCoordinate(lat, lon); // Pass lat, lon
-                }
-            });
-        }
-
-        function processPolygonCoords(polygonCoords) { // polygonCoords is array of rings
-            polygonCoords.forEach(ring => processRing(ring));
-        }
-
-        if (type === "Polygon") {
-            processPolygonCoords(coords);
-        } else if (type === "MultiPolygon") {
-            coords.forEach(polygon => processPolygonCoords(polygon));
-        }
-        // Add other types like Point, LineString if necessary
-    });
-
-    if (!foundAnyCoords || !northMostPoint || !southMostPoint || !eastMostPoint || !westMostPoint) {
-        console.error("Extrempunkte konnten nicht ermittelt werden oder keine gültigen Koordinaten gefunden.");
-        return null;
-    }
-    
-    return { 
-        minLat: overallMinLat, maxLat: overallMaxLat, 
-        minLon: overallMinLon, maxLon: overallMaxLon,
-        northPoint: northMostPoint, 
-        southPoint: southMostPoint, 
-        eastPoint: eastMostPoint,   
-        westPoint: westMostPoint    
+function initializeBoundingData() {
+    return {
+        minLat: Infinity, maxLat: -Infinity, minLon: Infinity, maxLon: -Infinity,
+        northPoint: null, southPoint: null, eastPoint: null, westPoint: null,
+        foundAnyCoords: false
     };
 }
 
+function updateBoundingExtremes(lat, lon, data) {
+    if (!data.foundAnyCoords) {
+        data.maxLat = lat; data.northPoint = [lat, lon];
+        data.minLat = lat; data.southPoint = [lat, lon];
+        data.maxLon = lon; data.eastPoint = [lat, lon];
+        data.minLon = lon; data.westPoint = [lat, lon];
+        data.foundAnyCoords = true;
+    } else {
+        if (lat > data.maxLat) data.maxLat = lat;
+        if (lat < data.minLat) data.minLat = lat;
+        if (lon > data.maxLon) data.maxLon = lon;
+        if (lon < data.minLon) data.minLon = lon;
+        if (lat > data.northPoint[0]) data.northPoint = [lat, lon];
+        if (lat < data.southPoint[0]) data.southPoint = [lat, lon];
+        if (lon > data.eastPoint[1]) data.eastPoint = [lat, lon];
+        if (lon < data.westPoint[1]) data.westPoint = [lat, lon];
+    }
+}
+
+function processSingleCoordinateForBoundingBox(lat, lon, boundingData) {
+    if (typeof lon === 'number' && typeof lat === 'number' && isFinite(lon) && isFinite(lat)) {
+        updateBoundingExtremes(lat, lon, boundingData);
+    }
+}
+
+function processRingForBoundingBox(ring, boundingData) {
+    ring.forEach(point => processSingleCoordinateForBoundingBox(point[1], point[0], boundingData)); // lon, lat -> lat, lon
+}
+
+function processPolygonCoordsForBoundingBox(polygonCoords, boundingData) {
+    polygonCoords.forEach(ring => processRingForBoundingBox(ring, boundingData));
+}
+
+function findBoundingBox(gaforFeatures) {
+    const boundingData = initializeBoundingData();
+    gaforFeatures.forEach(item => {
+        if (!item.geometry || !item.geometry.coordinates) return;
+        const type = item.geometry.type;
+        const coords = item.geometry.coordinates;
+        if (type === "Polygon") processPolygonCoordsForBoundingBox(coords, boundingData);
+        else if (type === "MultiPolygon") coords.forEach(polygon => processPolygonCoordsForBoundingBox(polygon, boundingData));
+    });
+    if (!boundingData.foundAnyCoords) {
+        console.error("Extrempunkte konnten nicht ermittelt werden.");
+        return null;
+    }
+    return boundingData;
+}
+
+function removeCurrentGaforDisplayPolygon() {
+    if (currentGaforBoundingPolygon) {
+        if (typeof L !== 'undefined' && map && map.hasLayer(currentGaforBoundingPolygon)) {
+            map.removeLayer(currentGaforBoundingPolygon);
+        } else if (currentGaforBoundingPolygon.removeFromMap) { // Fallback for non-Leaflet
+            currentGaforBoundingPolygon.removeFromMap();
+        }
+        currentGaforBoundingPolygon = null;
+    }
+}
+
+function createAndDisplayGaforPolygon(vertices) {
+    if (typeof L !== 'undefined' && map && typeof L.polygon === 'function') {
+        currentGaforBoundingPolygon = L.polygon(vertices, { color: 'orange', weight: 2, fillOpacity: 0.1 }).addTo(map);
+    } else {
+        console.warn("Kartenbibliothek nicht verfügbar oder Polygon konnte nicht gezeichnet werden.");
+    }
+}
+
+function updateGaforDisplayButtonState(enable) {
+    const resetGaforButton = document.getElementById("resetGafor");
+    if (resetGaforButton) resetGaforButton.disabled = !enable;
+}
 
 function calculateAndDisplayGaforElements(gaforFeatures) {
     const boundingBoxData = findBoundingBox(gaforFeatures);
     if (!boundingBoxData) {
-        const resetGaforButton = document.getElementById("resetGafor");
-        if (resetGaforButton) resetGaforButton.disabled = true;
+        updateGaforDisplayButtonState(false);
         showExtremeCoordinates(null, null, null, null);
         return false;
     }
-    const { 
-        northPoint, southPoint, eastPoint, westPoint 
-    } = boundingBoxData;
-    const displayPolygonVertices = [
-        northPoint,
-        eastPoint, 
-        southPoint,
-        westPoint   
-    ];
-    if (currentGaforBoundingPolygon) {
-        if (typeof L !== 'undefined' && map && map.hasLayer(currentGaforBoundingPolygon)) {
-            map.removeLayer(currentGaforBoundingPolygon);
-        } else if (currentGaforBoundingPolygon.removeFromMap) { 
-             currentGaforBoundingPolygon.removeFromMap();
-        }
-        currentGaforBoundingPolygon = null;
-    }
-    if (typeof L !== 'undefined' && map && typeof L.polygon === 'function') {
-         currentGaforBoundingPolygon = L.polygon(displayPolygonVertices, { color: 'orange', weight: 2, fillOpacity: 0.1 }).addTo(map);
-    } else {
-        console.warn("Kartenbibliothek (z.B. Leaflet) nicht verfügbar oder Polygon konnte nicht gezeichnet werden.");
-    }
+    const { northPoint, eastPoint, southPoint, westPoint } = boundingBoxData;
+    const displayPolygonVertices = [northPoint, eastPoint, southPoint, westPoint];
+    removeCurrentGaforDisplayPolygon();
+    createAndDisplayGaforPolygon(displayPolygonVertices);
     showExtremeCoordinates(northPoint, eastPoint, southPoint, westPoint);
-    const resetGaforButton = document.getElementById("resetGafor");
-    if (resetGaforButton) resetGaforButton.disabled = false;
-
+    updateGaforDisplayButtonState(true);
     return true;
 }
-
 
 function processSelectedGaforAreas() {
     setTimeout(() => {
         const numbers = extractGaforNumbers();
-        if (!numbers) {
-            const resetGaforButton = document.getElementById("resetGafor");
-            if (resetGaforButton) resetGaforButton.disabled = true;
-            showExtremeCoordinates(null, null, null, null); 
-            return;
-        }
+        if (!numbers) { updateGaforDisplayButtonState(false); showExtremeCoordinates(null, null, null, null); return; }
 
         const gaforFeatures = filterGaforFeaturesByNumbers(numbers);
-        if (!gaforFeatures) {
-            const resetGaforButton = document.getElementById("resetGafor");
-            if (resetGaforButton) resetGaforButton.disabled = true;
-            showExtremeCoordinates(null, null, null, null); 
-            return;
-        }
+        if (!gaforFeatures) { updateGaforDisplayButtonState(false); showExtremeCoordinates(null, null, null, null); return; }
 
         const success = calculateAndDisplayGaforElements(gaforFeatures);
         if (!success) {
-             const resetGaforButton = document.getElementById("resetGafor");
-             if (resetGaforButton && !currentGaforBoundingPolygon) { 
-                resetGaforButton.disabled = true;
-             }
-             showExtremeCoordinates(null, null, null, null);
+            updateGaforDisplayButtonState(!!currentGaforBoundingPolygon); // Disable if no polygon
+            showExtremeCoordinates(null, null, null, null);
         }
     }, 0);
 }
 
+function formatCoordinateForDisplay(point) {
+    const lat = typeof toDMS === 'function' ? toDMS(point[0], true) : `${point[0].toFixed(6)}N`;
+    const lon = typeof toDMS === 'function' ? toDMS(point[1], false) : `${point[1].toFixed(6)}E`;
+    return `${lat} ${lon}`;
+}
+
+function createHtmlForExtremePoint(label, point) {
+    return `
+        <div class="gaforOrder">
+            <span style="width: 12px;">${label}:</span>
+            <span>${formatCoordinateForDisplay(point)}</span>
+        </div>`;
+}
+
 function showExtremeCoordinates(north, east, south, west) {
-    const gaforDisplayElement = document.getElementById('gaforPolygonInfo'); 
-    if (gaforDisplayElement) {
-        gaforDisplayElement.innerHTML = ''; 
-        if (north && east && south && west) {
-            const extremePoints = [
-                { label: "N", point: north },
-                { label: "E", point: east },
-                { label: "S", point: south },
-                { label: "W", point: west }
-            ];
-            const formatCoord = (point) => { 
-                const lat = typeof toDMS === 'function' ? toDMS(point[0], true) : `${point[0].toFixed(6)}N`;
-                const lon = typeof toDMS === 'function' ? toDMS(point[1], false) : `${point[1].toFixed(6)}E`;
-                return `${lat} ${lon}`;
-            };
-            extremePoints.forEach(item => {
-               gaforDisplayElement.innerHTML +=`
-               <div class="gaforOrder">
-                    <span style="width: 12px;" >${item.label}:</span>
-                    <span >${formatCoord(item.point)}</span>
-               </div>`;
-            });
-        } else {
-            gaforDisplayElement.innerHTML = '';
-        }
-    } else {
-        console.error("GAFOR Display Element ('gaforPolygonInfo') nicht gefunden.");
+    const gaforDisplayElement = document.getElementById('gaforPolygonInfo');
+    if (!gaforDisplayElement) { console.error("GAFOR Display Element nicht gefunden."); return; }
+    gaforDisplayElement.innerHTML = '';
+    if (north && east && south && west) {
+        const extremePoints = [
+            { label: "N", point: north }, { label: "E", point: east },
+            { label: "S", point: south }, { label: "W", point: west }
+        ];
+        extremePoints.forEach(item => gaforDisplayElement.innerHTML += createHtmlForExtremePoint(item.label, item.point));
     }
     const gaforRadiusDisplay = document.getElementById('gaforRadius');
-    if (gaforRadiusDisplay) {
-        gaforRadiusDisplay.innerHTML = ''; 
-    }
+    if (gaforRadiusDisplay) gaforRadiusDisplay.innerHTML = '';
 }
 
 function calculateDistance([lat1, lon1], [lat2, lon2]) {
     const toRadians = deg => (deg * Math.PI) / 180;
-    const R = 6371;
+    const R = 6371; // Earth radius in kilometers
     const dLat = toRadians(lat2 - lat1);
     const dLon = toRadians(lon2 - lon1);
     const rLat1 = toRadians(lat1);
     const rLat2 = toRadians(lat2);
-    const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(rLat1) *
-        Math.cos(rLat2) *
-        Math.sin(dLon / 2) ** 2;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(rLat1) * Math.cos(rLat2) * Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; 
+    return R * c;
 }
 
 function validateInput(input) {
-    input.value = input.value
-        .replace(/[^0-9\s]/g, '')
-        .replace(/\s+/g, ' ');    
+    input.value = input.value.replace(/[^0-9\s]/g, '').replace(/\s+/g, ' ');
 }
 
 function resetGaforUIElements() {
     const gaforInput = document.getElementById("gaforNumbers");
-    if (gaforInput) {
-        gaforInput.value = '';
-    }
-    showExtremeCoordinates(null, null, null, null);
+    if (gaforInput) gaforInput.value = '';
+    showExtremeCoordinates(null, null, null, null); // Clears the display
 }
 
 function resetGaforPolygonStyles() {
-    if (airspaceStates && airspaceStates.gafor && airspaceStates.gafor.airspace && airspaceStates.gafor.airspace.length > 0 && polygonLayers && polygonLayers.gafor) {
+    if (airspaceStates?.gafor?.airspace?.length > 0 && polygonLayers?.gafor) {
         polygonLayers.gafor.forEach(polygon => {
             if (polygon.layer && typeof polygon.layer.setStyle === 'function') {
                 polygon.layer.setStyle({ fillColor: 'lightblue', fillOpacity: 0.5 });
@@ -265,21 +201,10 @@ function resetGaforPolygonStyles() {
 }
 
 function resetGaforVisuals() {
-    if (currentGaforBoundingPolygon) {
-        if (typeof L !== 'undefined' && map && map.hasLayer(currentGaforBoundingPolygon)) {
-            map.removeLayer(currentGaforBoundingPolygon);
-        } else if (currentGaforBoundingPolygon.removeFromMap) { 
-             currentGaforBoundingPolygon.removeFromMap();
-        }
-        currentGaforBoundingPolygon = null;
-    }
-
+    removeCurrentGaforDisplayPolygon();
     resetGaforUIElements();
-    resetGaforPolygonStyles(); 
-    const resetGaforButton = document.getElementById("resetGafor");
-    if (resetGaforButton) {
-        resetGaforButton.disabled = true;
-    }
+    resetGaforPolygonStyles();
+    updateGaforDisplayButtonState(false); // Disable reset button
     const gaforLoaderPos = document.getElementById("loaderGaforPos");
     if (gaforLoaderPos) gaforLoaderPos.style.display = "none";
 }

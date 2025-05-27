@@ -153,11 +153,17 @@ class AirspacePolygon {
         if (this.layer) this.layer.setStyle(this.getStyle());
     }
 
-    async _handleLabelClick() {
+  async _handleLabelClick() {
         currentAirspace = this;
-        const id = await this.setAipInfoAirspace(this.ident || this.name);
-        if (id) this.showInfoPdf(id);
-        else console.log('No PDF ID found for:', this.ident || this.name);
+        const identifierForLookup = (this instanceof EdrAirspace || this instanceof EddAirspace)
+            ? this.ident 
+            : (this.name || this.ident);
+        const id = await this.setAipInfoAirspace(identifierForLookup);
+        if (id) {
+            this.showInfoPdf(id);
+        } else {
+            console.log('No PDF ID found for (label click):', identifierForLookup);
+        }
     }
 
     _addEventListenersToLabelMarker() {
