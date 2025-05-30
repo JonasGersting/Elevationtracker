@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="fonts/fonts.css">
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
 </head>
-
 <body>
     <div class="topSearchBar">
         <div class="searchDropDown">
@@ -30,7 +29,6 @@
                     <button class="searchButton" onclick="setSearchCat('CTR')">CTR</button>
                     <button class="searchButton" onclick="setSearchCat('Hinderniss')">Hinderniss</button>
                     <button class="searchButton" onclick="setSearchCat('NAV-Aid')">NAV-Aid</button>
-
                 </div>
             </div>
         </div>
@@ -200,7 +198,7 @@
                 <button id="loginBtn" class="shadow" type="submit">Login</button>
             </form>
             <div id="loginSuccess" class="d-none">
-                <span>Sie werden eingeloggt...</span>
+                <span>Daten werden geladen...</span>
                 <span class="loader z-index1100"></span>
             </div>
         </div>
@@ -261,11 +259,7 @@
 
     </div>
 </body>
-<script src="libs/firebase/firebase-app-compat.js"></script>
-<script src="libs/firebase/firebase-functions-compat.js"></script>
-<script src="libs/firebase/firebase-auth-compat.js"></script>
-<script src="libs/firebase/firebase-database-compat.js"></script>
-<script src="services/firebaseService.js" type="module"></script>
+<script src="libs/firebase/firebase.bundle.js" type="module"></script>
 <script src="libs/indexDB/umd.js"></script>
 <script src="libs/leaflet/leaflet.js"></script>
 <script src="libs/leaflet/OSMBuildings-Leaflet.js"></script>

@@ -36,6 +36,18 @@ let smallAerodromeInstances = [];
 let smallAerodromesActive = false;
 const DB_NAME = 'cacheDatabase';
 const STORE_NAME = 'cacheStore';
+let fbAccessData, fbDatabase, fbDbRef, fbDbGet;
+
+function initializeFirebaseDataDependencies() {
+    fbAccessData = window.firebaseGlobalAccess;
+    if (fbAccessData) {
+        fbDatabase = fbAccessData.database;
+        fbDbRef = fbAccessData.dbRef;
+        fbDbGet = fbAccessData.dbGet;
+    } else {
+        showErrorBanner("Firebase Global Access ist nicht verfügbar. Bitte neu laden.");
+    }
+}
 
 function removePolygonsIfExist(airspaceKey, gaforCalc) {
     if (polygonLayers[airspaceKey] && polygonLayers[airspaceKey].length > 0) {
@@ -43,7 +55,7 @@ function removePolygonsIfExist(airspaceKey, gaforCalc) {
         polygonLayers[airspaceKey] = [];
         if (airspaceKey === 'gafor' && gaforCalc) {
             gaforCalc.style.display = 'none';
-            resetGaforVisuals();
+            if (typeof resetGaforVisuals === 'function') resetGaforVisuals();
         }
         return true;
     }
@@ -78,19 +90,23 @@ function initializePolygonLayerArray(airspaceKey) {
 
 async function togglePolygons(airspaceKey) {
     let gaforCalc = document.getElementById('calcGaforRadius');
-    toggleActBtn(airspaceKey);
+    if (typeof toggleActBtn === 'function') toggleActBtn(airspaceKey);
     if (removePolygonsIfExist(airspaceKey, gaforCalc)) return;
-
     if (airspaceKey === 'gafor') prepareGaforUI(gaforCalc);
-    let airspaceData = await fetchAndSetAirspaceData(airspaceKey);
+    await fetchAndSetAirspaceData(airspaceKey);
     await fetchAdditionalAirspaceInfo(airspaceKey);
     initializePolygonLayerArray(airspaceKey);
-    if (!airspaceData) return;
-    const itemsToProcess = airspaceData === ctrAirspace ? airspaceData : [...airspaceData].reverse();
+    const currentAirspaceData = airspaceStates[airspaceKey].airspace;
+    if (!currentAirspaceData) return;
+    const itemsToProcess = airspaceKey === 'ctr' ? currentAirspaceData : [...currentAirspaceData].reverse();
     processItems(itemsToProcess, airspaceKey, map, polygonLayers[airspaceKey]);
 }
 
 async function getDB() {
+    if (typeof idb === 'undefined' || !idb.openDB) {
+        showErrorBanner("IndexedDB Library (idb) nicht gefunden. Bitte laden Sie die idb-Bibliothek.");
+        throw new Error("IndexedDB Library nicht gefunden.");
+    }
     return idb.openDB(DB_NAME, 1, {
         upgrade(db) {
             if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -125,15 +141,26 @@ async function getAndProcessCachedData(key) {
 }
 
 async function fetchProcessAndCacheFirebaseData(key) {
-    const database = firebase.database();
-    const snapshot = await database.ref(key).once("value");
+    if (!fbDatabase || !fbDbRef || !fbDbGet) {
+        showErrorBanner(`Firebase Database nicht initialisiert für ${key}. Bitte neu laden.`);
+        initializeFirebaseDataDependencies();
+        if (!fbDatabase || !fbDbRef || !fbDbGet) { 
+            showErrorBanner(`Firebase Database nicht initialisiert für ${key}.`);
+            return null;
+        }
+    }
+    const dataRef = fbDbRef(fbDatabase, key);
+    const snapshot = await fbDbGet(dataRef); 
+
     if (!snapshot.exists()) {
         showErrorBanner(`Keine Daten für ${key} gefunden.`);
         return null;
     }
     let data = snapshot.val();
     if (data === null) return null;
-    if (Array.isArray(data) && data.length > 0 && data[0]?.features) data = data[0].features;
+    if (Array.isArray(data) && data.length > 0 && data[0] && typeof data[0].features !== 'undefined') {
+        data = data[0].features;
+    }
     await saveToIndexedDB(key, data);
     assignDataToGlobalVar(key, data);
     return data;
@@ -141,7 +168,7 @@ async function fetchProcessAndCacheFirebaseData(key) {
 
 function handleGetDataError(error, key) {
     const message = error.code === 'PERMISSION_DENIED' ? "Zugriff auf Datenbank verweigert. Bitte neu anmelden." : `Fehler beim Laden von ${key}.`;
-    showErrorBanner(message); 
+    showErrorBanner(message);
     throw error;
 }
 
@@ -159,17 +186,17 @@ const dataAssignments = {
     aerodromes: (data) => { aerodromes = data; markerData.aerodrome.source = data; },
     navAids: (data) => { navAids = data; markerData.navaid.source = data; },
     obstacles: (data) => { obstacles = data; markerData.obstacle.source = data; },
-    fisAirspace: (data) => fisAirspace = data,
-    edrAirspace: (data) => edrAirspace = data,
-    eddAirspace: (data) => eddAirspace = data,
-    ctrAirspace: (data) => ctrAirspace = data,
+    fisAirspace: (data) => { fisAirspace = data; airspaceStates.fis.airspace = data; },
+    edrAirspace: (data) => { edrAirspace = data; airspaceStates.edrLower.airspace = data; airspaceStates.edrUpper.airspace = data; },
+    eddAirspace: (data) => { eddAirspace = data; airspaceStates.edd.airspace = data; },
+    ctrAirspace: (data) => { ctrAirspace = data; airspaceStates.ctr.airspace = data; },
     aipInfo: (data) => aipInfo = data,
-    rmzAirspace: (data) => rmzAirspace = data,
-    firAirspace: (data) => firAirspace = data,
-    gaforAirspace: (data) => gaforAirspace = data,
-    pjeAirspace: (data) => pjeAirspace = data,
-    tmzAirspace: (data) => tmzAirspace = data,
-    atzAirspace: (data) => atzAirspace = data,
+    rmzAirspace: (data) => { rmzAirspace = data; airspaceStates.rmz.airspace = data; },
+    firAirspace: (data) => { firAirspace = data; airspaceStates.fir.airspace = data; },
+    gaforAirspace: (data) => { gaforAirspace = data; airspaceStates.gafor.airspace = data; },
+    pjeAirspace: (data) => { pjeAirspace = data; airspaceStates.pje.airspace = data; },
+    tmzAirspace: (data) => { tmzAirspace = data; airspaceStates.tmz.airspace = data; },
+    atzAirspace: (data) => { atzAirspace = data; airspaceStates.atz.airspace = data; },
     ctrInfo: (data) => ctrInfo = data,
     eddInfo: (data) => eddInfo = data,
     edrInfo: (data) => edrInfo = data,
@@ -256,7 +283,7 @@ function processItems(items, airspaceKey, mapInstance, layerArray) {
 
 function initializeSmallAerodromeEventHandler() {
     if (map) map.on('zoomend', handleSmallAerodromeVisibilityBasedOnZoom);
-    else console.error("Karte nicht initialisiert.");
+    else showErrorBanner("Karte ist nicht initialisiert. Bitte neu laden.");
 }
 
 function addMarkersToMap(key) {
@@ -276,8 +303,8 @@ function removeMarkersFromMap(key) {
 }
 
 function toggleMarkers(key) {
-    toggleActBtn(key);
-    if (!markerData[key]) { console.warn(`Unbekannter Schlüssel: ${key}`); return; }
+    if (typeof toggleActBtn === 'function') toggleActBtn(key);
+    if (!markerData[key]) { showErrorBanner(`Unbekannter Schlüssel: ${key}`); return; }
     if (!markerData[key].added) addMarkersToMap(key);
     else removeMarkersFromMap(key);
 }
@@ -292,7 +319,7 @@ function removeAerodromeMarkersFromMap(key) {
         smallAerodromeInstances.forEach(saItem => map.removeLayer(saItem.marker));
         smallAerodromesActive = false;
     }
-    smallAerodromeInstances = []; 
+    smallAerodromeInstances = [];
     markerData[key].markers.forEach(item => {
         if (item && item.marker && !(item instanceof SmallAerodrome)) map.removeLayer(item.marker);
     });
@@ -300,7 +327,7 @@ function removeAerodromeMarkersFromMap(key) {
 
 function createAndAddObstacleMarker(data, clusterGroup) {
     const obstacle = new Obstacle(data.geoLat, data.geoLong, data.txtName, data['Parent Designator'], data['Type of Obstacle'], data.LIGHTED, data.DayMarking, data['ValElev (ft)'], data['valHgt (ft)'], map);
-    obstacle.marker.options.parentDesignator = data['Parent Designator']; 
+    obstacle.marker.options.parentDesignator = data['Parent Designator'];
     obstacle.addToCluster(clusterGroup);
     return obstacle;
 }
@@ -367,4 +394,5 @@ function checkSmallAerodromeVisibilityBasedOnZoom() {
 function handleSmallAerodromeVisibilityBasedOnZoom() {
     checkSmallAerodromeVisibilityBasedOnZoom();
 }
+
 

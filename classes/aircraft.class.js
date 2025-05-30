@@ -447,10 +447,15 @@ class Aircraft {
             (this.callsign && (this.callsign.startsWith('DE') && this.callsign.replace(/\s/g, '').length == 5));
     }
 
+    isGlider() {
+         return gliderAcft.includes(this.type) ||
+            this.type == 'GLID';
+    }
+
     getSvgForType(rotation, color) {
         if (this.isHelicopter()) {
             return this.getHelicopterSvg(rotation, color);
-        } else if (this.type == 'GLID') {
+        } else if (this.isGlider()) {
             return this.getGliderSvg(rotation, color);
         } else if (businessAcft.includes(this.type)) {
             return this.getBusinessAcftSvg(rotation, color);
