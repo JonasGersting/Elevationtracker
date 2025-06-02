@@ -22,18 +22,9 @@ const firebaseConfig = {
   measurementId: "G-BS3BDK1C03"
 };
 
-// Firebase-App initialisieren
 const app = initializeApp(firebaseConfig);
-
-// Authentifizierung initialisieren
 const authInstance = getAuth(app);
-
-// Funktionen initialisieren
 const functionsInstance = getFunctions(app, 'europe-west3');
-
-
-
-// Stelle Firebase-Instanzen und SDK-Funktionen global bereit
 window.firebaseGlobalAccess = {
     app: app,
     auth: authInstance,
@@ -42,5 +33,6 @@ window.firebaseGlobalAccess = {
     browserSessionPersistence: fbBrowserSessionPersistence,
     signInWithCustomToken: fbSignInWithCustomToken,
     onAuthStateChanged: fbOnAuthStateChanged,
-    httpsCallable: fbHttpsCallable
+    httpsCallable: fbHttpsCallable,
+    token: null
 };

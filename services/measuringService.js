@@ -147,7 +147,7 @@ function deleteMeasurement(id) {
         if (measurement.label) map.removeLayer(measurement.label);
         allMeasurements.splice(measurementIndex, 1);
     } else {
-        console.warn(`Messung mit ID ${id} nicht gefunden.`);
+        showErrorBanner(`Messung mit ID ${id} konnte nicht gelöscht werden.`);
     }
 }
 

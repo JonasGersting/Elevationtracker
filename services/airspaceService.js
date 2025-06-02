@@ -197,8 +197,7 @@ let currentSequenceFoundNavAidNames = [];
 
 function validateNavAidDataForSearch() {
     if (!navAids || navAids.length === 0) {
-        console.error("NavAids-Daten sind nicht verfügbar oder leer.");
-        alert("Navigationshilfen-Daten nicht geladen.");
+       showErrorBanner("Keine NavAids verfügbar. Bitte laden Sie die Daten neu.");
         return false;
     }
     return true;
@@ -302,7 +301,7 @@ function calculateAngle(lat1, lon1, lat2, lon2) {
 async function getElevation(lat, lng) {
     const response = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`);
     if (!response.ok) {
-        console.error('Fehler beim Abrufen der Höhe:', response.statusText);
+        showErrorBanner("Fehler beim Abrufen der Höhe. Bitte versuchen Sie es später erneut.");
         return 'Unbekannt';
     }
     const data = await response.json();

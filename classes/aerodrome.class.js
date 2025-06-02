@@ -121,17 +121,17 @@ class Aerodrome extends AirspacePolygon {
         try {
             const loader = document.getElementById('loaderAipImg');
             const btn = document.getElementById('showAipImgsBtn');
-            if (!loader || !btn) { console.warn("AIP UI elements missing."); return; }
             loader.style.display = 'inline-block';
             if (this.aipIds && this.aipIds.length > 0) {
                 this.currentPage = 0;
                 btn.disabled = false;
             } else {
                 btn.disabled = true;
-                console.warn(`Keine AIP Bilder für ${this.icaoCode} oder leer.`);
             }
             loader.style.display = 'none';
-        } catch (e) { console.error('Fehler AIP Init:', e.message); }
+        } catch (e) { 
+            showErrorBanner("Fehler beim Initialisieren der AIP-Buttons.");
+         }
     }
 
     async onClick() {

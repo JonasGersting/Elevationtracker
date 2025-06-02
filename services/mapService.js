@@ -39,7 +39,7 @@ function toggleBuildings() {
             osmb = new OSMBuildings(map);
             osmb.load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
         } catch (e) {
-            console.error("Fehler beim Aktivieren von OSM Buildings:", e);
+            showerrorBanner("OSM Buildings konnten nicht geladen werden.");
         }
     } else {
         if (osmb) {
@@ -282,7 +282,7 @@ async function getWeather(weatherType) {
         await updateWeatherLayer(weatherType);
         toggleWeatherMap(weatherType);
     } catch (error) {
-        console.error(`Fehler: ${error.message}`);
+        showerrorBanner(`Fehler beim Abrufen der Wetterdaten.${error.message}`);
     }
 }
 

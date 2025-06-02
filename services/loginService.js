@@ -2,6 +2,8 @@ let isInitialized = false;
 let fbAccess, fbAuth, fbFunctions, fbSetPersistence,
     fbBrowserSessionPersistence, fbSignInWithCustomToken,
     fbOnAuthStateChanged, fbHttpsCallable;
+let tokenRefreshIntervalId = null;
+const TOKEN_REFRESH_INTERVAL = 45 * 60 * 1000;
 
 function initializeFirebaseGlobals() {
     fbAccess = window.firebaseGlobalAccess;
@@ -44,16 +46,9 @@ function handleNoTokenError() {
     showErrorBanner("Login fehlgeschlagen: Ungültige Antwort vom Server.");
 }
 
-async function validateAndSignIn(password) {
-    if (!fbFunctions || !fbHttpsCallable) {
-        showErrorBanner("Firebase Functions nicht initialisiert.");
-        handleLoginError({ message: "Firebase Functions nicht initialisiert." });
-        throw new Error("Firebase Functions nicht initialisiert.");
-    }
-    const validateAccess = fbHttpsCallable(fbFunctions, 'validateAccessAndGenerateToken');
-
+async function performValidationAndSignInLogic(validateAccessCallable, password) {
     try {
-        const result = await validateAccess({ password: password });
+        const result = await validateAccessCallable({ password: password });
         const customAuthToken = result.data.token;
         if (customAuthToken) {
             await signInWithFirebaseToken(customAuthToken);
@@ -64,6 +59,16 @@ async function validateAndSignIn(password) {
         handleLoginError(error);
         throw error;
     }
+}
+
+async function validateAndSignIn(password) {
+    if (!fbFunctions || !fbHttpsCallable) {
+        showErrorBanner("Firebase Functions nicht initialisiert.");
+        handleLoginError({ message: "Firebase Functions nicht initialisiert." });
+        throw new Error("Firebase Functions nicht initialisiert.");
+    }
+    const validateAccess = fbHttpsCallable(fbFunctions, 'validateAccessAndGenerateToken');
+    await performValidationAndSignInLogic(validateAccess, password);
 }
 
 async function login(password) {
@@ -82,19 +87,39 @@ function handleLogin(event) {
     login(password);
 }
 
+async function handleAuthenticatedUser() {
+    try {
+        await generateToken(true);
+        startTokenRefreshInterval();
+        init();
+    } catch (error) {
+        showErrorBanner("Fehler bei der Initialisierung der Sitzung.");
+    }
+}
+
+function handleUnauthenticatedUser() {
+    stopTokenRefreshInterval();
+    if (window.firebaseGlobalAccess) {
+        window.firebaseGlobalAccess.token = null;
+    }
+    showLogIn();
+}
+
+async function onAuthUserChanged(user) {
+    if (user) {
+        await handleAuthenticatedUser();
+    } else {
+        handleUnauthenticatedUser();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebaseGlobals();
     if (typeof initializeFirebaseDataDependencies === 'function') {
         initializeFirebaseDataDependencies();
     }
     if (fbAuth && fbOnAuthStateChanged) {
-        fbOnAuthStateChanged(fbAuth, user => {
-            if (user) {
-                init();
-            } else {
-                showLogIn();
-            }
-        });
+        fbOnAuthStateChanged(fbAuth, onAuthUserChanged);
     } else {
         showErrorBanner("Firebase Auth konnte nicht initialisiert werden. Bitte Seite neu laden.");
     }
@@ -111,19 +136,56 @@ function showErrorBanner(message) {
     }, 3000);
 }
 
-// Funktion zum Abrufen des ID-Tokens und global speichern
-async function generateToken() {
+function getAuthenticatedUserOrThrow() {
+    if (!window.firebaseGlobalAccess || !window.firebaseGlobalAccess.auth) {
+        throw new Error("Firebase Auth ist nicht initialisiert.");
+    }
     const user = window.firebaseGlobalAccess.auth.currentUser;
     if (!user) {
-        throw new Error("Benutzer ist nicht eingeloggt.");
+        showErrorBanner("Benutzer ist nicht eingeloggt. Bitte anmelden.");
+        throw new Error("Benutzer ist nicht eingeloggt für Token-Generierung.");
     }
-    const token = await user.getIdToken();
-    window.firebaseGlobalAccess = { token };
-    console.log("Token erfolgreich generiert und global gespeichert:", token);
+    return user;
+}
+
+async function fetchAndSetIdToken(user, forceRefresh) {
+    try {
+        const tokenValue = await user.getIdToken(forceRefresh);
+        window.firebaseGlobalAccess.token = tokenValue;
+    } catch (error) {
+        showErrorBanner("Fehler beim Abrufen des ID-Tokens: " + (error.message || "Unbekannter Fehler"));
+        throw error;
+    }
+}
+
+async function generateToken(forceRefresh = false) {
+    const user = getAuthenticatedUserOrThrow();
+    await fetchAndSetIdToken(user, forceRefresh);
+}
+
+async function performTokenRefresh() {
+    try {
+        await generateToken(true);
+    } catch (error) {
+        showErrorBanner("Fehler bei der automatischen Token-Aktualisierung: " + (error.message || "Unbekannter Fehler"));
+    }
+}
+
+function startTokenRefreshInterval() {
+    if (tokenRefreshIntervalId) {
+        clearInterval(tokenRefreshIntervalId);
+    }
+    tokenRefreshIntervalId = setInterval(performTokenRefresh, TOKEN_REFRESH_INTERVAL);
+}
+
+function stopTokenRefreshInterval() {
+    if (tokenRefreshIntervalId) {
+        clearInterval(tokenRefreshIntervalId);
+        tokenRefreshIntervalId = null;
+    }
 }
 
 async function fetchInitialData() {
-    generateToken();
     await Promise.all([
         getData('navAids'),
         getData('aerodromes'),

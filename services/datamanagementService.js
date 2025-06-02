@@ -140,47 +140,48 @@ async function getAndProcessCachedData(key) {
     return null;
 }
 
-async function fetchProcessAndCacheFirebaseData(key) {
-    // Prüfe, ob der Token global verfügbar ist
+function getFirebaseTokenOrThrow() {
     const globalAccess = window.firebaseGlobalAccess;
     if (!globalAccess || !globalAccess.token) {
-        showErrorBanner("Kein Token verfügbar. Bitte einloggen.");
+        showErrorBanner("Kein Token verfügbar. Bitte erneut einloggen.");
         throw new Error("Kein Token verfügbar.");
     }
+    return globalAccess.token;
+}
 
-    const token = globalAccess.token;
-    console.log(`Token für ${key} verwendet:`, token);
-    
+function buildFirebaseUrl(key, token) {
     const databaseURL = "https://aromaps-3b242-default-rtdb.europe-west1.firebasedatabase.app";
+    return `${databaseURL}/${key}.json?auth=${token}`;
+}
 
-    // URL für die Anfrage
-    const url = `${databaseURL}/${key}.json?auth=${token}`;
+async function handleFirebaseResponse(response, key) {
+    if (!response.ok) {
+        showErrorBanner(`Fehler beim Abrufen der Daten für ${key}: ${response.statusText}`);
+        throw new Error(`Fehler beim Abrufen der Daten: ${response.statusText}`);
+    }
+    let data = await response.json();
+    if (data === null) {
+        showErrorBanner(`Keine Daten für ${key} gefunden.`);
+        return null;
+    }
+    if (Array.isArray(data) && data.length > 0 && data[0] && typeof data[0].features !== 'undefined') {
+        data = data[0].features;
+    }
+    return data;
+}
 
+async function fetchProcessAndCacheFirebaseData(key) {
     try {
-        // HTTP-GET-Anfrage an die Firebase REST-API
+        const token = getFirebaseTokenOrThrow();
+        const url = buildFirebaseUrl(key, token);
         const response = await fetch(url);
-        if (!response.ok) {
-            showErrorBanner(`Fehler beim Abrufen der Daten für ${key}: ${response.statusText}`);
-            throw new Error(`Fehler beim Abrufen der Daten: ${response.statusText}`);
-        }
-
-        let data = await response.json();
-        if (data === null) {
-            showErrorBanner(`Keine Daten für ${key} gefunden.`);
-            return null;
-        }
-
-        // Falls die Daten ein bestimmtes Format haben, verarbeite sie entsprechend
-        if (Array.isArray(data) && data.length > 0 && data[0] && typeof data[0].features !== 'undefined') {
-            data = data[0].features;
-        }
-
-        // Daten im Cache speichern
+        const data = await handleFirebaseResponse(response, key);
+        if (data === null) return null; 
         await saveToIndexedDB(key, data);
         assignDataToGlobalVar(key, data);
         return data;
     } catch (error) {
-        console.error(`Fehler beim Abrufen der Daten für ${key}:`, error);
+        showErrorBanner(`Fehler beim Abrufen der Daten für ${key}: ${error.message}`);
         throw error;
     }
 }
@@ -192,11 +193,8 @@ function handleGetDataError(error, key) {
 }
 
 async function getData(key) {
-    // Versuche, die Daten aus dem Cache zu laden
     let data = await getAndProcessCachedData(key);
     if (data) return data;
-
-    // Falls keine Daten im Cache vorhanden sind, lade sie über die REST-API
     try {
         return await fetchProcessAndCacheFirebaseData(key);
     } catch (error) {

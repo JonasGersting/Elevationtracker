@@ -2,16 +2,15 @@ let currentGaforBoundingPolygon = null;
 
 function extractGaforNumbers() {
     const inputElement = document.getElementById("gaforNumbers");
-    if (!inputElement) { console.error("GAFOR Input-Element nicht gefunden."); return null; }
     const input = inputElement.value.trim();
-    inputElement.value = ''; // Clear after read
+    inputElement.value = '';
     const numbers = input.split(/\s+/).filter(Boolean).map(num => num.padStart(2, "0"));
     if (!numbers.length) { showErrorBanner("Bitte geben Sie gültige GAFOR-Nummern ein."); return null; }
     return numbers;
 }
 
 function filterGaforFeaturesByNumbers(numbers) {
-    if (!airspaceStates?.gafor?.airspace) { // Optional chaining for safety
+    if (!airspaceStates?.gafor?.airspace) { 
         showErrorBanner("GAFOR Airspace-Daten sind nicht verfügbar.");
         return null;
     }
@@ -76,7 +75,7 @@ function findBoundingBox(gaforFeatures) {
         else if (type === "MultiPolygon") coords.forEach(polygon => processPolygonCoordsForBoundingBox(polygon, boundingData));
     });
     if (!boundingData.foundAnyCoords) {
-        console.error("Extrempunkte konnten nicht ermittelt werden.");
+        showErrorBanner("Keine gültigen GAFOR-Koordinaten gefunden.");
         return null;
     }
     return boundingData;
@@ -97,7 +96,7 @@ function createAndDisplayGaforPolygon(vertices) {
     if (typeof L !== 'undefined' && map && typeof L.polygon === 'function') {
         currentGaforBoundingPolygon = L.polygon(vertices, { color: 'orange', weight: 2, fillOpacity: 0.1 }).addTo(map);
     } else {
-        console.warn("Kartenbibliothek nicht verfügbar oder Polygon konnte nicht gezeichnet werden.");
+        showErrorBanner("Polygon konnte nicht gezeichnet werden.");
     }
 }
 
@@ -154,7 +153,6 @@ function createHtmlForExtremePoint(label, point) {
 
 function showExtremeCoordinates(north, east, south, west) {
     const gaforDisplayElement = document.getElementById('gaforPolygonInfo');
-    if (!gaforDisplayElement) { console.error("GAFOR Display Element nicht gefunden."); return; }
     gaforDisplayElement.innerHTML = '';
     if (north && east && south && west) {
         const extremePoints = [
@@ -169,7 +167,7 @@ function showExtremeCoordinates(north, east, south, west) {
 
 function calculateDistance([lat1, lon1], [lat2, lon2]) {
     const toRadians = deg => (deg * Math.PI) / 180;
-    const R = 6371; // Earth radius in kilometers
+    const R = 6371;
     const dLat = toRadians(lat2 - lat1);
     const dLon = toRadians(lon2 - lon1);
     const rLat1 = toRadians(lat1);
@@ -186,7 +184,7 @@ function validateInput(input) {
 function resetGaforUIElements() {
     const gaforInput = document.getElementById("gaforNumbers");
     if (gaforInput) gaforInput.value = '';
-    showExtremeCoordinates(null, null, null, null); // Clears the display
+    showExtremeCoordinates(null, null, null, null); 
 }
 
 function resetGaforPolygonStyles() {
@@ -204,7 +202,7 @@ function resetGaforVisuals() {
     removeCurrentGaforDisplayPolygon();
     resetGaforUIElements();
     resetGaforPolygonStyles();
-    updateGaforDisplayButtonState(false); // Disable reset button
+    updateGaforDisplayButtonState(false); 
     const gaforLoaderPos = document.getElementById("loaderGaforPos");
     if (gaforLoaderPos) gaforLoaderPos.style.display = "none";
 }

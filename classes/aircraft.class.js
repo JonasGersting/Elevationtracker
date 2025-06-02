@@ -275,8 +275,8 @@ class Aircraft {
             const data = await response.json();
             const lastLegData = this.parseTrackData(data);
             trackCoordinates = lastLegData.map(item => [item[1], item[2]]);
-        } catch (error) {
-            console.error("Initial track fetch error:", error);
+        } catch (e) {
+            showErrorBanner(`Fehler beim Abrufen der Flugstrecke. ${e} `);
             trackCoordinates = [];
         } finally {
             this.updateAndDrawTrack();

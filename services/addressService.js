@@ -7,7 +7,7 @@ async function searchAdress() {
     const searchQuery = document.getElementById('searchInput').value;
     const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&addressdetails=1&limit=5&polygon_geojson=1`);
     if (!response.ok) {
-        console.error('Fehler beim Abrufen der Adresse', response.statusText);
+        showErrorBanner('Fehler beim Abrufen der Adresse: ' + response.statusText);
         return;
     }
     const data = await response.json();

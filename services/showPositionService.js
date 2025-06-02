@@ -15,10 +15,6 @@ function toDMS(coordinate, isLatitude) {
 
 function showCursorCoordinates(map) {
     const displayDiv = document.getElementById('showActualPos');
-    if (!displayDiv) {
-        console.error("Element mit der ID 'showActualPos' nicht gefunden.");
-        return;
-    }
     map.on('mousemove', function (event) {
         const { lat, lng } = event.latlng;
         const latitudeDMS = toDMS(lat, true);

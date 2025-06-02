@@ -56,8 +56,7 @@ class PjeAirspace extends AirspacePolygon {
         if (id) {
             this.showInfoPdf(id);
         } else {
-            console.log('No PDF ID found for:', this.name);
-        }
+            showErrorBanner("Fehler: Keine PDF-ID gefunden.");     }
     }
 
     getStyle() {
