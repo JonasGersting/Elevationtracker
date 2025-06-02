@@ -51,6 +51,7 @@ async function validateAndSignIn(password) {
         throw new Error("Firebase Functions nicht initialisiert.");
     }
     const validateAccess = fbHttpsCallable(fbFunctions, 'validateAccessAndGenerateToken');
+
     try {
         const result = await validateAccess({ password: password });
         const customAuthToken = result.data.token;
@@ -61,7 +62,7 @@ async function validateAndSignIn(password) {
         }
     } catch (error) {
         handleLoginError(error);
-        throw error; 
+        throw error;
     }
 }
 
@@ -110,10 +111,19 @@ function showErrorBanner(message) {
     }, 3000);
 }
 
-async function fetchInitialData() {
-    if (!window.firebaseGlobalAccess?.database) { 
-        showErrorBanner("Datenmanagement-Service ist nicht bereit. Bitte warten Sie einen Moment.");
+// Funktion zum Abrufen des ID-Tokens und global speichern
+async function generateToken() {
+    const user = window.firebaseGlobalAccess.auth.currentUser;
+    if (!user) {
+        throw new Error("Benutzer ist nicht eingeloggt.");
     }
+    const token = await user.getIdToken();
+    window.firebaseGlobalAccess = { token };
+    console.log("Token erfolgreich generiert und global gespeichert:", token);
+}
+
+async function fetchInitialData() {
+    generateToken();
     await Promise.all([
         getData('navAids'),
         getData('aerodromes'),
@@ -166,8 +176,8 @@ function showLogInSuccess() {
 
 function hideLogInSuccess() {
     const loginSuccess = document.getElementById("loginSuccess");
-    if(loginSuccess){ 
-       loginSuccess.classList.add("d-none");
+    if (loginSuccess) {
+        loginSuccess.classList.add("d-none");
     }
 }
 

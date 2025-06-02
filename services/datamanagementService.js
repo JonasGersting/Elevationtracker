@@ -141,29 +141,48 @@ async function getAndProcessCachedData(key) {
 }
 
 async function fetchProcessAndCacheFirebaseData(key) {
-    if (!fbDatabase || !fbDbRef || !fbDbGet) {
-        showErrorBanner(`Firebase Database nicht initialisiert für ${key}. Bitte neu laden.`);
-        initializeFirebaseDataDependencies();
-        if (!fbDatabase || !fbDbRef || !fbDbGet) { 
-            showErrorBanner(`Firebase Database nicht initialisiert für ${key}.`);
+    // Prüfe, ob der Token global verfügbar ist
+    const globalAccess = window.firebaseGlobalAccess;
+    if (!globalAccess || !globalAccess.token) {
+        showErrorBanner("Kein Token verfügbar. Bitte einloggen.");
+        throw new Error("Kein Token verfügbar.");
+    }
+
+    const token = globalAccess.token;
+    console.log(`Token für ${key} verwendet:`, token);
+    
+    const databaseURL = "https://aromaps-3b242-default-rtdb.europe-west1.firebasedatabase.app";
+
+    // URL für die Anfrage
+    const url = `${databaseURL}/${key}.json?auth=${token}`;
+
+    try {
+        // HTTP-GET-Anfrage an die Firebase REST-API
+        const response = await fetch(url);
+        if (!response.ok) {
+            showErrorBanner(`Fehler beim Abrufen der Daten für ${key}: ${response.statusText}`);
+            throw new Error(`Fehler beim Abrufen der Daten: ${response.statusText}`);
+        }
+
+        let data = await response.json();
+        if (data === null) {
+            showErrorBanner(`Keine Daten für ${key} gefunden.`);
             return null;
         }
-    }
-    const dataRef = fbDbRef(fbDatabase, key);
-    const snapshot = await fbDbGet(dataRef); 
 
-    if (!snapshot.exists()) {
-        showErrorBanner(`Keine Daten für ${key} gefunden.`);
-        return null;
+        // Falls die Daten ein bestimmtes Format haben, verarbeite sie entsprechend
+        if (Array.isArray(data) && data.length > 0 && data[0] && typeof data[0].features !== 'undefined') {
+            data = data[0].features;
+        }
+
+        // Daten im Cache speichern
+        await saveToIndexedDB(key, data);
+        assignDataToGlobalVar(key, data);
+        return data;
+    } catch (error) {
+        console.error(`Fehler beim Abrufen der Daten für ${key}:`, error);
+        throw error;
     }
-    let data = snapshot.val();
-    if (data === null) return null;
-    if (Array.isArray(data) && data.length > 0 && data[0] && typeof data[0].features !== 'undefined') {
-        data = data[0].features;
-    }
-    await saveToIndexedDB(key, data);
-    assignDataToGlobalVar(key, data);
-    return data;
 }
 
 function handleGetDataError(error, key) {
@@ -173,8 +192,11 @@ function handleGetDataError(error, key) {
 }
 
 async function getData(key) {
+    // Versuche, die Daten aus dem Cache zu laden
     let data = await getAndProcessCachedData(key);
     if (data) return data;
+
+    // Falls keine Daten im Cache vorhanden sind, lade sie über die REST-API
     try {
         return await fetchProcessAndCacheFirebaseData(key);
     } catch (error) {

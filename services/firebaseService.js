@@ -7,11 +7,6 @@ import {
     onAuthStateChanged as fbOnAuthStateChanged
 } from 'firebase/auth';
 import {
-    getDatabase,
-    ref as fbDbRef,
-    get as fbDbGet
-} from 'firebase/database';
-import {
     getFunctions,
     httpsCallable as fbHttpsCallable
 } from 'firebase/functions';
@@ -27,32 +22,25 @@ const firebaseConfig = {
   measurementId: "G-BS3BDK1C03"
 };
 
+// Firebase-App initialisieren
 const app = initializeApp(firebaseConfig);
+
+// Authentifizierung initialisieren
 const authInstance = getAuth(app);
-const databaseInstance = getDatabase(app);
+
+// Funktionen initialisieren
 const functionsInstance = getFunctions(app, 'europe-west3');
+
+
 
 // Stelle Firebase-Instanzen und SDK-Funktionen global bereit
 window.firebaseGlobalAccess = {
-    // Firebase Service Instanzen
     app: app,
     auth: authInstance,
-    database: databaseInstance,
     functions: functionsInstance,
-
-    // Firebase Auth SDK Funktionen
     setAuthPersistence: fbSetPersistence,
     browserSessionPersistence: fbBrowserSessionPersistence,
     signInWithCustomToken: fbSignInWithCustomToken,
     onAuthStateChanged: fbOnAuthStateChanged,
-
-    // Firebase Database SDK Funktionen
-    dbRef: fbDbRef,
-    dbGet: fbDbGet,
-
-    // Firebase Functions SDK Funktionen
-    httpsCallable: fbHttpsCallable,
+    httpsCallable: fbHttpsCallable
 };
-
-// Kein 'export' hier nötig, da die Bereitstellung über window.firebaseGlobalAccess erfolgt
-// und dieses Skript als Modul geladen wird, das Nebeneffekte (window-Zuweisung) hat.
