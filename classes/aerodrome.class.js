@@ -169,17 +169,16 @@ class Aerodrome extends AirspacePolygon {
 
     setaipInfo(icaoCode) {
         aipInfo.forEach(item => {
-            if (item.Flugplatz === icaoCode) {
+            if (item.indicator === icaoCode) {
                 this.aipIds = [
-                    item.Adinfo,
-                    item.AD
+                    item.Adinfo
                 ];
-                if (Array.isArray(item.VFRchart)) {
-                    item.VFRchart.forEach(item => {
+                if (Array.isArray(item.charts)) {
+                    item.charts.forEach(item => {
                         this.aipIds.push(item);
                     });
-                } else if (item.VFRchart) {
-                    this.aipIds.push(item.VFRchart);
+                } else if (item.charts) {
+                    this.aipIds.push(item.charts);
                 }
             }
         });
@@ -203,7 +202,7 @@ class Aerodrome extends AirspacePolygon {
             <button onclick="currentAerodrome.changeAipImg('left')" class="switchButton left-32" id="switchAipImgLeft"><</button>
             <button onclick="currentAerodrome.changeAipImg('right')" class="switchButton right-32" id="switchAipImgRight">></button>
             <span id="pageIndicator">${this.currentPage + 1} / ${this.aipIds.length}</span>
-            <iframe id="pdfIframe" src="https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=page-fit" frameborder="0"></iframe>
+            <iframe id="pdfIframe" src="https://aip.dfs.de/vfr/scripts/getLogicalpage.php?id=${this.aipIds[this.currentPage]}#zoom=page-fit" frameborder="0"></iframe>
         `;
     }
 
@@ -238,7 +237,7 @@ class Aerodrome extends AirspacePolygon {
         let aipIframe = document.getElementById('pdfIframe');
         let pageIndicator = document.getElementById('pageIndicator');
         if (aipIframe) {
-            aipIframe.src = `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${this.aipIds[this.currentPage]}#zoom=page-fit`;
+            aipIframe.src = `https://aip.dfs.de/vfr/scripts/getLogicalpage.php?id=${this.aipIds[this.currentPage]}#zoom=page-fit`;
         }
         if (pageIndicator) {
             pageIndicator.innerHTML = `${this.currentPage + 1} / ${this.aipIds.length}`;

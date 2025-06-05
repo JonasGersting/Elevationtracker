@@ -22,5 +22,5 @@ let twoEngAcft = ['B738', 'B737', 'A321', 'B752', 'A320', 'A333', 'B38M', 'A20N'
 let fourEngAcft = ['C17', 'A388', 'B748', 'B744', 'A343', 'A400', 'A346', 'A124', 'K35R', 'C5M',  ];
 let businessAcft = ['LJ45', 'GL5T', 'CL60', 'GL7T', 'GLF5', 'GA6C', 'GLEX', 'C525', 'PRM1', 'F900', 'C700', 'C550', 'E55P', 'C56X', 'E55P', 'LJ35', 'PC24', 'C25C', 'C25A', 'CRJX', 'SF50', 'C680',
     'CRJ9', 'E145', 'E50P', 'C68A', 'GLF6', 'CL35', 'G550', 'CRJ7', 'E45X', 'BE40', 'C130', 'C30J', 'CL30', 'GLF4', 'F2TH', 'C25B', 'G280', 'C510', 'LJ60', 'CRJ2', 'HDJT', 'C750', 'C560', 'WW24',
-    'C25M', 'E3TF', 'FA7X'              
+    'C25M', 'E3TF', 'FA7X', 'E35L'              
 ]

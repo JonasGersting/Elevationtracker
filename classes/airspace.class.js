@@ -341,9 +341,9 @@ class AirspacePolygon {
     returnCorrectAipPath(pdfId) {
         const vfrIdents = ['ED-R KIEL', 'ED-R ECKERNFÖRD', 'ED-R HOHE DÜNE'];
         if (vfrIdents.includes(this.ident)) {
-            return `https://aip.dfs.de/VFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`;
+            return `https://aip.dfs.de/vfr/scripts/getLogicalpage.php?id=${pdfId}#zoom=page-fit`;
         } else {
-            return `https://aip.dfs.de/IFR/scripts/renderPage.php?fmt=pdf&id=${pdfId}#zoom=page-fit`;
+            return `https://aip.dfs.de/ifr/scripts/getLogicalpage.php?id=${pdfId}#zoom=page-fit`;
         }
     }
 
