@@ -480,7 +480,7 @@ class Aircraft {
             return this.getBallOrShipSvg(color);
         } else if (this.registration == 'TWR') {
             return this.getTowerSvg();
-        } else if (this.isTwoEngAcft) {
+        } else if (this.isTwoEngAcft()) {
             return this.getDefaultAcftSvg(rotation, color);
         } else {
             return this.getUnkownAcftSvg(rotation, color);
