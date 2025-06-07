@@ -197,7 +197,7 @@ let currentSequenceFoundNavAidNames = [];
 
 function validateNavAidDataForSearch() {
     if (!navAids || navAids.length === 0) {
-       showErrorBanner("Keine NavAids verfügbar. Bitte laden Sie die Daten neu.");
+        showErrorBanner("Keine NavAids verfügbar. Bitte laden Sie die Daten neu.");
         return false;
     }
     return true;
