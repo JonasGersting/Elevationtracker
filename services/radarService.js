@@ -193,7 +193,7 @@ async function fetchAircraftData(centerLat, centerLon, radius) {
 
 async function updateTrackedAircraftImageDetails(aircraft) {
     trackedAcftImgJSON = await aircraft.getImage();
-    if (trackedAcftImgJSON != undefined) {
+    if (trackedAcftImgJSON && trackedAcftImgJSON.thumbnail) {
         trackedAcftImg = trackedAcftImgJSON.thumbnail.src;
         trackedAcftImgLink = trackedAcftImgJSON.link;
         trackedAcftImgPhotographer = `Photo © ${trackedAcftImgJSON.photographer}`;
@@ -213,12 +213,20 @@ async function processFoundCallsignAircraft(acftData) {
     await updateTrackedAircraftImageDetails(aircraft);
     await aircraft.showDetails();
     await aircraft.fetchInitialTrack();
-    map.setView([acftData.lat, acftData.lon], 10);
+    setMapView(acftData);
     if (!radarActive) {
         radarActive = true;
         toggleActBtnRadar();
     }
     setTimeout(() => startRadarInterval(), 1000);
+}
+
+function setMapView(acftData) {
+    if (acftData.lat && acftData.lon) {
+        map.setView([acftData.lat, acftData.lon], 10);
+    } else {
+        map.setView([acftData.lastPosition.lat, acftData.lastPosition.lon], 10);
+    }
 }
 
 async function fetchAircraftDataCallsign(callsign) {
@@ -237,6 +245,8 @@ async function fetchAircraftDataCallsign(callsign) {
         }
     } catch (error) {
         showErrorBanner("Fehler beim Abrufen der Flugdaten. Bitte versuchen Sie es später erneut.");
+        console.log(`Fehler beim Abrufen der Flugdaten: ${error.message}`);
+
     }
 }
 

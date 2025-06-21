@@ -9,7 +9,13 @@ class Aircraft {
     }
 
     initBaseProps(data) {
-        const { lat, lon, t, alt_baro, hex, flight, r } = data;
+        let { lat, lon, t, alt_baro, hex, flight, r, lastPosition } = data;
+        if (!lat || !lon) {
+            if (lastPosition && lastPosition.lat && lastPosition.lon) {
+                lat = lastPosition.lat || 0;
+                lon = lastPosition.lon || 0;
+            }
+        }
         this.position = [lat, lon];
         this.type = t;
         this.altitude = alt_baro;
@@ -19,7 +25,10 @@ class Aircraft {
     }
 
     initMovementProps(data) {
-        const { ias, true_heading, track, gs, seen_pos } = data;
+        let { ias, true_heading, track, gs, seen_pos, lastPosition } = data;
+        if (!seen_pos && lastPosition) {
+            seen_pos = lastPosition.seen_pos;
+        }
         this.speed = ias;
         this.heading = true_heading;
         this.track = track;
@@ -63,6 +72,10 @@ class Aircraft {
     }
 
     createAndAddMarker() {
+        if (!this.position || typeof this.position[0] !== 'number' || typeof this.position[1] !== 'number') {
+            console.warn(`Flugzeug ${this.hex || 'N/A'} hat keine gültige Position und wird nicht zur Karte hinzugefügt.`);
+            return;
+        }
         const iconConfig = this.getMarkerIconConfig();
         const tooltipContent = this.getMarkerTooltipContent();
         const tooltipOptions = this.getMarkerTooltipOptions();
