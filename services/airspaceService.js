@@ -267,7 +267,7 @@ function getOrientationFromDegrees(deg) {
     ];
     const normalizedDeg = ((parseFloat(deg) % 360) + 360) % 360;
     for (const dir of directions) {
-        if (normalizedDeg < dir.limit) return dir.name;
+        if (normalizedDeg <= dir.limit) return dir.name;
     }
     return 'N';
 }
