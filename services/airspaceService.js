@@ -16,6 +16,10 @@ let initialMarkerLat = null;
 let initialMarkerLon = null;
 let distanceMeasurements = [];
 let activeMeasurement = null;
+let closestNavAid = null;
+let foundNavAids = [];
+let foundNavaidId = 0;
+let currentSequenceFoundNavAidNames = [];
 
 function checkCursorOverPolygon() {
     polygonIsBroughtUpToFront = !!isCursorOverPolygon;
@@ -190,10 +194,6 @@ function clearAllDistanceMeasurements() {
     clearSavedDistanceMeasurementsState();
 }
 
-let closestNavAid = null;
-let foundNavAids = [];
-let foundNavaidId = 0;
-let currentSequenceFoundNavAidNames = [];
 
 function validateNavAidDataForSearch() {
     if (!navAids || navAids.length === 0) {
@@ -217,7 +217,7 @@ function checkNavAidFilterCriteria(navaidProperties) {
 }
 
 function processFoundClosestNavAid(data, latLng, markerLat, markerLon, distance) {
-    currentSequenceFoundNavAidNames.push(data.properties.txtname);
+    currentSequenceFoundNavAidNames.push(data.properties.ident);
     const angle = calculateAngle(latLng[0], latLng[1], markerLat, markerLon);
     const line = L.polyline([[markerLat, markerLon], latLng], { color: 'red', weight: 2, dashArray: '5, 10' }).addTo(map);
     polylines.push(line);
@@ -239,9 +239,8 @@ function findClosestNavAid(markerLat, markerLon) {
     let closestData = null;
     let shortestDist = Infinity;
     let closestLatLng = null;
-
     navAids.forEach(navaid => {
-        const name = navaid.properties.txtname;
+        const name = navaid.properties.ident;
         if (isNavAidAlreadyFoundInSequence(name) || !checkNavAidFilterCriteria(navaid.properties)) return;
         const nLat = navaid.geometry.coordinates[1];
         const nLon = navaid.geometry.coordinates[0];
@@ -249,7 +248,7 @@ function findClosestNavAid(markerLat, markerLon) {
         if (dist < shortestDist) { shortestDist = dist; closestData = navaid; closestLatLng = [nLat, nLon]; }
     });
 
-    if (closestData && closestLatLng) {
+    if (closestData && closestLatLng) {        
         processFoundClosestNavAid(closestData, closestLatLng, markerLat, markerLon, shortestDist);
     } else {
         handleNoFurtherNavAidsFound();

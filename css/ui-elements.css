@@ -195,7 +195,7 @@
     animation: spin 1s linear infinite;
 }
 
-.gaforLoader{
+.gaforLoader {
     display: inline-block;
     margin-left: 10px;
     width: 12px;
@@ -239,13 +239,13 @@
     background-image: url('../img/closeAddressGreen.png');
 }
 
-#deleteSearch:disabled{
+#deleteSearch:disabled {
     background-color: rgb(180, 180, 180);
     cursor: not-allowed;
     opacity: 0.6;
 }
 
-.resetGaforBtn{
+.resetGaforBtn {
     background-image: url('../img/closeAddressGreen.png');
     height: 28px;
     width: 28px;
@@ -261,7 +261,7 @@
     background-image: url('../img/closeAddressBlue.png');
 }
 
-.resetGaforBtn:disabled{
+.resetGaforBtn:disabled {
     background-color: rgb(180, 180, 180);
     cursor: not-allowed;
     opacity: 0.6;
@@ -270,6 +270,18 @@
 .border-radius-bottom16 {
     border-bottom-right-radius: 16px;
     border-bottom-left-radius: 16px;
+}
+
+.impressumLink {
+    color: rgb(15, 90, 210);
+    text-decoration: none;
+    position: absolute;
+    bottom: 0;
+    left: 30px;
+    z-index: 999;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 @keyframes spin {

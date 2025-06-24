@@ -246,7 +246,9 @@ async function fetchAircraftDataCallsign(callsign) {
     } catch (error) {
         showErrorBanner("Fehler beim Abrufen der Flugdaten. Bitte versuchen Sie es später erneut.");
         console.log(`Fehler beim Abrufen der Flugdaten: ${error.message}`);
-
+    }
+    if (radarActive) {
+        setTimeout(() => startRadarInterval(), 1000);
     }
 }
 
