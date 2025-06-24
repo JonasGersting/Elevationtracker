@@ -10,7 +10,7 @@ function extractGaforNumbers() {
 }
 
 function filterGaforFeaturesByNumbers(numbers) {
-    if (!airspaceStates?.gafor?.airspace) { 
+    if (!airspaceStates?.gafor?.airspace) {
         showErrorBanner("GAFOR Airspace-Daten sind nicht verfügbar.");
         return null;
     }
@@ -179,12 +179,31 @@ function calculateDistance([lat1, lon1], [lat2, lon2]) {
 
 function validateInput(input) {
     input.value = input.value.replace(/[^0-9\s]/g, '').replace(/\s+/g, ' ');
+    const numbersInput = input.value.trim().split(/\s+/).filter(Boolean).map(num => num.padStart(2, "0"));
+    changeClickedGaforArea(numbersInput);
+}
+
+function changeClickedGaforArea(numbersInput) {
+    if (polygonLayers?.gafor) {
+        polygonLayers.gafor.forEach(polygon => {
+            const isSelectedNow = numbersInput.includes(polygon.name);
+            polygon.isSelected = isSelectedNow;
+
+            if (polygon.layer && typeof polygon.layer.setStyle === 'function') {
+                if (isSelectedNow) {
+                    polygon.layer.setStyle({ fillColor: 'white', fillOpacity: 0.8 });
+                } else {
+                    polygon.layer.setStyle({ fillColor: 'lightblue', fillOpacity: 0.5 });
+                }
+            }
+        });
+    }
 }
 
 function resetGaforUIElements() {
     const gaforInput = document.getElementById("gaforNumbers");
     if (gaforInput) gaforInput.value = '';
-    showExtremeCoordinates(null, null, null, null); 
+    showExtremeCoordinates(null, null, null, null);
 }
 
 function resetGaforPolygonStyles() {
@@ -202,7 +221,7 @@ function resetGaforVisuals() {
     removeCurrentGaforDisplayPolygon();
     resetGaforUIElements();
     resetGaforPolygonStyles();
-    updateGaforDisplayButtonState(false); 
+    updateGaforDisplayButtonState(false);
     const gaforLoaderPos = document.getElementById("loaderGaforPos");
     if (gaforLoaderPos) gaforLoaderPos.style.display = "none";
 }
