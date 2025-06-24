@@ -61,7 +61,13 @@ function createAndAddAddressGeoJsonLayer(address) {
         layer.bindPopup(popupContent);
     }
     currentAdressGeoJSONLayer = L.geoJSON(geojson, {
-        onEachFeature: onEachFeatureCallback
+        onEachFeature: onEachFeatureCallback,
+         style: {
+            weight: 2,         
+            opacity: 1,       
+            fill: false,
+            interactive: true     
+        }
     }).addTo(map);
     return geojson;
 }
