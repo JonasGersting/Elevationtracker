@@ -71,9 +71,7 @@ function prepareGaforUI(gaforCalc) {
 }
 
 async function fetchAndSetAirspaceData(airspaceKey) {
-    const data = await getData(airspaceStates[airspaceKey].name);
-    airspaceStates[airspaceKey].airspace = data;
-    return data;
+    await getData(airspaceStates[airspaceKey].name);
 }
 
 async function fetchAdditionalAirspaceInfo(airspaceKey) {
@@ -97,6 +95,7 @@ async function togglePolygons(airspaceKey) {
     await fetchAdditionalAirspaceInfo(airspaceKey);
     initializePolygonLayerArray(airspaceKey);
     const currentAirspaceData = airspaceStates[airspaceKey].airspace;
+    
     if (!currentAirspaceData) return;
     const itemsToProcess = airspaceKey === 'ctr' ? currentAirspaceData : [...currentAirspaceData].reverse();
     processItems(itemsToProcess, airspaceKey, map, polygonLayers[airspaceKey]);
@@ -207,7 +206,12 @@ const dataAssignments = {
     navAids: (data) => { navAids = data; markerData.navaid.source = data; },
     obstacles: (data) => { obstacles = data; markerData.obstacle.source = data; },
     fisAirspace: (data) => { fisAirspace = data; airspaceStates.fis.airspace = data; },
-    edrAirspace: (data) => { edrAirspace = data; airspaceStates.edrLower.airspace = data; airspaceStates.edrUpper.airspace = data; },
+    edrAirspace: (data) => {
+        const finalData = (typeof newEdr !== 'undefined' && Array.isArray(newEdr)) ? [...data, ...newEdr] : data;
+        edrAirspace = finalData;
+        airspaceStates.edrLower.airspace = finalData;
+        airspaceStates.edrUpper.airspace = finalData;
+    },
     eddAirspace: (data) => { eddAirspace = data; airspaceStates.edd.airspace = data; },
     ctrAirspace: (data) => { ctrAirspace = data; airspaceStates.ctr.airspace = data; },
     aipInfo: (data) => aipInfo = data,
@@ -227,6 +231,7 @@ const dataAssignments = {
 
 function assignDataToGlobalVar(key, data) {
     if (dataAssignments[key]) {
+        
         dataAssignments[key](data);
     }
 }
@@ -236,7 +241,7 @@ function createEdrPolygon(item, mapInstance, layerArray, isUpper) {
     const lowerUnit = item.properties['Lower Limit Unit'];
     const condition = (lowerUnit === 'FL' && lowerLimit < 100) || (lowerUnit === 'FT' && lowerLimit < 10000);
     if (isUpper ? !condition : condition) {
-        return new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], lowerLimit, lowerUnit, item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
+        return new EdrAirspace(item.geometry, item.properties.Name, item.properties.Ident, mapInstance, layerArray, item.properties['Center Latitude'], item.properties['Center Longitude'], item.properties['Lower Limit'], item.properties['Lower Limit Unit'], item.properties['Upper Limit'], item.properties['Upper Limit Unit']);
     }
     return null;
 }
@@ -288,7 +293,7 @@ const polygonConstructors = {
 function processItems(items, airspaceKey, mapInstance, layerArray) {
     for (let i = items.length - 1; i >= 0; i--) {
         const item = items[i];
-        if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon")) {
+        if (item.geometry && (item.geometry.type === "Polygon" || item.geometry.type === "MultiPolygon" || item.geometry.type === "Circle")) {
             const constructor = polygonConstructors[airspaceKey];
             if (constructor) {
                 const polygon = constructor(item, mapInstance, layerArray);
@@ -407,8 +412,6 @@ function updateSmallAerodromeVisibility(show) {
 }
 
 function checkSmallAerodromeVisibilityBasedOnZoom() {
-    console.log('Checking small aerodrome visibility based on zoom level');
-
     if (!map || !markerData.aerodrome.added) return;
     const currentZoom = map.getZoom();
     if (currentZoom >= 9 && !smallAerodromesActive) updateSmallAerodromeVisibility(true);

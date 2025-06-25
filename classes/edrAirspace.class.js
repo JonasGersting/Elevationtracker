@@ -6,18 +6,33 @@ class EdrAirspace extends AirspacePolygon {
     }
 
     addToMap() {
-        const onFeature = (feature, layer) => {
-            layer.on('mouseover', () => {
-                this.edrHoverOn(layer);
+        if (this.geometry.type === 'Circle') {
+            const coordinates = this.geometry.coordinate;
+            this.layer = L.circle(coordinates, {
+                radius: this.geometry.radius,
+                ...this.getStyle() 
+            }).addTo(this.map);
+
+            this.layer.on('mouseover', () => {
+                this.edrHoverOn(this.layer);
             });
-            layer.on('mouseout', () => {
-                this.edrHoverOut(layer);
+            this.layer.on('mouseout', () => {
+                this.edrHoverOut(this.layer);
             });
-        };
-        this.layer = L.geoJSON(this.geometry, {
-            style: this.getStyle(),
-            onEachFeature: onFeature
-        }).addTo(this.map);
+        } else {
+            const onFeature = (feature, layer) => {
+                layer.on('mouseover', () => {
+                    this.edrHoverOn(layer);
+                });
+                layer.on('mouseout', () => {
+                    this.edrHoverOut(layer);
+                });
+            };
+            this.layer = L.geoJSON(this.geometry, {
+                style: this.getStyle(),
+                onEachFeature: onFeature
+            }).addTo(this.map);
+        }
         super.addToMap();
     }
 
