@@ -176,7 +176,7 @@ async function fetchProcessAndCacheFirebaseData(key) {
         const url = buildFirebaseUrl(key, token);
         const response = await fetch(url);
         const data = await handleFirebaseResponse(response, key);
-        if (data === null) return null; 
+        if (data === null) return null;
         await saveToIndexedDB(key, data);
         assignDataToGlobalVar(key, data);
         return data;
@@ -311,6 +311,8 @@ function addMarkersToMap(key) {
     if (key === "obstacle") showObstacleMarkers(source, key);
     else showGenericMarkers(source, key);
     markerData[key].added = true;
+    if (key === "aerodrome") checkSmallAerodromeVisibilityBasedOnZoom();
+
 }
 
 function removeMarkersFromMap(key) {
@@ -393,7 +395,7 @@ function showGenericMarkers(source, key) {
         if (item && !(item instanceof SmallAerodrome)) item.addToMap();
         return item;
     });
-    if (key === "aerodrome") checkSmallAerodromeVisibilityBasedOnZoom();
+
 }
 
 function updateSmallAerodromeVisibility(show) {
@@ -405,6 +407,8 @@ function updateSmallAerodromeVisibility(show) {
 }
 
 function checkSmallAerodromeVisibilityBasedOnZoom() {
+    console.log('Checking small aerodrome visibility based on zoom level');
+
     if (!map || !markerData.aerodrome.added) return;
     const currentZoom = map.getZoom();
     if (currentZoom >= 9 && !smallAerodromesActive) updateSmallAerodromeVisibility(true);

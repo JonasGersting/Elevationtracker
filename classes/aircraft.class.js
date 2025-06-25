@@ -197,7 +197,7 @@ class Aircraft {
         document.getElementById('trackedPos').innerHTML =
             `${this.position[0].toFixed(2)}N, ${this.position[1].toFixed(2)}E`;
         document.getElementById('trackedType').innerHTML = this.type || 'N/A';
-        document.getElementById('trackedIas').innerHTML = `${this.groundSpeed || 'N/A'}kts`;
+        document.getElementById('trackedIas').innerHTML = `${this.groundSpeed || 'N/A'}kt`;
         document.getElementById('trackedHeading').innerHTML = `${this.heading || 'N/A'}°`;
         document.getElementById('trackedTrack').innerHTML = `${this.track || 'N/A'}°`;
     }
