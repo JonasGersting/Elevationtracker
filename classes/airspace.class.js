@@ -339,7 +339,7 @@ class AirspacePolygon {
     }
 
     returnCorrectAipPath(pdfId) {
-        const vfrIdents = ['ED-R KIEL', 'ED-R ECKERNFÖRD', 'ED-R HOHE DÜNE'];
+        const vfrIdents = ['ED-R KIEL', 'ED-R ECKERNFÖRD', 'ED-R HOHE DÜNE', 'ED-R SNAP', 'ED-R JAGEL', 'ED-R KLIXBÜHL'];
         if (vfrIdents.includes(this.ident)) {
             return `https://aip.dfs.de/vfr/scripts/getLogicalpage.php?id=${pdfId}#zoom=page-fit`;
         } else {
