@@ -72,3 +72,11 @@
     padding: 1px;
     box-sizing: border-box;
 }
+
+.elev-marker-min {
+    transform: rotate(270deg);
+}
+
+.elev-marker-max {
+    transform: rotate(90deg);
+}

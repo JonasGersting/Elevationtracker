@@ -38,11 +38,88 @@ const customIcon = L.icon({
 
 function bindMarkerPopupWithElevation(marker, lat, lng) {
     getElevation(lat, lng).then(elevation => {
-        const popupContent = `<b>Höhe:</b> ${elevation}FT<br>
+        const popupContent = `
+       <div class="popupContentWrapper">
+            <div class="popupContentPartWrapper">
+                <span><b>Höhe:</b> ${elevation}FT</span>
+            </div>
+        <div>
             <button class="navAidBtn marginTop16" onclick="findClosestNavAid(${lat},${lng})">NAV-AID</button>
-            <button class="navAidBtn marginTop16" onclick="startDistanceMeasurement(${lat},${lng})">DIST</button>`;
+            <button class="navAidBtn marginTop16" onclick="startDistanceMeasurement(${lat},${lng})">DIST</button>
+        </div>   
+        <div>
+            <input type="number" min="1" max="2" id="minMaxRadius" placeholder="Radius in NM" oninput="validateRadius(this)">
+            <button class="navAidBtn marginTop16" onclick="calcMinMaxElev(${lat}, ${lng})">min/max</button>
+        </div>
+       </div>
+       `;
         marker.bindPopup(popupContent).openPopup();
     });
+}
+
+function validateRadius(input) {
+    if (input.value > 2) {
+        input.value = 2;
+    }
+    if (input.value < 1 && input.value !== '') {
+        input.value = 1;
+    }
+}
+
+function calcMinMaxElev(lat, lng) {
+    let radiusInput = document.getElementById('minMaxRadius');
+    let radiusNM = parseFloat(radiusInput.value);
+    if (isNaN(radiusNM) || radiusNM <= 0) {
+        showErrorBanner("Bitte geben Sie einen gültigen Radius in NM ein.");
+        return;
+    }
+    const points = generatePoints(lat, lng, radiusNM, 200); // Pass the numeric value
+    console.log("Berechnete Punkte:", points);
+    createCircle(lat, lng, radiusNM);
+
+    if (points.length > 0) {
+        fetchElevationsAndFindMinMax(points).then(result => {
+            createElevMarker(result.minCoord.lat, result.minCoord.lng, result.minElevation, 'min');
+            createElevMarker(result.maxCoord.lat, result.maxCoord.lng, result.maxElevation, 'max');
+
+
+            console.log("Tiefster Punkt:", result.minElevation, "FT bei", decimalToDMS(result.minCoord.lat, result.minCoord.lng));
+            console.log("Höchster Punkt:", result.maxElevation, "FT bei", decimalToDMS(result.maxCoord.lat, result.maxCoord.lng));
+
+        }).catch(err => {
+            console.error(err);
+            showErrorBanner("Fehler beim Abrufen der Höhendaten.");
+        });
+    }
+}
+
+function createElevMarker(lat, lng, elevation, status) {
+    const iconClass = status === 'min' ? 'elev-marker-min' : 'elev-marker-max';
+    const marker = returnElevationIcon(lat, lng, iconClass, status);
+    markers.push(marker);
+    const popupContent = `<div class="popupContentWrapper">
+        <span><b>Höhe:</b> ${elevation}FT</span>
+        </div>`;
+    marker.bindPopup(popupContent).openPopup();
+
+}
+
+function returnElevationIcon(lat, lng, iconClass, status) {
+    const anchor = status === 'min' ? [24, 48] : [24, 0];
+    return L.marker([lat, lng], {
+        icon: L.divIcon({
+            className: 'custom-div-icon',
+            html: `<img src="./img/elevArrow.png" class="${iconClass}" style="width: 48px; height: 48px;">`,
+            iconSize: [48, 48],
+            iconAnchor: anchor
+        })
+    }).addTo(map);
+}
+
+function createCircle(lat, lng, radiusNM) {
+    const radiusMeters = radiusNM * 1852;
+    const circle = L.circle([lat, lng], { radius: radiusMeters }).addTo(map);
+    markers.push(circle);
 }
 
 function createMarker(lat, lng) {
@@ -248,7 +325,7 @@ function findClosestNavAid(markerLat, markerLon) {
         if (dist < shortestDist) { shortestDist = dist; closestData = navaid; closestLatLng = [nLat, nLon]; }
     });
 
-    if (closestData && closestLatLng) {        
+    if (closestData && closestLatLng) {
         processFoundClosestNavAid(closestData, closestLatLng, markerLat, markerLon, shortestDist);
     } else {
         handleNoFurtherNavAidsFound();
@@ -295,6 +372,24 @@ function calculateAngle(lat1, lon1, lat2, lon2) {
     const y = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
     let angle = toDeg(Math.atan2(x, y));
     return (angle < 0) ? angle + 360 : angle;
+}
+
+function decimalToDMS(lat, lng) {
+    function toDMS(deg) {
+        const absolute = Math.abs(deg);
+        const degrees = Math.floor(absolute);
+        const minutesNotTruncated = (absolute - degrees) * 60;
+        const minutes = Math.floor(minutesNotTruncated);
+        const seconds = Math.floor((minutesNotTruncated - minutes) * 60);
+        return `${degrees}°${minutes}'${seconds}"`;
+    }
+
+    const latDMS = toDMS(lat);
+    const latDir = lat >= 0 ? "N" : "S";
+    const lngDMS = toDMS(lng);
+    const lngDir = lng >= 0 ? "E" : "W";
+
+    return `${latDMS}${latDir} ${lngDMS}${lngDir}`;
 }
 
 async function getElevation(lat, lng) {
