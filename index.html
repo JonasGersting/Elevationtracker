@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="fonts/fonts.css">
     <link rel="icon" type="image/x-icon" href="img/mapBlue.png">
 </head>
+
 <body>
     <div class="topSearchBar">
         <div class="searchDropDown">
@@ -20,6 +21,7 @@
                 <div class="shadow" id="dropDownCategory">
                     <button class="searchButton" onclick="setSearchCat('Standort')">Standort</button>
                     <button class="searchButton" onclick="setSearchCat('Flugplatz')">Flugplatz</button>
+                    <button class="searchButton" onclick="setSearchCat('Callsign')">Callsign</button>
                     <button class="searchButton" onclick="setSearchCat('ED-R')">ED-R</button>
                     <button class="searchButton" onclick="setSearchCat('ED-D')">ED-D</button>
                     <button class="searchButton" onclick="setSearchCat('RMZ')">RMZ</button>
@@ -149,7 +151,8 @@
                     <div class="allAirspaceLayer smallMenu">
                         <button class="mapBtn" id="fis" onclick="togglePolygons('fis')">FIS</button>
                         <button class="mapBtn" id="edrLower" onclick="togglePolygons('edrLower')">EDR bis FL100</button>
-                        <button class="mapBtn" id="edrUpper" onclick="togglePolygons('edrUpper')">EDR über FL100</button>
+                        <button class="mapBtn" id="edrUpper" onclick="togglePolygons('edrUpper')">EDR über
+                            FL100</button>
                         <button class="mapBtn" id="edd" onclick="togglePolygons('edd')">EDD</button>
                         <button class="mapBtn" id="ctr" onclick="togglePolygons('ctr')">CTR</button>
                         <button class="mapBtn" id="rmz" onclick="togglePolygons('rmz')">RMZ</button>
@@ -169,7 +172,7 @@
                 </div>
             </div>
         </div>
-        <!-- <button id="radar" class="radarBtn shadow" onclick="toggleRadar()"></button> -->
+        <button id="radar" class="radarBtn shadow" onclick="toggleRadar()"></button>
         <button id="measuring" class="measuringBtn shadow" onclick="toggleMeasuringService()"></button>
     </div>
     <div class="shadow" id="calcGaforRadius">
@@ -267,7 +270,7 @@
 <script src="libs/leaflet/leaflet.markercluster.js"></script>
 <script src="services/loginService.js"></script>
 <script src="acftType.js"></script>
-<script src="temoEdr.js" ></script>
+<script src="temoEdr.js"></script>
 <script src="services/mapService.js"></script>
 <script src="services/airspaceService.js"></script>
 <script src="services/radarService.js"></script>
@@ -276,7 +279,7 @@
 <script src="services/showPositionService.js"></script>
 <script src="services/gaforService.js"></script>
 <script src="services/measuringService.js"></script>
-<script src="services/minMaxElevationService.js" ></script>
+<script src="services/minMaxElevationService.js"></script>
 <script src="classes/airspace.class.js"></script>
 <script src="classes/edrAirspace.class.js"></script>
 <script src="classes/fisAirspace.class.js"></script>

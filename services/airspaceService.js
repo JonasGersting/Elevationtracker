@@ -74,23 +74,20 @@ function calcMinMaxElev(lat, lng) {
         return;
     }
     const points = generatePoints(lat, lng, radiusNM, 300);
-    console.log("Berechnete Punkte:", points);
     createCircle(lat, lng, radiusNM);
+    findAndCreateElevMarker(points);
+}
 
-    // if (points.length > 0) {
-    //     fetchElevationsAndFindMinMax(points).then(result => {
-    //         createElevMarker(result.minCoord.lat, result.minCoord.lng, result.minElevation, 'min');
-    //         createElevMarker(result.maxCoord.lat, result.maxCoord.lng, result.maxElevation, 'max');
-
-
-    //         console.log("Tiefster Punkt:", result.minElevation, "FT bei", decimalToDMS(result.minCoord.lat, result.minCoord.lng));
-    //         console.log("Höchster Punkt:", result.maxElevation, "FT bei", decimalToDMS(result.maxCoord.lat, result.maxCoord.lng));
-
-    //     }).catch(err => {
-    //         console.error(err);
-    //         showErrorBanner("Fehler beim Abrufen der Höhendaten.");
-    //     });
-    // }
+function findAndCreateElevMarker(points) {
+    if (points.length > 0) {
+        fetchElevationsAndFindMinMax(points).then(result => {
+            createElevMarker(result.minCoord.lat, result.minCoord.lng, result.minElevation, 'min');
+            createElevMarker(result.maxCoord.lat, result.maxCoord.lng, result.maxElevation, 'max');
+        }).catch(err => {
+            console.error(err);
+            showErrorBanner("Fehler beim Abrufen der Höhendaten.");
+        });
+    }
 }
 
 function createElevMarker(lat, lng, elevation, status) {
@@ -298,9 +295,10 @@ function processFoundClosestNavAid(data, latLng, markerLat, markerLon, distance)
     const angle = calculateAngle(latLng[0], latLng[1], markerLat, markerLon);
     const line = L.polyline([[markerLat, markerLon], latLng], { color: 'red', weight: 2, dashArray: '5, 10' }).addTo(map);
     polylines.push(line);
-    const type = data.properties.type || data.properties['select-source-layer'];
-    const popupContent = `<div>
-        <p>${distance.toFixed(2)}NM ${getOrientationFromDegrees(angle.toFixed(2))} ${data.properties.txtname} ${type} ${data.properties.ident}</p>
+    let type = data.properties.type || data.properties['select-source-layer'];
+    type = type.replace(/_/g, '/');
+    const popupContent = `<div class="navAidPopupContentWrapper">
+        <b><p style="white-space: nowrap;">${distance.toFixed(2)}NM ${getOrientationFromDegrees(angle.toFixed(2))} ${data.properties.txtname} ${type} ${data.properties.ident}</p></b>
         <button class="navAidBtn" onclick="findClosestNavAid(${markerLat}, ${markerLon})">Finde nächstes Navaid</button>
         </div>`;
     line.bindPopup(popupContent).openPopup();
