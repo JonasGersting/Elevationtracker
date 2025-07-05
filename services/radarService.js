@@ -180,7 +180,7 @@ function processReceivedAircraft(acDataArray) {
 
 async function fetchAircraftData(centerLat, centerLon, radius) {
     try {
-        const response = await fetch(`http://91.99.191.89:3000/radar`);
+        const response = await fetch(`https://radar.jonasgersting.de/radar`);
         if (!response.ok) throw new Error(`API error: ${response.statusText}`);
         const data = await response.json();
         if (data && data.ac) {
