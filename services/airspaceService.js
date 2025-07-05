@@ -73,24 +73,24 @@ function calcMinMaxElev(lat, lng) {
         showErrorBanner("Bitte geben Sie einen gültigen Radius in NM ein.");
         return;
     }
-    const points = generatePoints(lat, lng, radiusNM, 200); // Pass the numeric value
+    const points = generatePoints(lat, lng, radiusNM, 300);
     console.log("Berechnete Punkte:", points);
     createCircle(lat, lng, radiusNM);
 
-    if (points.length > 0) {
-        fetchElevationsAndFindMinMax(points).then(result => {
-            createElevMarker(result.minCoord.lat, result.minCoord.lng, result.minElevation, 'min');
-            createElevMarker(result.maxCoord.lat, result.maxCoord.lng, result.maxElevation, 'max');
+    // if (points.length > 0) {
+    //     fetchElevationsAndFindMinMax(points).then(result => {
+    //         createElevMarker(result.minCoord.lat, result.minCoord.lng, result.minElevation, 'min');
+    //         createElevMarker(result.maxCoord.lat, result.maxCoord.lng, result.maxElevation, 'max');
 
 
-            console.log("Tiefster Punkt:", result.minElevation, "FT bei", decimalToDMS(result.minCoord.lat, result.minCoord.lng));
-            console.log("Höchster Punkt:", result.maxElevation, "FT bei", decimalToDMS(result.maxCoord.lat, result.maxCoord.lng));
+    //         console.log("Tiefster Punkt:", result.minElevation, "FT bei", decimalToDMS(result.minCoord.lat, result.minCoord.lng));
+    //         console.log("Höchster Punkt:", result.maxElevation, "FT bei", decimalToDMS(result.maxCoord.lat, result.maxCoord.lng));
 
-        }).catch(err => {
-            console.error(err);
-            showErrorBanner("Fehler beim Abrufen der Höhendaten.");
-        });
-    }
+    //     }).catch(err => {
+    //         console.error(err);
+    //         showErrorBanner("Fehler beim Abrufen der Höhendaten.");
+    //     });
+    // }
 }
 
 function createElevMarker(lat, lng, elevation, status) {

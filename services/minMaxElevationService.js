@@ -1,37 +1,33 @@
 const NM_TO_METER = 1852;
 
-// Radius in NM → Meter umrechnen und Punkte generieren
-function generatePoints(CenterLat, CenterLng, radiusNM, step) {
-  const radius = radiusNM * NM_TO_METER;
-  const earthRadius = 6371000;
+function generateGridPoints(stepsPerSide, radius, step, earthRadius, CenterLat, CenterLng, center) {
   const points = [];
-  const center = { lat: CenterLat, lng: CenterLng };
-
-  const stepsPerSide = Math.ceil((2 * radius) / step);
-
   for (let i = 0; i <= stepsPerSide; i++) {
     for (let j = 0; j <= stepsPerSide; j++) {
       const dx = -radius + i * step;
       const dy = -radius + j * step;
-
       const latOffset = (dy / earthRadius) * (180 / Math.PI);
       const lngOffset = (dx / earthRadius) * (180 / Math.PI) / Math.cos(CenterLat * Math.PI / 180);
-
       const lat = CenterLat + latOffset;
       const lng = CenterLng + lngOffset;
-
       const p = { lat, lng };
-
       if (haversineDistance(center, p) <= radius) {
         points.push(p);
       }
     }
   }
-
   return points;
 }
 
-// Haversine-Distanz in Meter
+function generatePoints(CenterLat, CenterLng, radiusNM, step) {
+  const radius = radiusNM * NM_TO_METER;
+  const earthRadius = 6371000;
+  const center = { lat: CenterLat, lng: CenterLng };
+  const stepsPerSide = Math.ceil((2 * radius) / step);
+  return generateGridPoints(stepsPerSide, radius, step, earthRadius, CenterLat, CenterLng, center);
+}
+
+
 function haversineDistance(p1, p2) {
   const toRad = deg => deg * Math.PI / 180;
   const R = 6371000;
@@ -44,7 +40,6 @@ function haversineDistance(p1, p2) {
   return R * c;
 }
 
-// Array in Päckchen (≤100) teilen
 function chunkArray(arr, size = 100) {
   const chunks = [];
   for (let i = 0; i < arr.length; i += size) {
@@ -53,56 +48,56 @@ function chunkArray(arr, size = 100) {
   return chunks;
 }
 
-// Elevations von der API abfragen & min/max finden
 async function fetchElevationsAndFindMinMax(points) {
-  const apiBase = "https://api.open-meteo.com/v1/elevation";
   const chunks = chunkArray(points, 100);
-
-  const allResults = []; // { lat, lng, elevation }
-  let chunkCounter = 0;
-
-  for (const chunk of chunks) {
-    if (chunkCounter > 0 && chunkCounter % 6 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-
-    const lats = chunk.map(p => p.lat.toFixed(6)).join(",");
-    const lngs = chunk.map(p => p.lng.toFixed(6)).join(",");
-    const url = `${apiBase}?latitude=${lats}&longitude=${lngs}`;
-
-    const res = await fetch(url);
-    const data = await res.json();
-
-    if (data && data.elevation && data.elevation.length === chunk.length) {
-      for (let i = 0; i < chunk.length; i++) {
-        allResults.push({
-          lat: chunk[i].lat,
-          lng: chunk[i].lng,
-          elevation: data.elevation[i]
-        });
-      }
-    } else {
-      console.warn("Keine oder fehlerhafte Elevationsdaten für Chunk:", chunk);
-    }
-    chunkCounter++;
-  }
-
-  if (allResults.length === 0) {
-    throw new Error("Keine Elevationsdaten erhalten");
-  }
-
-  let minPoint = allResults[0];
-  let maxPoint = allResults[0];
-
-  for (const pt of allResults) {
-    if (pt.elevation < minPoint.elevation) minPoint = pt;
-    if (pt.elevation > maxPoint.elevation) maxPoint = pt;
-  }
-
-  return {
-    minElevation: (minPoint.elevation * 3.28084).toFixed(2),
-    minCoord: { lat: minPoint.lat, lng: minPoint.lng },
-    maxElevation: (maxPoint.elevation * 3.28084).toFixed(2),
-    maxCoord: { lat: maxPoint.lat, lng: maxPoint.lng }
-  };
+  const results = await fetchAllChunks(chunks);
+  if (!results.length) throw new Error("Keine Elevationsdaten");
+  const { minPoint, maxPoint } = findMinMax(results);
+  return formatResult(minPoint, maxPoint);
 }
+
+async function fetchAllChunks(chunks) {
+  const results = [];
+  for (let i = 0; i < chunks.length; i++) {
+    if (i && i % 6 === 0) await delay(3000);
+    const data = await fetchChunk(chunks[i]);
+    if (validData(data, chunks[i])) {
+      results.push(...mapResults(chunks[i], data.elevation));
+    } else {
+      console.warn("Fehlerhafte Daten:", chunks[i]);
+    }
+  }
+  return results;
+}
+
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+const fetchChunk = async chunk => {
+  const lat = chunk.map(p => p.lat.toFixed(6)).join(",");
+  const lng = chunk.map(p => p.lng.toFixed(6)).join(",");
+  const url = `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`;
+  return fetch(url).then(r => r.json());
+};
+
+const validData = (data, chunk) =>
+  data?.elevation?.length === chunk.length;
+
+const mapResults = (chunk, elevations) =>
+  chunk.map((p, i) => ({ lat: p.lat, lng: p.lng, elevation: elevations[i] }));
+
+const findMinMax = arr =>
+  arr.reduce((a, p) => {
+    if (p.elevation < a.minPoint.elevation) a.minPoint = p;
+    if (p.elevation > a.maxPoint.elevation) a.maxPoint = p;
+    return a;
+  }, { minPoint: arr[0], maxPoint: arr[0] });
+
+const formatResult = (min, max) => ({
+  minElevation: toFeet(min.elevation),
+  minCoord: { lat: min.lat, lng: min.lng },
+  maxElevation: toFeet(max.elevation),
+  maxCoord: { lat: max.lat, lng: max.lng }
+});
+
+const toFeet = m => (m * 3.28084).toFixed(2);
+

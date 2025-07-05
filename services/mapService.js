@@ -1,5 +1,3 @@
-
-
 let currentAerodrome;
 let currentAirspace;
 let weatherPath;
@@ -58,7 +56,7 @@ function setOpacity() {
 var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 let openFlightMaps = L.tileLayer('https://nwy-tiles-api.prod.newaydata.com/tiles/{z}/{x}/{y}.png?path=2505/aero/latest', {
@@ -82,49 +80,49 @@ let icaoCard = L.tileLayer('https://ais.dfs.de/static-maps/icao500/tiles/{z}/{x}
 var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>), <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 var stadiaAlidadeSmooth = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 var stadiaAlidadeSmoothDark = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 let topPlusOpen = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 let topPlusOpenGrey = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_grau/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 let topPlusOpenLight = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 let topPlusOpenLightGray = L.tileLayer('https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web_light_grau/default/WEBMERCATOR/{z}/{y}/{x}.png', {
     minZoom: 4,
     maxZoom: 20,
-    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>'
+    attribution: '&copy; <a href="https://www.bkg.bund.de">BKG</a>, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 let googleSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     minZoom: 4,
     maxZoom: 22,
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community, <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>, <a href="https://open-meteo.com/">Open-Meteo</a>'
 });
 
 let dwdWeather = L.tileLayer.wms('https://maps.dwd.de/geoserver/wms', {
