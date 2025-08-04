@@ -159,6 +159,36 @@
     background-image: url('../img/rulerBlue.png') !important;
 }
 
+.notamBtn{
+    margin-top: 16px;
+    width: 80px;
+    height: 80px;
+    left: 0;
+    z-index: 1000;
+    background-color: rgb(40, 40, 126);
+    color: white;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    border-radius: 16px;
+    background-image: url('../img/NOTAM_White.png');
+    background-size: 80px;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    border: none;
+}
+
+.notamBtn:hover {
+    background-color: white !important;
+    background-image: url('../img/NOTAM_Blue.png') !important;
+}
+
+.notamBtn-active{
+    background-color: rgb(144, 183, 18) !important;
+    background-image: url('../img/NOTAM_Blue.png') !important;
+}
+
 .distance-permanent-label {
     background-color: transparent;
     border: none;

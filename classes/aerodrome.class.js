@@ -14,6 +14,7 @@ class Aerodrome extends AirspacePolygon {
         this.currentImgIndex;
         this.rotationAngle = 0;
         this.aipImgsAct = false;
+        this.notamInfoAct = false;
     }
 
     getRotationBarHtml(trueHeading) {
@@ -129,12 +130,12 @@ class Aerodrome extends AirspacePolygon {
                 btn.disabled = true;
             }
             loader.style.display = 'none';
-        } catch (e) { 
+        } catch (e) {
             showErrorBanner("Fehler beim Initialisieren der AIP-Buttons.");
-         }
+        }
     }
 
-    async onClick() {
+    async onClick() {       
         this.setaipInfo(this.icaoCode);
         currentAerodrome = this;
         const detailDiv = this.prepareDetailView();
@@ -143,6 +144,8 @@ class Aerodrome extends AirspacePolygon {
         this.loadMetarData(metarTargetId);
         this.initializeAipButtons();
     }
+
+ 
 
     returnCard(name, icaoCode, metarTargetId) {
         return `
@@ -157,13 +160,14 @@ class Aerodrome extends AirspacePolygon {
                         <button class="aerodromeCardButton" id="showAipImgsBtn" onclick="currentAerodrome.toggleAIPImgs()">
                         <span class="loader z-index1100" id="loaderAipImg" style="display: none;"></span>
                         AIP-Info</button>
-                        <button class="aerodromeCardButton" id="showNotam" disabled onclick="currentAerodrome.toggleNotam()">
+                        <button class="aerodromeCardButton" disabled id="showNotam" onclick="currentAerodrome.toggleNotam()">
                         <span class="loader z-index1100" id="loaderNotam" style="display: none;"></span>
                         NOTAM</button>
                     </div>
                 </div>
                 <div id="aipInfo">
                 </div>
+                <div id="notamInfo"></div>
             </div>`;
     }
 
@@ -184,14 +188,16 @@ class Aerodrome extends AirspacePolygon {
         });
     }
 
-     hideAIPImgs(aipImgContainer, aerodromeCard) {
+
+
+    hideAIPImgs(aipImgContainer, aerodromeCard) {
         this.aipImgsAct = false;
         aipImgContainer.style.width = '0px';
         aipImgContainer.innerHTML = '';
         aerodromeCard.style.borderRadius = '16px';
     }
 
-    getAipContainerWidth() {
+    getInfoContainerWidth() {
         if (window.innerWidth <= 1000) return '500px';
         if (window.innerWidth <= 1300) return '600px';
         return '900px';
@@ -210,19 +216,85 @@ class Aerodrome extends AirspacePolygon {
         this.aipImgsAct = true;
         aerodromeCard.style.borderTopRightRadius = '0px';
         aerodromeCard.style.borderBottomRightRadius = '0px';
-        aipImgContainer.style.width = this.getAipContainerWidth();
+        aipImgContainer.style.width = this.getInfoContainerWidth();
         aipImgContainer.innerHTML = '';
         this.setAipContainerContent(aipImgContainer);
     }
 
     toggleAIPImgs() {
-        let aipImgContainer = document.getElementById('aipInfo');
-        let aerodromeCard = document.getElementById('aerodromeCard');
+        const aipImgContainer = document.getElementById('aipInfo');
+        const notamInfoContainer = document.getElementById('notamInfo');
+        const aerodromeCard = document.getElementById('aerodromeCard');
+        if (this.notamInfoAct) {
+            this.hideNotamInfo(notamInfoContainer, aerodromeCard);
+        }
         if (this.aipImgsAct) {
             this.hideAIPImgs(aipImgContainer, aerodromeCard);
         } else {
             this.showAIPImgs(aipImgContainer, aerodromeCard);
         }
+    }
+
+    toggleNotam() {
+        const aipImgContainer = document.getElementById('aipInfo');
+        const notamInfoContainer = document.getElementById('notamInfo');
+        const aerodromeCard = document.getElementById('aerodromeCard');
+        if (this.aipImgsAct) {
+            this.hideAIPImgs(aipImgContainer, aerodromeCard);
+        }
+        if (this.notamInfoAct) {
+            this.hideNotamInfo(notamInfoContainer, aerodromeCard);
+        } else {
+            this.showNotamInfo(notamInfoContainer, aerodromeCard);
+
+        }
+    }
+
+    async showADNotam(notamInfoContainer) {
+       await this.checkNotamAvailability();
+        notamInfoContainer.innerHTML = '';
+        aerodromeNotam.forEach(notam => {
+            if (notam.itemA == this.icaoCode) {
+                notamInfoContainer.innerHTML += `<div class="notamDetail"> ${returnCorrectNOTAM(
+                    notam.endDate, notam.est, notam.fir,
+                    notam.itemA, notam.itemD, notam.itemE, notam.itemF, notam.itemG,
+                    notam.latitude, notam.longitude, notam.lower, notam.nof, notam.notamID, notam.purpose, notam.qcode, notam.radius,
+                    notam.referredNotamId, notam.scope, notam.startDate, notam.traffic, notam.type, notam.upper
+                )}</div>`;
+            }
+        });
+        if (notamInfoContainer.innerHTML === '') {
+            notamInfoContainer.innerHTML = `<div class="notamDetail">Keine NOTAM für diesen Flugplatz gefunden.</div>`;
+        }
+    }
+
+    async checkNotamAvailability() {
+        if (allNOTAM.length === 0) {
+            await getNotam('AD');
+            setLastNotamCheck();
+        } else {
+            let now = new Date();
+            if (lastNotamCheck - now > 5 * 60 * 1000) {
+                await getNotam('AD');
+                setLastNotamCheck();
+            }
+        }
+    }
+
+    hideNotamInfo(notamInfoContainer, aerodromeCard) {
+        this.notamInfoAct = false;
+        notamInfoContainer.style.width = '0px';
+        notamInfoContainer.innerHTML = '';
+        aerodromeCard.style.borderRadius = '16px';
+    }
+
+    async showNotamInfo(notamInfoContainer, aerodromeCard) {
+        this.notamInfoAct = true;
+        aerodromeCard.style.borderTopRightRadius = '0px';
+        aerodromeCard.style.borderBottomRightRadius = '0px';
+        notamInfoContainer.style.width = this.getInfoContainerWidth();
+        notamInfoContainer.innerHTML = '';
+        await this.showADNotam(notamInfoContainer);
     }
 
     updateAipPage(direction) {
