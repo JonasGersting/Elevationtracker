@@ -174,7 +174,7 @@
         </div>
         <button id="radar" class="radarBtn shadow" onclick="toggleRadar()"></button>
         <button id="measuring" class="measuringBtn shadow" onclick="toggleMeasuringService()"></button>
-        <button id="notam" class="notamBtn shadow" onclick="checkNotamAvailability()" ></button>
+        <button id="notam" class="notamBtn shadow" onclick="revealEnrouteNotam()"></button>
     </div>
     <div class="shadow" id="calcGaforRadius">
         <div class="gaforInput">
@@ -186,6 +186,28 @@
         </div>
 
 
+    </div>
+    <div id="notamFilter" class="shadow">
+        <div>
+            <input oninput="filterNotam('all Notam', 'all')" checked type="checkbox" id="all Notam" name="all Notam" value="all Notam">
+            <label for="all Notam">all Notam</label>
+        </div>
+        <div>
+            <input oninput="filterNotam('Sperrgebiete', 'R')" checked type="checkbox" id="Sperrgebiete" name="Sperrgebiete" value="Sperrgebiete" data-qcode="R">
+            <label for="Sperrgebiete">Sperrgebiete</label>
+        </div>
+        <div>
+            <input oninput="filterNotam('Warnings', 'W')" checked type="checkbox" id="Warnings" name="Warnings" value="Warnings" data-qcode="W">
+            <label for="Warnings">Warnings</label>
+        </div>
+        <div>
+            <input oninput="filterNotam('NAV-Anlagen', 'N')" checked type="checkbox" id="NAV-Anlagen" name="NAV-Anlagen" value="NAV-Anlagen" data-qcode="N">
+            <label for="NAV-Anlagen">NAV-Anlagen</label>
+        </div>
+          <div>
+            <input oninput="filterNotam('bigNotam', 'big')" type="checkbox" id="bigNotam" name="bigNotam" value="bigNotam" data-qcode="big">
+            <label for="bigNotam">Big Notam</label>
+        </div>
     </div>
     <div class="shadow" id="showActualPos"></div>
     <div id="aerodromeInfoDetail">

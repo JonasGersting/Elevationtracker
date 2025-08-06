@@ -282,12 +282,12 @@
     font-size: 14px;
 }
 
-.navAidPopupContentWrapper{
+.navAidPopupContentWrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    
+
 }
 
 .navAidBtn {
@@ -308,7 +308,7 @@
     color: rgb(40, 40, 126);
 }
 
-#minMaxRadius{
+#minMaxRadius {
     width: 110px;
     height: 38px;
     box-sizing: border-box;
@@ -319,18 +319,70 @@
 
 
 
-.popupContentWrapper{
+.popupContentWrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 }
 
-.popupContentPartWrapper{
+.popupContentPartWrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+}
+
+
+#notamFilter {
+    position: absolute;
+    z-index: 1000;
+    bottom: 589px;
+    width: 130px;
+    border-radius: 8px;
+    background-color: rgb(40, 40, 126);
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    left: 32px;
+    padding: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#notamFilter input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    top: 3px;
+    margin-right: 6px;
+    background-color: white;
+    border: 1px solid rgb(40, 40, 126);
+}
+
+
+#notamFilter input[type="checkbox"]:checked {
+    background-color: rgb(195, 245, 25);
+}
+
+
+#notamFilter input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    display: block;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border-style: solid;
+    border-width: 0 2px 2px 0;
+    border-color: rgb(40, 40, 126);
+    transform: rotate(45deg);
 }
 
 

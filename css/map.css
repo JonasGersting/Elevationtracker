@@ -73,6 +73,13 @@
     box-sizing: border-box;
 }
 
+.notam-label {
+    font-family: 'Roboto', sans-serif;
+    width: 60px;
+    border-radius: 8px;
+    text-align: center;
+    background-color: white;
+}
 .elev-marker-min {
     transform: rotate(270deg);
 }

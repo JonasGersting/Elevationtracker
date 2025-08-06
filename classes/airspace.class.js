@@ -113,7 +113,6 @@ class AirspacePolygon {
     }
 
     getPolygonStyleForLabelHover() {
-        // Standard-Hover-Stil für das Polygon, wenn über das Label gehovert wird
         return { fillColor: 'white', fillOpacity: 0.8 };
     }
 
@@ -129,7 +128,7 @@ class AirspacePolygon {
             if (nameEl) nameEl.style.display = 'block';
         }
         if (this.layer) {
-            this.layer.setStyle(this.getPolygonStyleForLabelHover()); // Geänderte Zeile
+            this.layer.setStyle(this.getPolygonStyleForLabelHover());
             this.layer.bringToFront();
         }
     }

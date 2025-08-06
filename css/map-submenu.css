@@ -167,7 +167,7 @@
     z-index: 1000;
     background-color: rgb(40, 40, 126);
     color: white;
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 16px;

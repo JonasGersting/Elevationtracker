@@ -26,6 +26,7 @@ class Notam {
         this.traffic = traffic;
         this.type = type;
         this.upper = upper;
+        this.idLabel = null; 
     }
 
     addToMap() {
@@ -38,11 +39,18 @@ class Notam {
             fillOpacity: 0
         });
 
-        this.layer.on('mouseover', () => {
+        this.layer.on('mouseover', (e) => {
             this.notamHoverOn(this.layer);
+            this.showIdLabel(e.latlng);
+        });
+        this.layer.on('mousemove', (e) => {
+            if (this.idLabel) {
+                this.idLabel.setLatLng(e.latlng);
+            }
         });
         this.layer.on('mouseout', () => {
             this.notamHoverOut(this.layer);
+            this.hideIdLabel();
         });
         this.layer.on('click', () => {
             this.showNotamPopup();
@@ -51,14 +59,40 @@ class Notam {
         this.layer.addTo(this.map);
     }
 
+    showIdLabel(position) {
+        if (this.idLabel) return;
+
+        const content = `<div class="notam-id-label">${this.notamID}</div>`;
+        const icon = L.divIcon({
+            html: content,
+            className: 'notam-label',
+            iconSize: null,
+            iconAnchor: [-10, 15] 
+        });
+
+        this.idLabel = L.marker(position, {
+            icon: icon,
+            pane: 'markerPane',
+            interactive: false
+        }).addTo(this.map);
+    }
+
+    hideIdLabel() {
+        if (this.idLabel) {
+            this.map.removeLayer(this.idLabel);
+            this.idLabel = null;
+        }
+    }
+
     showNotamPopup() {
+        this.hideIdLabel();
         const content = `<div class="notam-popup"> ${returnCorrectNOTAM(this.endDate, this.est, this.fir,
             this.itemA, this.itemD, this.itemE, this.itemF, this.itemG,
             this.latitude, this.longitude, this.lower, this.nof,
             this.notamID, this.purpose, this.qcode, this.radius,
             this.referredNotamId, this.scope, this.startDate,
             this.traffic, this.type, this.upper)}</div>`;
-        L.popup({ minWidth: 400 })
+        L.popup({ minWidth: 400, maxWidth: 500 })
             .setLatLng(this.layer.getLatLng())
             .setContent(content)
             .openOn(this.map);
@@ -68,6 +102,7 @@ class Notam {
         if (this.layer) {
             this.map.removeLayer(this.layer);
         }
+        this.hideIdLabel(); 
     }
 
     notamRadiusToMeters() {
@@ -77,7 +112,6 @@ class Notam {
     notamHoverOn(layer) {
         isCursorOverPolygon = true;
         layer.setStyle(this.getSpecificHoverStyle());
-        layer.bringToFront();
     }
 
     notamHoverOut(layer) {
@@ -86,7 +120,7 @@ class Notam {
     }
 
     getSpecificHoverStyle() {
-        return { fillColor: 'white', fillOpacity: 0.8 };
+        return { fillColor: 'blue', fillOpacity: 0.4 };
     }
 
     getStyle() {

@@ -135,7 +135,7 @@ class Aerodrome extends AirspacePolygon {
         }
     }
 
-    async onClick() {       
+    async onClick() {
         this.setaipInfo(this.icaoCode);
         currentAerodrome = this;
         const detailDiv = this.prepareDetailView();
@@ -145,7 +145,7 @@ class Aerodrome extends AirspacePolygon {
         this.initializeAipButtons();
     }
 
- 
+
 
     returnCard(name, icaoCode, metarTargetId) {
         return `
@@ -160,7 +160,7 @@ class Aerodrome extends AirspacePolygon {
                         <button class="aerodromeCardButton" id="showAipImgsBtn" onclick="currentAerodrome.toggleAIPImgs()">
                         <span class="loader z-index1100" id="loaderAipImg" style="display: none;"></span>
                         AIP-Info</button>
-                        <button class="aerodromeCardButton" disabled id="showNotam" onclick="currentAerodrome.toggleNotam()">
+                        <button class="aerodromeCardButton" id="showNotam" onclick="currentAerodrome.toggleNotam()">
                         <span class="loader z-index1100" id="loaderNotam" style="display: none;"></span>
                         NOTAM</button>
                     </div>
@@ -251,7 +251,7 @@ class Aerodrome extends AirspacePolygon {
     }
 
     async showADNotam(notamInfoContainer) {
-       await this.checkNotamAvailability();
+        await this.checkNotamAvailability();
         notamInfoContainer.innerHTML = '';
         aerodromeNotam.forEach(notam => {
             if (notam.itemA == this.icaoCode) {
