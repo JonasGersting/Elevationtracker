@@ -337,8 +337,8 @@
 #notamFilter {
     position: absolute;
     z-index: 1000;
-    bottom: 589px;
-    width: 130px;
+    bottom: 551px;
+    width: 135px;
     border-radius: 8px;
     background-color: rgb(40, 40, 126);
     color: white;

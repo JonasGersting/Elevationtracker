@@ -189,24 +189,34 @@
     </div>
     <div id="notamFilter" class="shadow">
         <div>
-            <input oninput="filterNotam('all Notam', 'all')" checked type="checkbox" id="all Notam" name="all Notam" value="all Notam">
-            <label for="all Notam">all Notam</label>
+            <input oninput="filterNotam('allQcodes')" checked type="checkbox" id="allQcodes" name="allQcodes"
+                value="allQcodes">
+            <label for="allQcodes">all Qcodes</label>
         </div>
         <div>
-            <input oninput="filterNotam('Sperrgebiete', 'R')" checked type="checkbox" id="Sperrgebiete" name="Sperrgebiete" value="Sperrgebiete" data-qcode="R">
+            <input oninput="filterNotam('Sperrgebiete')" checked type="checkbox" id="Sperrgebiete" name="Sperrgebiete"
+                value="Sperrgebiete" data-qcode="R">
             <label for="Sperrgebiete">Sperrgebiete</label>
         </div>
         <div>
-            <input oninput="filterNotam('Warnings', 'W')" checked type="checkbox" id="Warnings" name="Warnings" value="Warnings" data-qcode="W">
+            <input oninput="filterNotam('Warnings')" checked type="checkbox" id="Warnings" name="Warnings"
+                value="Warnings" data-qcode="W">
             <label for="Warnings">Warnings</label>
         </div>
         <div>
-            <input oninput="filterNotam('NAV-Anlagen', 'N')" checked type="checkbox" id="NAV-Anlagen" name="NAV-Anlagen" value="NAV-Anlagen" data-qcode="N">
+            <input oninput="filterNotam('NAV-Anlagen')" checked type="checkbox" id="NAV-Anlagen" name="NAV-Anlagen"
+                value="NAV-Anlagen" data-qcode="N">
             <label for="NAV-Anlagen">NAV-Anlagen</label>
         </div>
-          <div>
-            <input oninput="filterNotam('bigNotam', 'big')" type="checkbox" id="bigNotam" name="bigNotam" value="bigNotam" data-qcode="big">
-            <label for="bigNotam">Big Notam</label>
+        <div>
+            <input oninput="filterNotam('Hindernisse')" checked type="checkbox" id="Hindernisse" name="Hindernisse"
+                value="Hindernisse" data-qcode="O">
+            <label for="Hindernisse">Hindernisse</label>
+        </div>
+        <div>
+            <input oninput="filterNotam('excWideArea')" checked type="checkbox" id="excWideArea" name="excWideArea"
+                value="excWideArea" data-qcode="exc">
+            <label for="excWideArea">EXC wide area</label>
         </div>
     </div>
     <div class="shadow" id="showActualPos"></div>

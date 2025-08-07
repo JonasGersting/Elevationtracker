@@ -1,6 +1,5 @@
 let enrouteNotam = [];
 let aerodromeNotam = [];
-let bigRadiusNotam = [];
 let allNOTAM = [
     {
         "code23": "NM",
@@ -19,8 +18,8 @@ let allNOTAM = [
         "nof": "EDDZ",
         "notamID": "B0546/25",
         "purpose": "OPERATIONAL SIGNIFICANCE, FLIGHT OPERATIONS",
-        "qcode": "NMCT",
-        "radius": "25",
+        "qcode": "OBCE",
+        "radius": "1",
         "referredNotamId": "",
         "scope": "EN-ROUTE",
         "startDate": "20250813060000",
@@ -371,7 +370,7 @@ let allNOTAM = [
         "notamID": "A3613/25",
         "purpose": "OPERATIONAL SIGNIFICANCE, FLIGHT OPERATIONS",
         "qcode": "NMAS",
-        "radius": "25",
+        "radius": "250",
         "referredNotamId": "",
         "scope": "AERODROME, EN-ROUTE",
         "startDate": "20250806073000",
@@ -525,7 +524,13 @@ async function revealEnrouteNotam() {
         notamIsActive = false;
     } else {
         notamIsActive = true;
-        splitAllNotam(allNOTAM, 'enroute')
+        document.getElementById('allQcodes').checked = true;
+        document.getElementById('Sperrgebiete').checked = true;
+        document.getElementById('Warnings').checked = true;
+        document.getElementById('NAV-Anlagen').checked = true;
+        document.getElementById('Hindernisse').checked = true;
+        document.getElementById('excWideArea').checked = true;
+        splitAllNotam(allNOTAM, 'enroute');
     }
 }
 
@@ -550,15 +555,12 @@ function removeNotam() {
 function splitAllNotam(data, status) {
     enrouteNotam = [];
     aerodromeNotam = [];
-    bigRadiusNotam = [];
     // Assuming data is an array of NOTAM objects
     // Uncomment the next line if data is structured differently
     // data = data[0].all_NOTAM.notams;
     // data[0].all_NOTAM.notams.forEach(notam => {
     data.forEach(notam => {
-        if (notam.radius > 25) {
-            bigRadiusNotam.push(notam);
-        } else if (notam.scope === 'AERODROME') {
+        if (notam.scope === 'AERODROME') {
             aerodromeNotam.push(notam);
         } else {
             enrouteNotam.push(notam);
@@ -566,13 +568,13 @@ function splitAllNotam(data, status) {
     });
     if (status === 'enroute') {
         createNotamInstances();
-        redrawAllNotams(); 
+        redrawAllNotams();
     }
 }
 
 
 function createNotamInstances() {
-    notamInstances = []; 
+    notamInstances = [];
     enrouteNotam.forEach(notam => {
         const notamInstance = new Notam(
             map,
@@ -589,14 +591,33 @@ function createNotamInstances() {
 
 function redrawAllNotams() {
     removeNotam();
-    const activeQCodePrefixes = [];
-    const filterCheckboxes = document.querySelectorAll('#notamFilter input[type="checkbox"]:checked:not([id="all Notam"])');
-    filterCheckboxes.forEach(cb => activeQCodePrefixes.push(cb.dataset.qcode));
-    const filteredInstances = notamInstances.filter(notam => {
-        return activeQCodePrefixes.some(prefix => notam.qcode.startsWith(prefix));
-    });
-    filteredInstances.sort((a, b) => b.radius - a.radius);
-    filteredInstances.forEach(notam => notam.addToMap());
+    const allQcodesChecked = document.getElementById('allQcodes').checked;
+    const excludeWideArea = document.getElementById('excWideArea').checked;
+    let qCodeFilteredInstances;
+    if (allQcodesChecked) {
+        qCodeFilteredInstances = notamInstances;
+    } else {
+        const activeQCodePrefixes = [];
+        const filterCheckboxes = document.querySelectorAll('#notamFilter input[type="checkbox"]:checked:not([id="allQcodes"]):not([id="excWideArea"])');
+        filterCheckboxes.forEach(cb => {
+            activeQCodePrefixes.push(cb.dataset.qcode);
+        });
+        if (activeQCodePrefixes.length > 0) {
+            qCodeFilteredInstances = notamInstances.filter(notam =>
+                activeQCodePrefixes.some(prefix => notam.qcode.startsWith(prefix))
+            );
+        } else {
+            qCodeFilteredInstances = [];
+        }
+    }
+    let finalFilteredInstances;
+    if (excludeWideArea) {
+        finalFilteredInstances = qCodeFilteredInstances.filter(notam => notam.radius <= 25);
+    } else {
+        finalFilteredInstances = qCodeFilteredInstances;
+    }
+    finalFilteredInstances.sort((a, b) => b.radius - a.radius);
+    finalFilteredInstances.forEach(notam => notam.addToMap());
 }
 
 
@@ -607,7 +628,6 @@ function toggleNotamBtnStatus() {
     } else {
         notamBtn.classList.add('notamBtn-active');
     }
-
 }
 
 function convertToDMS(lat, lon) {
@@ -616,13 +636,11 @@ function convertToDMS(lat, lon) {
     const latMin = Math.round((latAbs - latDeg) * 60);
     const latDir = lat >= 0 ? 'N' : 'S';
     const latFormatted = String(latDeg).padStart(2, '0') + String(latMin).padStart(2, '0') + latDir;
-
     const lonAbs = Math.abs(lon);
     const lonDeg = Math.floor(lonAbs);
     const lonMin = Math.round((lonAbs - lonDeg) * 60);
     const lonDir = lon >= 0 ? 'E' : 'W';
     const lonFormatted = String(lonDeg).padStart(3, '0') + String(lonMin).padStart(2, '0') + lonDir;
-
     return latFormatted + lonFormatted;
 }
 
@@ -664,10 +682,18 @@ function returnCorrectNOTAM(endDate, est, fir,
         `;
 }
 
-function filterNotam(cat, qCodeStart) {
-    const notamCheckbox = document.getElementById(cat);
-    setCorrectCheckboxes(cat, notamCheckbox.checked ? 'checked' : 'unchecked');
-    setAllNotamCheckboxState();
+function filterNotam(cat) {
+    const checkbox = document.getElementById(cat);
+    if (!checkbox) return;
+    if (cat === 'allQcodes') {
+        const state = checkbox.checked ? 'checked' : 'unchecked';
+        setStateSimpleCheckbox('Sperrgebiete', state);
+        setStateSimpleCheckbox('Warnings', state);
+        setStateSimpleCheckbox('NAV-Anlagen', state);
+        setStateSimpleCheckbox('Hindernisse', state);
+    } else if (cat !== 'excWideArea') {
+        setAllQcodesCheckboxState();
+    }
     redrawAllNotams();
 }
 
@@ -705,6 +731,13 @@ function setStateSimpleCheckbox(cat, state) {
             checkbox.checked = false;
         }
     }
+}
+
+function setAllQcodesCheckboxState() {
+    const allQcodesCheckbox = document.getElementById('allQcodes');
+    const otherQcodeCheckboxes = document.querySelectorAll('#notamFilter input[type="checkbox"][data-qcode]:not([data-qcode="exc"])');
+    const allOthersAreChecked = Array.from(otherQcodeCheckboxes).every(cb => cb.checked);
+    allQcodesCheckbox.checked = allOthersAreChecked;
 }
 
 function setAllNotamCheckboxState() {
